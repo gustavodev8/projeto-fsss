@@ -17,16 +17,16 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="items-center pb-2">
-          <img src={unnamedLogo} alt="Logo UNAMED" className="w-24 h-24 object-contain mb-3" />
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-primary/10 via-background to-primary/5">
+      <Card className="w-full max-w-sm shadow-xl border-border/60">
+        <CardHeader className="items-center pb-2 pt-8">
+          <img src={unnamedLogo} alt="Logo UNAMED" className="w-24 h-24 object-contain mb-3 drop-shadow-sm" />
           <h1 className="text-2xl font-bold text-foreground">Reserva FSSS</h1>
           <p className="text-sm text-muted-foreground text-center">
             Acesso restrito a professores e funcionários
           </p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pb-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
@@ -50,7 +50,7 @@ const Login = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full mt-2">
               Entrar
             </Button>
           </form>

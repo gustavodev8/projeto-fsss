@@ -11,6 +11,7 @@ export interface ReservableItem {
 
 export interface Reservation {
   id: string;
+  groupId?: string; // agrupa espaço + instrumentos reservados juntos
   itemId: string;
   itemName: string;
   date: string;
@@ -20,25 +21,26 @@ export interface Reservation {
 }
 
 export const espacos: ReservableItem[] = [
-  { id: "e1", name: "Sala 12", description: "Sala de aula padrão com projetor e ar-condicionado. Capacidade: 40 alunos.", category: "espacos", image: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=400&h=300&fit=crop", available: true },
-  { id: "e2", name: "Laboratório de Ciências", description: "Laboratório equipado com bancadas, microscópios e reagentes.", category: "espacos", image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400&h=300&fit=crop", available: true },
-  { id: "e3", name: "Auditório", description: "Auditório com capacidade para 200 pessoas, palco e sistema de som.", category: "espacos", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop", available: false },
-  { id: "e4", name: "Quadra Poliesportiva", description: "Quadra coberta para futsal, vôlei e basquete.", category: "espacos", image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop", available: true },
-  { id: "e5", name: "Sala de Música", description: "Sala acústica com piano, estantes e isolamento sonoro.", category: "espacos", image: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=300&fit=crop", available: true },
-  { id: "e6", name: "Biblioteca", description: "Biblioteca com acervo de 5.000 livros e espaço de leitura.", category: "espacos", image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=400&h=300&fit=crop", available: true },
-  { id: "e7", name: "Laboratório de Informática", description: "30 computadores com internet de alta velocidade.", category: "espacos", image: "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=400&h=300&fit=crop", available: false },
-  { id: "e8", name: "Sala de Artes", description: "Espaço amplo com cavaletes, pias e material de arte.", category: "espacos", image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=300&fit=crop", available: true },
+  { id: "e1",  name: "Sala de Vídeo",         description: "Sala equipada com TV de grande porte e sistema de som para exibição de vídeos e apresentações.",  category: "espacos", image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=300&fit=crop", available: true },
+  { id: "e2",  name: "Espaço Irmã Rosa",       description: "Salão multiuso amplo, ideal para reuniões, eventos e atividades em grupo.",                          category: "espacos", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop", available: true },
+  { id: "e3",  name: "Espaço Irmã Jovina",     description: "Espaço versátil para palestras, dinâmicas e atividades formativas.",                                  category: "espacos", image: "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=400&h=300&fit=crop", available: true },
+  { id: "e4",  name: "Espaço do Churrasco",    description: "Área externa coberta com churrasqueiras, mesas e espaço para confraternizações.",                     category: "espacos", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=300&fit=crop", available: true },
+  { id: "e5",  name: "Espaço Verde",           description: "Área aberta com jardim, ideal para atividades ao ar livre e momentos de integração.",                 category: "espacos", image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop", available: true },
+  { id: "e6",  name: "Sala de Vidro",          description: "Sala moderna com paredes de vidro, climatizada, para reuniões e atendimentos.",                       category: "espacos", image: "https://images.unsplash.com/photo-1497366754035-f200968a333e?w=400&h=300&fit=crop", available: true },
+  { id: "e7",  name: "Biblioteca",             description: "Biblioteca com acervo completo e espaço de leitura e estudo.",                                         category: "espacos", image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=400&h=300&fit=crop", available: true },
+  { id: "e8",  name: "Sala de Informática 1",  description: "Laboratório de informática com 30 computadores e internet de alta velocidade.",                        category: "espacos", image: "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=400&h=300&fit=crop", available: true },
+  { id: "e9",  name: "Sala de Informática 2",  description: "Laboratório de informática com 30 computadores e internet de alta velocidade.",                        category: "espacos", image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop", available: true },
+  { id: "e10", name: "Laboratório de Química", description: "Laboratório equipado com bancadas, vidrarias e reagentes para experimentos.",                          category: "espacos", image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400&h=300&fit=crop", available: true },
+  { id: "e11", name: "Laboratório de Física",  description: "Laboratório com equipamentos para experimentos de física e demonstrações científicas.",                 category: "espacos", image: "https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400&h=300&fit=crop", available: true },
+  { id: "e12", name: "Sala de Enfermagem",     description: "Sala equipada para práticas de enfermagem, com materiais e manequins de simulação.",                   category: "espacos", image: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=300&fit=crop", available: true },
+  { id: "e13", name: "Sala de Podcast",        description: "Estúdio de podcast com isolamento acústico, microfones e mesa de som.",                                category: "espacos", image: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&h=300&fit=crop", available: true },
 ];
 
 export const instrumentos: ReservableItem[] = [
-  { id: "i1", name: "Projetor Epson", description: "Projetor multimídia 3.500 lumens com HDMI e VGA.", category: "instrumentos", image: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=300&fit=crop", available: true, totalUnits: 5, availableUnits: 3 },
-  { id: "i2", name: "Violão Nº 3", description: "Violão clássico Yamaha, cordas de nylon.", category: "instrumentos", image: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400&h=300&fit=crop", available: true, totalUnits: 8, availableUnits: 5 },
-  { id: "i3", name: "Caixa de Som Amplificada", description: "Caixa de som 500W com microfone sem fio.", category: "instrumentos", image: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop", available: true, totalUnits: 3, availableUnits: 1 },
-  { id: "i4", name: "Notebook Dell", description: "Notebook Dell Inspiron i5, 8GB RAM, 256GB SSD.", category: "instrumentos", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop", available: false, totalUnits: 10, availableUnits: 0 },
-  { id: "i5", name: "Teclado Musical", description: "Teclado Casio CTK-3500 com 61 teclas.", category: "instrumentos", image: "https://images.unsplash.com/photo-1520523839897-bd33c68d826a?w=400&h=300&fit=crop", available: true, totalUnits: 2, availableUnits: 2 },
-  { id: "i6", name: "Microscópio Binocular", description: "Microscópio óptico com aumento de até 1000x.", category: "instrumentos", image: "https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400&h=300&fit=crop", available: true, totalUnits: 6, availableUnits: 4 },
-  { id: "i7", name: "Kit Robótica", description: "Kit LEGO Mindstorms para aulas de programação.", category: "instrumentos", image: "https://images.unsplash.com/photo-1561557944-6e7860d1a7eb?w=400&h=300&fit=crop", available: true, totalUnits: 4, availableUnits: 2 },
-  { id: "i8", name: "Câmera DSLR", description: "Câmera Canon T7i com lente 18-55mm.", category: "instrumentos", image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop", available: true, totalUnits: 2, availableUnits: 1 },
+  { id: "i1", name: "Microfone",     description: "Microfone com fio para apresentações, aulas e eventos.",                    category: "instrumentos", image: "https://images.unsplash.com/photo-1516223725307-6f76b9ec8742?w=400&h=300&fit=crop", available: true, totalUnits: 4,  availableUnits: 4  },
+  { id: "i2", name: "Notebook",      description: "Notebook para uso em aulas, apresentações e atividades acadêmicas.",         category: "instrumentos", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop", available: true, totalUnits: 10, availableUnits: 10 },
+  { id: "i3", name: "Caixa de Som",  description: "Caixa de som amplificada 500W com entrada USB, Bluetooth e microfone.",     category: "instrumentos", image: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop", available: true, totalUnits: 15, availableUnits: 15 },
+  { id: "i4", name: "Projetor",      description: "Projetor multimídia 3.500 lumens com HDMI e VGA para salas de aula.",        category: "instrumentos", image: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=300&fit=crop", available: true, totalUnits: 5,  availableUnits: 5  },
 ];
 
 export interface TimeSlot {
@@ -49,16 +51,19 @@ export interface TimeSlot {
 }
 
 export const timeSlots: TimeSlot[] = [
+  // Manhã
+  { label: "07:00 – 07:50", start: "07:00", end: "07:50", isBreak: false },
   { label: "07:50 – 08:40", start: "07:50", end: "08:40", isBreak: false },
   { label: "08:40 – 09:30", start: "08:40", end: "09:30", isBreak: false },
-  { label: "09:30 – 10:20", start: "09:30", end: "10:20", isBreak: false },
-  { label: "10:20 – 10:35", start: "10:20", end: "10:35", isBreak: true },
-  { label: "10:35 – 11:25", start: "10:35", end: "11:25", isBreak: false },
-  { label: "11:25 – 12:15", start: "11:25", end: "12:15", isBreak: false },
-  { label: "12:15 – 13:05", start: "12:15", end: "13:05", isBreak: false },
-  { label: "13:05 – 13:55", start: "13:05", end: "13:55", isBreak: true },
-  { label: "13:55 – 14:45", start: "13:55", end: "14:45", isBreak: false },
-  { label: "14:45 – 15:35", start: "14:45", end: "15:35", isBreak: false },
-  { label: "15:35 – 16:25", start: "15:35", end: "16:25", isBreak: false },
-  { label: "16:25 – 17:15", start: "16:25", end: "17:15", isBreak: false },
+  { label: "09:30 – 09:50", start: "09:30", end: "09:50", isBreak: true },
+  { label: "09:50 – 10:40", start: "09:50", end: "10:40", isBreak: false },
+  { label: "10:40 – 11:30", start: "10:40", end: "11:30", isBreak: false },
+  { label: "11:30 – 12:20", start: "11:30", end: "12:20", isBreak: false },
+  // Tarde
+  { label: "13:00 – 13:50", start: "13:00", end: "13:50", isBreak: false },
+  { label: "13:50 – 14:40", start: "13:50", end: "14:40", isBreak: false },
+  { label: "14:40 – 15:30", start: "14:40", end: "15:30", isBreak: false },
+  { label: "15:30 – 15:50", start: "15:30", end: "15:50", isBreak: true },
+  { label: "15:50 – 16:40", start: "15:50", end: "16:40", isBreak: false },
+  { label: "16:40 – 17:30", start: "16:40", end: "17:30", isBreak: false },
 ];

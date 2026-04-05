@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut, CalendarDays } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import unnamedLogo from "@/unnamed.png";
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -8,8 +9,9 @@ const Header = () => {
 
   return (
     <header className="bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-      <button onClick={() => navigate("/")} className="font-sans font-bold text-lg text-foreground tracking-tight">
-        ReservaEdu
+      <button onClick={() => navigate("/")} className="flex items-center gap-2 font-sans font-bold text-lg text-foreground tracking-tight">
+        <img src={unnamedLogo} alt="Logo" className="h-8 w-8 object-contain" />
+        Reserva FSSS
       </button>
       <div className="flex items-center gap-3">
         <button
@@ -19,8 +21,8 @@ const Header = () => {
           <CalendarDays className="w-4 h-4" />
           <span className="hidden sm:inline">Minhas Reservas</span>
         </button>
-        <span className="text-sm text-foreground font-medium">{user?.name}</span>
-        <button onClick={logout} className="text-muted-foreground hover:text-foreground transition-colors">
+        <span className="text-sm text-foreground font-medium hidden sm:inline">{user?.name}</span>
+        <button onClick={logout} title="Sair" className="text-muted-foreground hover:text-foreground transition-colors">
           <LogOut className="w-4 h-4" />
         </button>
       </div>

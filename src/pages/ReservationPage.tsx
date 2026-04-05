@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Clock, Sun, Sunset, PackagePlus, Check } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -19,45 +19,176 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
+const morningSlots = timeSlots.slice(0, 7);
+const afternoonSlots = timeSlots.slice(7);
+
+interface InstrumentSelection {
+  id: string;
+  quantity: number;
+}
+
 const ReservationPage = () => {
   const { category, id } = useParams<{ category: string; id: string }>();
   const navigate = useNavigate();
-  const { addReservation } = useReservations();
+  const { addReservation, reservations } = useReservations();
 
   const allItems = category === "espacos" ? espacos : instrumentos;
   const item: ReservableItem | undefined = allItems.find((i) => i.id === id);
+  const isInstrumento = category === "instrumentos";
 
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [quantity, setQuantity] = useState(1);
+  const [selectedInstruments, setSelectedInstruments] = useState<InstrumentSelection[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Mock some occupied slots
+  // Quantidade já reservada por slot para o item atual
+  const reservedQtyForSlot = useMemo(() => {
+    if (!date || !item) return {} as Record<string, number>;
+    const dateStr = format(date, "yyyy-MM-dd");
+    const result: Record<string, number> = {};
+    reservations
+      .filter((r) => r.itemId === item.id && r.date === dateStr)
+      .forEach((r) =>
+        r.slots.forEach((s) => {
+          result[s] = (result[s] ?? 0) + (r.quantity ?? 1);
+        })
+      );
+    return result;
+  }, [date, item, reservations]);
+
+  // Quantidade reservada por slot para cada instrumento
+  const instReservedQty = useMemo(() => {
+    if (!date) return {} as Record<string, Record<string, number>>;
+    const dateStr = format(date, "yyyy-MM-dd");
+    const result: Record<string, Record<string, number>> = {};
+    reservations
+      .filter((r) => r.category === "instrumentos" && r.date === dateStr)
+      .forEach((r) => {
+        if (!result[r.itemId]) result[r.itemId] = {};
+        r.slots.forEach((s) => {
+          result[r.itemId][s] = (result[r.itemId][s] ?? 0) + (r.quantity ?? 1);
+        });
+      });
+    return result;
+  }, [date, reservations]);
+
+  // Disponível por instrumento considerando os slots selecionados
+  const instAvailable = useMemo(() => {
+    const result: Record<string, number> = {};
+    instrumentos.forEach((inst) => {
+      if (selectedSlots.length === 0) {
+        result[inst.id] = inst.totalUnits ?? 1;
+        return;
+      }
+      const slotQty = instReservedQty[inst.id] ?? {};
+      const min = Math.min(
+        ...selectedSlots.map((s) => (inst.totalUnits ?? 1) - (slotQty[s] ?? 0))
+      );
+      result[inst.id] = Math.max(0, min);
+    });
+    return result;
+  }, [selectedSlots, instReservedQty]);
+
   const occupiedSlots = useMemo(() => {
-    if (!date) return new Set<string>();
-    const day = date.getDay();
-    if (day === 1) return new Set(["07:50 – 08:40", "08:40 – 09:30"]);
-    if (day === 3) return new Set(["13:55 – 14:45", "14:45 – 15:35"]);
-    return new Set<string>();
-  }, [date]);
+    if (!date || !item) return new Set<string>();
+    const occupied = new Set<string>();
+    Object.entries(reservedQtyForSlot).forEach(([slot, qty]) => {
+      if (!isInstrumento || qty >= (item.totalUnits ?? 1)) {
+        occupied.add(slot);
+      }
+    });
+    return occupied;
+  }, [reservedQtyForSlot, isInstrumento, item, date]);
+
+  const availableQtyForSelection = useMemo(() => {
+    if (!item || selectedSlots.length === 0) return item?.totalUnits ?? 1;
+    const total = item.totalUnits ?? 1;
+    const min = Math.min(
+      ...selectedSlots.map((s) => total - (reservedQtyForSlot[s] ?? 0))
+    );
+    return Math.max(0, min);
+  }, [selectedSlots, reservedQtyForSlot, item]);
 
   const toggleSlot = (label: string) => {
-    setSelectedSlots((prev) =>
-      prev.includes(label) ? prev.filter((s) => s !== label) : [...prev, label]
+    setSelectedSlots((prev) => {
+      const next = prev.includes(label)
+        ? prev.filter((s) => s !== label)
+        : [...prev, label];
+      setQuantity((q) => {
+        const total = item?.totalUnits ?? 1;
+        const min = next.length === 0
+          ? total
+          : Math.min(...next.map((s) => total - (reservedQtyForSlot[s] ?? 0)));
+        return Math.min(q, Math.max(1, min));
+      });
+      // Ajusta qtd dos instrumentos selecionados
+      setSelectedInstruments((prev) =>
+        prev.map((si) => {
+          const inst = instrumentos.find((i) => i.id === si.id);
+          if (!inst) return si;
+          const slotQty = instReservedQty[si.id] ?? {};
+          const avail = next.length === 0
+            ? (inst.totalUnits ?? 1)
+            : Math.max(0, Math.min(...next.map((s) => (inst.totalUnits ?? 1) - (slotQty[s] ?? 0))));
+          return { ...si, quantity: Math.min(si.quantity, Math.max(1, avail)) };
+        })
+      );
+      return next;
+    });
+  };
+
+  const toggleInstrument = (instId: string) => {
+    setSelectedInstruments((prev) =>
+      prev.some((si) => si.id === instId)
+        ? prev.filter((si) => si.id !== instId)
+        : [...prev, { id: instId, quantity: 1 }]
+    );
+  };
+
+  const updateInstrumentQty = (instId: string, val: number) => {
+    setSelectedInstruments((prev) =>
+      prev.map((si) =>
+        si.id === instId
+          ? { ...si, quantity: Math.max(1, Math.min(instAvailable[instId] ?? 1, val)) }
+          : si
+      )
     );
   };
 
   const handleConfirm = () => {
     if (!item || !date || selectedSlots.length === 0) return;
+    const dateStr = format(date, "yyyy-MM-dd");
+    const ts = Date.now();
+    // groupId só existe quando há instrumentos junto com o espaço
+    const groupId = !isInstrumento && selectedInstruments.length > 0 ? `g-${ts}` : undefined;
+
     addReservation({
-      id: `r-${Date.now()}`,
+      id: `r-${ts}`,
+      groupId,
       itemId: item.id,
       itemName: item.name,
-      date: format(date, "yyyy-MM-dd"),
+      date: dateStr,
       slots: selectedSlots,
-      quantity: category === "instrumentos" ? quantity : undefined,
+      quantity: isInstrumento ? quantity : undefined,
       category: category as "espacos" | "instrumentos",
     });
+
+    selectedInstruments.forEach((si, idx) => {
+      const inst = instrumentos.find((i) => i.id === si.id);
+      if (!inst) return;
+      addReservation({
+        id: `r-${ts}-${idx}`,
+        groupId,
+        itemId: inst.id,
+        itemName: inst.name,
+        date: dateStr,
+        slots: selectedSlots,
+        quantity: si.quantity,
+        category: "instrumentos",
+      });
+    });
+
     setShowSuccess(true);
   };
 
@@ -70,11 +201,51 @@ const ReservationPage = () => {
     );
   }
 
-  const isInstrumento = category === "instrumentos";
-  const maxQty = item.availableUnits ?? 1;
+  const canConfirm = !!date && selectedSlots.length > 0;
+
+  const SlotButton = ({ slot }: { slot: typeof timeSlots[0] }) => {
+    const isOccupied = occupiedSlots.has(slot.label);
+    const isSelected = selectedSlots.includes(slot.label);
+    const isDisabled = slot.isBreak || isOccupied;
+    const reserved = reservedQtyForSlot[slot.label] ?? 0;
+    const remaining = (item.totalUnits ?? 1) - reserved;
+
+    if (slot.isBreak) {
+      return (
+        <div className="col-span-3 flex items-center gap-2 py-1">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">Intervalo</span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+      );
+    }
+
+    return (
+      <button
+        disabled={isDisabled}
+        onClick={() => toggleSlot(slot.label)}
+        className={cn(
+          "relative font-mono text-xs py-3 px-2 rounded-lg border-2 transition-all duration-150 text-center font-medium",
+          isOccupied && "bg-muted/50 text-muted-foreground border-border cursor-not-allowed",
+          !isDisabled && !isSelected && "border-available/60 text-available bg-available/5 hover:bg-available/10 hover:border-available",
+          isSelected && "bg-primary text-primary-foreground border-primary shadow-md scale-[1.02]"
+        )}
+      >
+        <span className="block leading-tight">{slot.label}</span>
+        {isOccupied && (
+          <span className="block text-[9px] mt-0.5 opacity-60 font-sans font-normal">Esgotado</span>
+        )}
+        {isInstrumento && !isOccupied && reserved > 0 && (
+          <span className="block text-[9px] mt-0.5 font-sans font-normal opacity-80">
+            {remaining} restante{remaining !== 1 ? "s" : ""}
+          </span>
+        )}
+      </button>
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       <Header />
       <main className="max-w-2xl mx-auto px-4 py-6">
         <button
@@ -96,93 +267,211 @@ const ReservationPage = () => {
 
         {/* Date picker */}
         <div className="bg-card border border-border rounded-lg p-4 mb-6">
-          <Label className="text-base font-semibold mb-3 block">Escolha a data</Label>
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={(d) => {
-              setDate(d);
-              setSelectedSlots([]);
-            }}
-            disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
-            locale={ptBR}
-            className="p-3 pointer-events-auto mx-auto"
-          />
+          <Label className="text-base font-semibold mb-4 block">Escolha a data</Label>
+          <div className="flex justify-center">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={(d) => {
+                setDate(d);
+                setSelectedSlots([]);
+                setQuantity(1);
+                setSelectedInstruments([]);
+              }}
+              disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+              locale={ptBR}
+              className="pointer-events-auto"
+            />
+          </div>
         </div>
 
         {/* Time slots */}
         {date && (
-          <div className="bg-card border border-border rounded-lg p-4 mb-6">
-            <Label className="text-base font-semibold mb-3 block">Escolha o horário</Label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {timeSlots.map((slot) => {
-                const isOccupied = occupiedSlots.has(slot.label);
-                const isSelected = selectedSlots.includes(slot.label);
-                const isDisabled = slot.isBreak || isOccupied;
+          <div className="bg-card border border-border rounded-lg p-5 mb-6">
+            <div className="flex items-center justify-between mb-5">
+              <Label className="text-base font-semibold">Escolha o horário</Label>
+              {selectedSlots.length > 0 && (
+                <span className="flex items-center gap-1.5 text-xs text-primary font-semibold bg-primary/10 px-2.5 py-1 rounded-full">
+                  <Clock className="w-3 h-3" />
+                  {selectedSlots.length} selecionado{selectedSlots.length > 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
 
-                return (
-                  <button
-                    key={slot.label}
-                    disabled={isDisabled}
-                    onClick={() => toggleSlot(slot.label)}
-                    className={cn(
-                      "font-mono text-xs py-2.5 px-3 rounded-md border transition-all text-center",
-                      isDisabled && "bg-muted text-muted-foreground border-border cursor-not-allowed opacity-60",
-                      !isDisabled && !isSelected && "border-available text-available hover:bg-available/5",
-                      isSelected && "bg-primary text-primary-foreground border-primary"
-                    )}
-                  >
-                    {slot.label}
-                    {slot.isBreak && (
-                      <span className="block text-[10px] mt-0.5 opacity-70">Intervalo</span>
-                    )}
-                  </button>
-                );
-              })}
+            <div className="mb-4">
+              <div className="flex items-center gap-1.5 mb-3">
+                <Sun className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manhã</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {morningSlots.map((slot) => <SlotButton key={slot.label} slot={slot} />)}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 my-4">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">Almoço · 12:20 – 13:00</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            <div>
+              <div className="flex items-center gap-1.5 mb-3">
+                <Sunset className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tarde</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {afternoonSlots.map((slot) => <SlotButton key={slot.label} slot={slot} />)}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 mt-5 pt-4 border-t border-border">
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded border-2 border-available bg-available/5" />
+                <span className="text-[11px] text-muted-foreground">Disponível</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded bg-primary" />
+                <span className="text-[11px] text-muted-foreground">Selecionado</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded border-2 border-border bg-muted/50" />
+                <span className="text-[11px] text-muted-foreground">Indisponível</span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Quantity (instruments only) */}
+        {/* Quantidade — apenas para instrumentos */}
         {isInstrumento && date && selectedSlots.length > 0 && (
           <div className="bg-card border border-border rounded-lg p-4 mb-6">
             <Label className="text-base font-semibold mb-1 block">Quantidade</Label>
             <p className="text-xs text-muted-foreground mb-3">
-              {maxQty} {maxQty === 1 ? "unidade disponível" : "unidades disponíveis"}
+              {availableQtyForSelection} {availableQtyForSelection === 1 ? "unidade disponível" : "unidades disponíveis"} para os horários selecionados
             </p>
             <Input
               type="number"
               min={1}
-              max={maxQty}
+              max={availableQtyForSelection}
               value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, Math.min(maxQty, Number(e.target.value))))}
+              onChange={(e) =>
+                setQuantity(Math.max(1, Math.min(availableQtyForSelection, Number(e.target.value))))
+              }
               className="w-24 font-mono"
             />
           </div>
         )}
 
-        {/* Confirm */}
-        <Button
-          onClick={handleConfirm}
-          disabled={!date || selectedSlots.length === 0}
-          className="w-full"
-          size="lg"
-        >
-          Confirmar Reserva
-        </Button>
+        {/* Instrumentos adicionais — apenas para espaços */}
+        {!isInstrumento && date && selectedSlots.length > 0 && (
+          <div className="bg-card border border-border rounded-lg p-5 mb-6">
+            <div className="flex items-center gap-2 mb-1">
+              <PackagePlus className="w-4 h-4 text-primary" />
+              <Label className="text-base font-semibold">Deseja reservar algum instrumento?</Label>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Adicione equipamentos para usar no espaço reservado.
+            </p>
+
+            <div className="space-y-2">
+              {instrumentos.map((inst) => {
+                const avail = instAvailable[inst.id] ?? 0;
+                const sel = selectedInstruments.find((si) => si.id === inst.id);
+                const isChecked = !!sel;
+                const isUnavailable = avail <= 0;
+
+                return (
+                  <div
+                    key={inst.id}
+                    onClick={() => !isUnavailable && toggleInstrument(inst.id)}
+                    className={cn(
+                      "flex items-center justify-between rounded-lg border-2 px-4 py-3 transition-all",
+                      isUnavailable && "opacity-50 cursor-not-allowed border-border bg-muted/30",
+                      !isUnavailable && !isChecked && "border-border hover:border-primary/40 cursor-pointer",
+                      isChecked && "border-primary bg-primary/5 cursor-pointer"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      {/* Checkbox visual */}
+                      <div className={cn(
+                        "w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all",
+                        isChecked ? "bg-primary border-primary" : "border-muted-foreground/40"
+                      )}>
+                        {isChecked && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{inst.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {isUnavailable
+                            ? "Esgotado para os horários selecionados"
+                            : `${avail} unidade${avail !== 1 ? "s" : ""} disponível${avail !== 1 ? "is" : ""}`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {isChecked && (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-2 ml-3"
+                      >
+                        <span className="text-xs text-muted-foreground">Qtd:</span>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={avail}
+                          value={sel.quantity}
+                          onChange={(e) => updateInstrumentQty(inst.id, Number(e.target.value))}
+                          className="w-16 h-8 font-mono text-sm text-center"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </main>
+
+      {/* Sticky confirm bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-4 py-3 z-10">
+        <div className="max-w-2xl mx-auto">
+          {canConfirm && (
+            <p className="text-xs text-muted-foreground text-center mb-2">
+              {format(date!, "dd/MM/yyyy")} · {selectedSlots.length} horário{selectedSlots.length > 1 ? "s" : ""}
+              {isInstrumento && ` · ${quantity} unidade${quantity > 1 ? "s" : ""}`}
+              {!isInstrumento && selectedInstruments.length > 0 && ` · ${selectedInstruments.length} instrumento${selectedInstruments.length > 1 ? "s" : ""}`}
+            </p>
+          )}
+          <Button onClick={handleConfirm} disabled={!canConfirm} className="w-full" size="lg">
+            Confirmar Reserva
+          </Button>
+        </div>
+      </div>
 
       {/* Success modal */}
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-        <DialogContent className="sm:max-w-sm text-center">
-          <DialogHeader className="items-center">
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader className="items-center text-center">
             <CheckCircle2 className="w-12 h-12 text-available mb-2" />
             <DialogTitle className="text-xl">Reserva confirmada!</DialogTitle>
-            <DialogDescription className="text-left space-y-1 mt-3">
-              <span className="block"><strong>Item:</strong> {item.name}</span>
+            <DialogDescription className="text-left space-y-1 mt-3 w-full">
+              <span className="block"><strong>Espaço:</strong> {item.name}</span>
               <span className="block"><strong>Data:</strong> {date ? format(date, "dd/MM/yyyy") : ""}</span>
               <span className="block"><strong>Horários:</strong> {selectedSlots.join(", ")}</span>
               {isInstrumento && <span className="block"><strong>Quantidade:</strong> {quantity}</span>}
+              {!isInstrumento && selectedInstruments.length > 0 && (
+                <div className="pt-1 mt-1 border-t border-border">
+                  <p className="font-semibold mb-1">Instrumentos:</p>
+                  {selectedInstruments.map((si) => {
+                    const inst = instrumentos.find((i) => i.id === si.id);
+                    return inst ? (
+                      <span key={si.id} className="block text-sm">
+                        {inst.name} — {si.quantity} unidade{si.quantity > 1 ? "s" : ""}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              )}
             </DialogDescription>
           </DialogHeader>
           <Button onClick={() => navigate("/")} className="w-full mt-2">

@@ -45,14 +45,16 @@ const Listing = () => {
             <button
               key={item.id}
               onClick={() => navigate(`/${category}/${item.id}`)}
-              className="bg-card border border-border rounded-lg overflow-hidden text-left hover:border-primary/40 hover:shadow-sm transition-all"
+              className="bg-card border border-border rounded-lg overflow-hidden text-left hover:border-primary/40 hover:shadow-md transition-all group"
             >
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-40 object-cover"
-                loading="lazy"
-              />
+              <div className="overflow-hidden">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              </div>
               <div className="p-4 flex items-center justify-between">
                 <span className="font-medium text-foreground">{item.name}</span>
                 <Badge
