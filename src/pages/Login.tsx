@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import unnamedLogo from "@/unnamed.png";
+import unnamedLogo from "@/assets/logo.png";
 
 const Login = () => {
   const { login } = useAuth();

@@ -19,7 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import unnamedLogo from "@/unnamed.png";
+import unnamedLogo from "@/assets/logo.png";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Helpers

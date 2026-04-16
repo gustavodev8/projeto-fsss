@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut, CalendarDays, LayoutDashboard } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import unnamedLogo from "@/unnamed.png";
+import unnamedLogo from "@/assets/logo.png";
 
 const Header = () => {
   const { user, logout } = useAuth();
