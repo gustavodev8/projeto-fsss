@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,47 +6,50 @@
 
 @layer base {
   :root {
-    --background: 220 14% 96%;
-    --foreground: 220 43% 11%;
+    /* Fundo levemente frio — limpo e institucional */
+    --background: 210 20% 98%;
+    --foreground: 215 35% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 43% 11%;
+    --card-foreground: 215 35% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 43% 11%;
+    --popover-foreground: 215 35% 12%;
 
-    --primary: 220 78% 48%;
+    /* Azul naval institucional */
+    --primary: 215 72% 32%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 43% 11%;
+    --secondary: 210 18% 95%;
+    --secondary-foreground: 215 35% 12%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 210 18% 95%;
+    --muted-foreground: 215 16% 46%;
 
-    --accent: 220 14% 96%;
-    --accent-foreground: 220 43% 11%;
+    --accent: 210 18% 93%;
+    --accent-foreground: 215 35% 12%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --available: 142 72% 35%;
-    --unavailable: 0 72% 51%;
+    --available: 142 60% 32%;
+    --unavailable: 0 65% 48%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 220 78% 48%;
+    --border: 215 18% 88%;
+    --input: 215 18% 88%;
+    --ring: 215 72% 32%;
 
-    --radius: 0.5rem;
+    /* Raio menor = mais sóbrio/institucional */
+    --radius: 0.25rem;
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-foreground: 215 16% 26%;
+    --sidebar-primary: 215 35% 12%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 220 78% 48%;
+    --sidebar-accent: 215 18% 95%;
+    --sidebar-accent-foreground: 215 35% 12%;
+    --sidebar-border: 215 18% 88%;
+    --sidebar-ring: 215 72% 32%;
   }
 }
 
@@ -67,5 +70,12 @@
 
   img {
     @apply select-none;
+  }
+
+  /* Headings usam Merriweather para autoridade institucional */
+  h1, h2, h3 {
+    font-family: 'Merriweather', serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 }
