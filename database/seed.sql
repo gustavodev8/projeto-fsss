@@ -130,18 +130,18 @@ INSERT INTO itens (id, nome, descricao, categoria, imagem_url, disponivel, total
 -- ─────────────────────────────────────────────────────────────────────────────
 
 INSERT INTO itens (id, nome, descricao, categoria, imagem_url, disponivel, total_unidades) VALUES
-('i0000001-0000-0000-0000-000000000001', 'Microfone',
+('b0000001-0000-0000-0000-000000000001', 'Microfone',
  'Microfone com fio para apresentações, aulas e eventos.',
  'instrumentos', 'https://images.unsplash.com/photo-1516223725307-6f76b9ec8742?w=400&h=300&fit=crop', TRUE, 4),
 
-('i0000001-0000-0000-0000-000000000002', 'Notebook',
+('b0000001-0000-0000-0000-000000000002', 'Notebook',
  'Notebook para uso em aulas, apresentações e atividades acadêmicas.',
  'instrumentos', 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop', TRUE, 10),
 
-('i0000001-0000-0000-0000-000000000003', 'Caixa de Som',
+('b0000001-0000-0000-0000-000000000003', 'Caixa de Som',
  'Caixa de som amplificada 500W com entrada USB, Bluetooth e microfone.',
  'instrumentos', 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop', TRUE, 15),
 
-('i0000001-0000-0000-0000-000000000004', 'Projetor',
+('b0000001-0000-0000-0000-000000000004', 'Projetor',
  'Projetor multimídia 3.500 lumens com HDMI e VGA para salas de aula.',
  'instrumentos', 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=300&fit=crop', TRUE, 5);
