@@ -5,7 +5,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Reservation } from "@/data/mockData";
 import { generateDailyReportPDF } from "@/lib/pdfUtils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -87,32 +86,17 @@ const ReservationRow = ({ r }: { r: Reservation }) => (
       {r.userName ?? r.userEmail ?? "—"}
     </td>
     <td className="py-3 px-4 text-sm text-foreground">{r.itemName}</td>
-    <td className="py-3 px-4">
-      <Badge
-        variant="outline"
-        className={
-          r.category === "espacos"
-            ? "border-primary/40 text-primary text-[11px]"
-            : "border-muted-foreground/40 text-muted-foreground text-[11px]"
-        }
-      >
-        {r.category === "espacos" ? "Espaço" : "Equipamento"}
-      </Badge>
+    <td className="py-3 px-4 text-sm text-muted-foreground">
+      {r.category === "espacos" ? "Espaço" : "Equipamento"}
     </td>
-    <td className="py-3 px-4 text-sm text-muted-foreground font-mono text-xs">
-      {r.slots.join(" | ")}
+    <td className="py-3 px-4 text-sm text-foreground">
+      {r.slots.join("  ·  ")}
     </td>
     <td className="py-3 px-4 text-sm text-center text-muted-foreground">
       {r.quantity ?? "—"}
     </td>
-    <td className="py-3 px-4 text-sm text-center">
-      {r.groupId ? (
-        <Badge variant="outline" className="text-[11px] border-muted-foreground/30 text-muted-foreground">
-          Agrupado
-        </Badge>
-      ) : (
-        <span className="text-muted-foreground text-xs">—</span>
-      )}
+    <td className="py-3 px-4 text-sm text-center text-muted-foreground">
+      {r.groupId ? "Sim" : "—"}
     </td>
   </tr>
 );
@@ -405,20 +389,11 @@ const AdminDashboard = () => {
                           {r.userName ?? r.userEmail ?? "—"}
                         </td>
                         <td className="py-2.5 px-4 text-sm text-foreground">{r.itemName}</td>
-                        <td className="py-2.5 px-4">
-                          <Badge
-                            variant="outline"
-                            className={
-                              r.category === "espacos"
-                                ? "border-primary/40 text-primary text-[11px]"
-                                : "border-muted-foreground/40 text-muted-foreground text-[11px]"
-                            }
-                          >
-                            {r.category === "espacos" ? "Espaço" : "Equipamento"}
-                          </Badge>
+                        <td className="py-2.5 px-4 text-sm text-muted-foreground">
+                          {r.category === "espacos" ? "Espaço" : "Equipamento"}
                         </td>
-                        <td className="py-2.5 px-4 text-xs font-mono text-muted-foreground">
-                          {r.slots.join(" | ")}
+                        <td className="py-2.5 px-4 text-sm text-foreground">
+                          {r.slots.join("  ·  ")}
                         </td>
                         <td className="py-2.5 px-4 text-sm text-center text-muted-foreground">
                           {r.quantity ?? "—"}
