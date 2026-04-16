@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { Reservation } from "@/data/mockData";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ReservationContextType {
   reservations: Reservation[];
@@ -12,9 +13,15 @@ const ReservationContext = createContext<ReservationContextType | null>(null);
 
 export const ReservationProvider = ({ children }: { children: ReactNode }) => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const { user } = useAuth();
 
   const addReservation = (r: Reservation) => {
-    setReservations((prev) => [...prev, r]);
+    const withUser: Reservation = {
+      ...r,
+      userName: r.userName ?? user?.name,
+      userEmail: r.userEmail ?? user?.email,
+    };
+    setReservations((prev) => [...prev, withUser]);
   };
 
   const cancelReservation = (id: string) => {

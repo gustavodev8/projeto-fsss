@@ -1,60 +1,208 @@
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
-import { DoorOpen, Music } from "lucide-react";
+import { useReservations } from "@/contexts/ReservationContext";
+import { DoorOpen, Package, LayoutDashboard, CalendarDays } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-const categories = [
+// ──────────────────────────────────────────────────────────────────────────────
+// Hub do Professor
+// ──────────────────────────────────────────────────────────────────────────────
+
+const professorCategories = [
   {
     key: "espacos",
     label: "Espaços",
-    subtitle: "Salas, laboratórios, quadra, auditório",
+    subtitle: "Salas, laboratórios, auditórios e áreas externas",
     icon: DoorOpen,
     path: "/espacos",
   },
   {
     key: "instrumentos",
-    label: "Instrumentos",
-    subtitle: "Equipamentos, projetores, instrumentos musicais",
-    icon: Music,
+    label: "Equipamentos",
+    subtitle: "Projetores, notebooks, microfones e caixas de som",
+    icon: Package,
     path: "/instrumentos",
   },
 ];
 
-const Home = () => {
+const ProfessorHub = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const firstName = user?.name?.split(" ")[0];
+  const { reservations } = useReservations();
+
+  const today = new Date().toISOString().split("T")[0];
+  const myUpcoming = reservations.filter(
+    (r) => r.userEmail === user?.email && r.date >= today
+  );
+
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Bom dia";
+    if (h < 18) return "Boa tarde";
+    return "Boa noite";
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="max-w-2xl mx-auto px-4 py-12">
-        {firstName && (
-          <p className="text-sm text-muted-foreground text-center mb-1">
-            Olá, <span className="font-medium text-foreground">{firstName}</span>
+      <main className="max-w-3xl mx-auto px-4 py-10">
+        {/* Saudação */}
+        <div className="mb-8">
+          <p className="text-sm text-muted-foreground mb-0.5">
+            {greeting()}, <span className="font-medium text-foreground">{user?.name}</span>
           </p>
-        )}
-        <h1 className="text-2xl font-bold text-foreground text-center mb-8">
-          O que você deseja reservar?
-        </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {categories.map((cat) => (
+          <h1 className="text-2xl text-foreground">O que deseja reservar?</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Selecione uma categoria para verificar disponibilidade e realizar sua reserva.
+          </p>
+        </div>
+
+        {/* Cards de categoria */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          {professorCategories.map((cat) => (
             <button
               key={cat.key}
               onClick={() => navigate(cat.path)}
-              className="bg-card border border-border rounded-lg p-8 text-left hover:border-primary/40 hover:shadow-md transition-all group"
+              className="bg-card border border-border rounded p-6 text-left hover:border-primary/50 hover:shadow-sm transition-all group"
             >
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                <cat.icon className="w-6 h-6 text-primary" />
+              <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                <cat.icon className="w-5 h-5 text-primary" />
               </div>
-              <h2 className="text-lg font-semibold text-foreground mb-1">{cat.label}</h2>
+              <h2 className="text-base font-semibold text-foreground mb-1">{cat.label}</h2>
               <p className="text-sm text-muted-foreground">{cat.subtitle}</p>
             </button>
           ))}
         </div>
+
+        {/* Reservas próximas do professor */}
+        {myUpcoming.length > 0 && (
+          <div className="bg-card border border-border rounded overflow-hidden">
+            <div className="border-b border-border px-5 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                <h2 className="text-sm font-semibold text-foreground">
+                  Suas próximas reservas
+                </h2>
+              </div>
+              <button
+                onClick={() => navigate("/minhas-reservas")}
+                className="text-xs text-primary hover:underline font-medium"
+              >
+                Ver todas
+              </button>
+            </div>
+            <div className="divide-y divide-border">
+              {myUpcoming.slice(0, 3).map((r) => (
+                <div key={r.id} className="px-5 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{r.itemName}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {r.date.split("-").reverse().join("/")} · {r.slots[0]}
+                      {r.slots.length > 1 && ` +${r.slots.length - 1} horário${r.slots.length > 2 ? "s" : ""}`}
+                    </p>
+                  </div>
+                  <span className="text-xs px-2 py-0.5 rounded border border-available/50 text-available font-medium">
+                    Confirmada
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Hub do Administrador
+// ──────────────────────────────────────────────────────────────────────────────
+
+const AdminHub = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { reservations } = useReservations();
+
+  const today = new Date().toISOString().split("T")[0];
+  const todayCount = reservations.filter((r) => r.date === today).length;
+  const totalCount = reservations.length;
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="max-w-3xl mx-auto px-4 py-10">
+        <div className="mb-8">
+          <p className="text-sm text-muted-foreground mb-0.5">
+            Bem-vindo, <span className="font-medium text-foreground">{user?.name}</span>
+          </p>
+          <h1 className="text-2xl text-foreground">Painel Institucional</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Acesso rápido às ferramentas administrativas.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Card: Painel Admin */}
+          <button
+            onClick={() => navigate("/admin")}
+            className="bg-card border border-border rounded p-6 text-left hover:border-primary/50 hover:shadow-sm transition-all group"
+          >
+            <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+              <LayoutDashboard className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-base font-semibold text-foreground mb-1">Painel Administrativo</h2>
+            <p className="text-sm text-muted-foreground">
+              Gerencie reservas, visualize relatórios e baixe PDFs diários.
+            </p>
+            {(todayCount > 0 || totalCount > 0) && (
+              <div className="mt-3 flex gap-3 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">{todayCount}</span> hoje
+                <span className="text-border">·</span>
+                <span className="font-medium text-foreground">{totalCount}</span> total
+              </div>
+            )}
+          </button>
+
+          {/* Card: Reservar como admin */}
+          <button
+            onClick={() => navigate("/espacos")}
+            className="bg-card border border-border rounded p-6 text-left hover:border-primary/50 hover:shadow-sm transition-all group"
+          >
+            <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+              <DoorOpen className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-base font-semibold text-foreground mb-1">Realizar Reserva</h2>
+            <p className="text-sm text-muted-foreground">
+              Reserve espaços e equipamentos em nome da instituição.
+            </p>
+          </button>
+        </div>
+
+        {/* Atalhos rápidos */}
+        <div className="mt-6 flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="text-xs">
+            <LayoutDashboard className="w-3.5 h-3.5 mr-1.5" />
+            Abrir painel
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate("/instrumentos")} className="text-xs">
+            <Package className="w-3.5 h-3.5 mr-1.5" />
+            Equipamentos
+          </Button>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Home — roteia pelo role
+// ──────────────────────────────────────────────────────────────────────────────
+
+const Home = () => {
+  const { user } = useAuth();
+  if (user?.role === "admin") return <AdminHub />;
+  return <ProfessorHub />;
 };
 
 export default Home;

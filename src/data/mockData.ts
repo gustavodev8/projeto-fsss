@@ -18,6 +18,8 @@ export interface Reservation {
   slots: string[];
   quantity?: number;
   category: "espacos" | "instrumentos";
+  userName?: string;
+  userEmail?: string;
 }
 
 export const espacos: ReservableItem[] = [

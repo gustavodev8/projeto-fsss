@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,13 +10,23 @@ import Index from "./pages/Index";
 import Listing from "./pages/Listing";
 import ReservationPage from "./pages/ReservationPage";
 import MyReservations from "./pages/MyReservations";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+/** Redireciona para Login se não autenticado. */
 const AuthGate = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   if (!user) return <Login />;
+  return <>{children}</>;
+};
+
+/** Redireciona para / se não for admin. */
+const AdminGate = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  if (!user) return <Login />;
+  if (user.role !== "admin") return <Navigate to="/" replace />;
   return <>{children}</>;
 };
 
@@ -25,9 +35,18 @@ const AppRoutes = () => (
     <ReservationProvider>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/:category" element={<Listing />} />
+        <Route path="/espacos" element={<Listing />} />
+        <Route path="/instrumentos" element={<Listing />} />
         <Route path="/:category/:id" element={<ReservationPage />} />
         <Route path="/minhas-reservas" element={<MyReservations />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminGate>
+              <AdminDashboard />
+            </AdminGate>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ReservationProvider>
