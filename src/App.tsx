@@ -35,10 +35,9 @@ const AppRoutes = () => (
     <ReservationProvider>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/espacos" element={<Listing />} />
-        <Route path="/instrumentos" element={<Listing />} />
-        <Route path="/:category/:id" element={<ReservationPage />} />
         <Route path="/minhas-reservas" element={<MyReservations />} />
+        <Route path="/:category/:id" element={<ReservationPage />} />
+        <Route path="/:category" element={<Listing />} />
         <Route
           path="/admin"
           element={

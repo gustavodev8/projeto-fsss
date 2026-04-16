@@ -142,7 +142,7 @@ const AdminHub = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Card: Painel Admin */}
           <button
             onClick={() => navigate("/admin")}
@@ -153,7 +153,7 @@ const AdminHub = () => {
             </div>
             <h2 className="text-base font-semibold text-foreground mb-1">Painel Administrativo</h2>
             <p className="text-sm text-muted-foreground">
-              Gerencie reservas, visualize relatórios e baixe PDFs diários.
+              Visualize relatórios e baixe PDFs de reservas.
             </p>
             {(todayCount > 0 || totalCount > 0) && (
               <div className="mt-3 flex gap-3 text-xs text-muted-foreground">
@@ -164,7 +164,7 @@ const AdminHub = () => {
             )}
           </button>
 
-          {/* Card: Reservar como admin */}
+          {/* Card: Espaços */}
           <button
             onClick={() => navigate("/espacos")}
             className="bg-card border border-border rounded p-6 text-left hover:border-primary/50 hover:shadow-sm transition-all group"
@@ -172,23 +172,25 @@ const AdminHub = () => {
             <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
               <DoorOpen className="w-5 h-5 text-primary" />
             </div>
-            <h2 className="text-base font-semibold text-foreground mb-1">Realizar Reserva</h2>
+            <h2 className="text-base font-semibold text-foreground mb-1">Espaços</h2>
             <p className="text-sm text-muted-foreground">
-              Reserve espaços e equipamentos em nome da instituição.
+              Salas, laboratórios, auditórios e áreas externas.
             </p>
           </button>
-        </div>
 
-        {/* Atalhos rápidos */}
-        <div className="mt-6 flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="text-xs">
-            <LayoutDashboard className="w-3.5 h-3.5 mr-1.5" />
-            Abrir painel
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate("/instrumentos")} className="text-xs">
-            <Package className="w-3.5 h-3.5 mr-1.5" />
-            Equipamentos
-          </Button>
+          {/* Card: Equipamentos */}
+          <button
+            onClick={() => navigate("/instrumentos")}
+            className="bg-card border border-border rounded p-6 text-left hover:border-primary/50 hover:shadow-sm transition-all group"
+          >
+            <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+              <Package className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-base font-semibold text-foreground mb-1">Equipamentos</h2>
+            <p className="text-sm text-muted-foreground">
+              Projetores, notebooks, microfones e caixas de som.
+            </p>
+          </button>
         </div>
       </main>
     </div>
