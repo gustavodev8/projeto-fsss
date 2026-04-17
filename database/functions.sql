@@ -144,3 +144,48 @@ AS $$
 $$;
 
 GRANT EXECUTE ON FUNCTION fn_listar_professores() TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_criar_item: cria um novo espaço ou equipamento
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_criar_item(
+    p_nome           TEXT,
+    p_descricao      TEXT,
+    p_categoria      categoria_item,
+    p_imagem_url     TEXT    DEFAULT NULL,
+    p_total_unidades INTEGER DEFAULT NULL
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_id UUID;
+BEGIN
+    INSERT INTO itens (nome, descricao, categoria, imagem_url, disponivel, total_unidades)
+    VALUES (p_nome, p_descricao, p_categoria, p_imagem_url, TRUE, p_total_unidades)
+    RETURNING id INTO v_id;
+    RETURN v_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_criar_item(TEXT, TEXT, categoria_item, TEXT, INTEGER) TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_deletar_item: remove um item (falha se tiver reservas ativas)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_deletar_item(p_item_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    DELETE FROM itens WHERE id = p_item_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_deletar_item(UUID) TO anon;

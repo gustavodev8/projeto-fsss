@@ -38,6 +38,41 @@ export async function fetchItemById(id: string): Promise<ReservableItem | null> 
   return mapItem(data);
 }
 
+export async function fetchAllItems(): Promise<ReservableItem[]> {
+  const { data, error } = await supabase
+    .from("itens")
+    .select("*")
+    .order("categoria")
+    .order("nome");
+
+  if (error || !data) return [];
+  return data.map(mapItem);
+}
+
+export async function createItem(params: {
+  nome: string;
+  descricao: string;
+  categoria: "espacos" | "instrumentos";
+  imagemUrl?: string;
+  totalUnidades?: number;
+}): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.rpc("fn_criar_item", {
+    p_nome: params.nome,
+    p_descricao: params.descricao,
+    p_categoria: params.categoria,
+    p_imagem_url: params.imagemUrl || null,
+    p_total_unidades: params.totalUnidades ?? null,
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
+export async function deleteItem(id: string): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.rpc("fn_deletar_item", { p_item_id: id });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 export async function fetchHorarios(): Promise<TimeSlot[]> {
   const { data, error } = await supabase
     .from("horarios")

@@ -6,6 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { Reservation } from "@/types";
 import { generateDailyReportPDF } from "@/lib/pdfUtils";
 import { listProfessors, createProfessor } from "@/services/users";
+import { fetchAllItems, createItem, deleteItem } from "@/services/items";
+import type { ReservableItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +25,10 @@ import {
   ChevronRight,
   UserPlus,
   CheckCircle2,
+  Building2,
+  Box,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import unnamedLogo from "@/assets/logo.png";
 
@@ -150,6 +156,67 @@ const AdminDashboard = () => {
     setProfSuccess(true);
     queryClient.invalidateQueries({ queryKey: ["professors"] });
     setTimeout(() => setProfSuccess(false), 3000);
+  };
+
+  // ── Estado do formulário de itens ───────────────────────────────────────
+  const [itemCategoria, setItemCategoria] = useState<"espacos" | "instrumentos">("espacos");
+  const [itemNome, setItemNome] = useState("");
+  const [itemDescricao, setItemDescricao] = useState("");
+  const [itemImagemUrl, setItemImagemUrl] = useState("");
+  const [itemQtd, setItemQtd] = useState(1);
+  const [itemLoading, setItemLoading] = useState(false);
+  const [itemError, setItemError] = useState("");
+  const [itemSuccess, setItemSuccess] = useState(false);
+  const [itemListTab, setItemListTab] = useState<"espacos" | "instrumentos">("espacos");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const { data: allItems = [], refetch: refetchItems } = useQuery({
+    queryKey: ["allItems"],
+    queryFn: fetchAllItems,
+  });
+
+  const espacosList = allItems.filter((i) => i.category === "espacos");
+  const instrumentosList = allItems.filter((i) => i.category === "instrumentos");
+
+  const handleCreateItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setItemError("");
+    setItemSuccess(false);
+    setItemLoading(true);
+    const result = await createItem({
+      nome: itemNome.trim(),
+      descricao: itemDescricao.trim(),
+      categoria: itemCategoria,
+      imagemUrl: itemImagemUrl.trim() || undefined,
+      totalUnidades: itemCategoria === "instrumentos" ? itemQtd : undefined,
+    });
+    setItemLoading(false);
+    if (!result.ok) {
+      setItemError(result.error ?? "Erro ao criar item.");
+      return;
+    }
+    setItemNome("");
+    setItemDescricao("");
+    setItemImagemUrl("");
+    setItemQtd(1);
+    setItemSuccess(true);
+    refetchItems();
+    queryClient.invalidateQueries({ queryKey: ["items", itemCategoria] });
+    setTimeout(() => setItemSuccess(false), 3000);
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    if (!confirm("Tem certeza que deseja remover este item?")) return;
+    setDeletingId(id);
+    const result = await deleteItem(id);
+    setDeletingId(null);
+    if (!result.ok) {
+      alert("Não foi possível remover. Verifique se não há reservas ativas para este item.");
+      return;
+    }
+    refetchItems();
+    queryClient.invalidateQueries({ queryKey: ["items", "espacos"] });
+    queryClient.invalidateQueries({ queryKey: ["items", "instrumentos"] });
   };
 
   const today = isoToday();
@@ -444,6 +511,156 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+        {/* ── Seção: Gerenciar Espaços e Equipamentos ──────────────────────── */}
+        <div className="bg-card border border-border rounded overflow-hidden">
+          <div className="border-b border-border px-5 py-4 flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-primary" />
+            <div>
+              <h2 className="text-base text-foreground">Gerenciar Espaços e Equipamentos</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Adicione ou remova itens disponíveis para reserva.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Formulário de criação */}
+            <form onSubmit={handleCreateItem} className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Novo item</h3>
+
+              {/* Categoria */}
+              <div className="flex gap-2">
+                {(["espacos", "instrumentos"] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setItemCategoria(cat)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded border transition-colors ${
+                      itemCategoria === cat
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    {cat === "espacos"
+                      ? <><Building2 className="w-3.5 h-3.5" /> Espaço</>
+                      : <><Box className="w-3.5 h-3.5" /> Equipamento</>}
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Nome</Label>
+                <Input
+                  placeholder={itemCategoria === "espacos" ? "Ex: Espaço Irmã Rosa" : "Ex: Caixa de Som"}
+                  value={itemNome}
+                  onChange={(e) => setItemNome(e.target.value)}
+                  required
+                  className="h-9 text-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Descrição</Label>
+                <Input
+                  placeholder="Breve descrição do item"
+                  value={itemDescricao}
+                  onChange={(e) => setItemDescricao(e.target.value)}
+                  required
+                  className="h-9 text-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">URL da imagem <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                <Input
+                  placeholder="https://..."
+                  value={itemImagemUrl}
+                  onChange={(e) => setItemImagemUrl(e.target.value)}
+                  className="h-9 text-sm"
+                />
+              </div>
+
+              {itemCategoria === "instrumentos" && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Quantidade total</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={itemQtd}
+                    onChange={(e) => setItemQtd(Math.max(1, Number(e.target.value)))}
+                    required
+                    className="h-9 text-sm w-28 font-mono"
+                  />
+                </div>
+              )}
+
+              {itemError && (
+                <p className="text-xs text-destructive bg-destructive/8 border border-destructive/20 rounded px-3 py-2">
+                  {itemError}
+                </p>
+              )}
+
+              {itemSuccess && (
+                <div className="flex items-center gap-2 text-xs text-available bg-available/8 border border-available/20 rounded px-3 py-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  Item adicionado com sucesso!
+                </div>
+              )}
+
+              <Button type="submit" disabled={itemLoading} className="w-full h-9 text-sm gap-1.5">
+                <Plus className="w-3.5 h-3.5" />
+                {itemLoading ? "Adicionando..." : "Adicionar Item"}
+              </Button>
+            </form>
+
+            {/* Lista de itens */}
+            <div>
+              <div className="flex gap-2 mb-3">
+                {(["espacos", "instrumentos"] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setItemListTab(cat)}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded border transition-colors ${
+                      itemListTab === cat
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-border text-muted-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    {cat === "espacos" ? `Espaços (${espacosList.length})` : `Equipamentos (${instrumentosList.length})`}
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                {(itemListTab === "espacos" ? espacosList : instrumentosList).map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between rounded border border-border px-3 py-2.5 gap-2"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
+                      {item.totalUnits && (
+                        <p className="text-xs text-muted-foreground">Qtd: {item.totalUnits}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleDeleteItem(item.id)}
+                      disabled={deletingId === item.id}
+                      title="Remover"
+                      className="shrink-0 p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors disabled:opacity-40"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+                {(itemListTab === "espacos" ? espacosList : instrumentosList).length === 0 && (
+                  <p className="text-sm text-muted-foreground">Nenhum item cadastrado.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* ── Seção: Gerenciar Professores ─────────────────────────────────── */}
         <div className="bg-card border border-border rounded overflow-hidden">
           <div className="border-b border-border px-5 py-4 flex items-center gap-2">
