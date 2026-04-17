@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
-import { espacos, instrumentos, ReservableItem } from "@/data/mockData";
+import { fetchItems } from "@/services/items";
 import { ArrowLeft, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +13,13 @@ const Listing = () => {
   const [search, setSearch] = useState("");
 
   const isEspacos = category === "espacos";
-  const items: ReservableItem[] = isEspacos ? espacos : instrumentos;
+  const cat = isEspacos ? ("espacos" as const) : ("instrumentos" as const);
   const title = isEspacos ? "Espaços" : "Instrumentos";
+
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ["items", cat],
+    queryFn: () => fetchItems(cat),
+  });
 
   const filtered = items.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase())
@@ -40,38 +46,44 @@ const Listing = () => {
             className="pl-9"
           />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {filtered.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => navigate(`/${category}/${item.id}`)}
-              className="bg-card border border-border rounded-lg overflow-hidden text-left hover:border-primary/40 hover:shadow-md transition-all group"
-            >
-              <div className="overflow-hidden">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                />
-              </div>
-              <div className="p-4 flex items-center justify-between">
-                <span className="font-medium text-foreground">{item.name}</span>
-                <Badge
-                  variant="outline"
-                  className={
-                    item.available
-                      ? "border-available text-available"
-                      : "border-unavailable text-unavailable"
-                  }
-                >
-                  {item.available ? "Disponível" : "Indisponível"}
-                </Badge>
-              </div>
-            </button>
-          ))}
-        </div>
-        {filtered.length === 0 && (
+
+        {isLoading ? (
+          <div className="text-center text-muted-foreground py-12">Carregando...</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {filtered.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => navigate(`/${category}/${item.id}`)}
+                className="bg-card border border-border rounded-lg overflow-hidden text-left hover:border-primary/40 hover:shadow-md transition-all group"
+              >
+                <div className="overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="p-4 flex items-center justify-between">
+                  <span className="font-medium text-foreground">{item.name}</span>
+                  <Badge
+                    variant="outline"
+                    className={
+                      item.available
+                        ? "border-available text-available"
+                        : "border-unavailable text-unavailable"
+                    }
+                  >
+                    {item.available ? "Disponível" : "Indisponível"}
+                  </Badge>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && filtered.length === 0 && (
           <p className="text-center text-muted-foreground mt-12">
             Nenhum resultado encontrado.
           </p>

@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { useReservations } from "@/contexts/ReservationContext";
-import { Reservation } from "@/data/mockData";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Reservation } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CalendarX, Package } from "lucide-react";
@@ -15,11 +16,13 @@ type DisplayItem =
 const MyReservations = () => {
   const navigate = useNavigate();
   const { reservations, cancelReservation, cancelGroup } = useReservations();
+  const { user } = useAuth();
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
 
   const today = new Date().toISOString().split("T")[0];
-  const upcoming = reservations.filter((r) => r.date >= today);
-  const past = reservations.filter((r) => r.date < today);
+  const myReservations = reservations.filter((r) => r.userEmail === user?.email);
+  const upcoming = myReservations.filter((r) => r.date >= today);
+  const past = myReservations.filter((r) => r.date < today);
   const displayed = tab === "upcoming" ? upcoming : past;
 
   // Agrupa reservas pelo groupId

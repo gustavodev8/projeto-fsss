@@ -12,20 +12,17 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-    setTimeout(() => {
-      const ok = login(email, password);
-      if (!ok) setError("E-mail ou senha inválidos. Verifique suas credenciais.");
-      setLoading(false);
-    }, 400);
+    const ok = await login(email, password);
+    if (!ok) setError("E-mail ou senha inválidos. Verifique suas credenciais.");
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Topo institucional */}
       <header className="bg-card border-b border-border">
         <div className="h-1 bg-primary w-full" />
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3">
@@ -39,7 +36,6 @@ const Login = () => {
         </div>
       </header>
 
-      {/* Formulário centralizado */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm">
           <h1 className="text-2xl text-foreground mb-1">Acesso ao Sistema</h1>
@@ -95,7 +91,6 @@ const Login = () => {
             </Button>
           </form>
 
-          {/* Credenciais de demonstração */}
           <div className="mt-8 pt-6 border-t border-border">
             <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-2">
               Credenciais de demonstração
@@ -114,7 +109,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Rodapé */}
       <footer className="py-4 text-center text-xs text-muted-foreground border-t border-border">
         FSSS — Acesso restrito a professores e funcionários autorizados
       </footer>

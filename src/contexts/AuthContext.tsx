@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import { signIn } from "@/services/auth";
 
 export type UserRole = "admin" | "professor";
 
 export interface User {
+  id: string;
   name: string;
   email: string;
   role: UserRole;
@@ -10,56 +12,37 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
-// Usuários do sistema (em produção, virão de um backend)
-const USERS: Array<User & { password: string }> = [
-  {
-    name: "Administrador",
-    email: "admin@fsss.edu.br",
-    password: "admin@fsss",
-    role: "admin",
-  },
-  {
-    name: "Prof. Ana Silva",
-    email: "ana.silva@fsss.edu.br",
-    password: "professor",
-    role: "professor",
-  },
-  {
-    name: "Prof. Carlos Mendes",
-    email: "carlos.mendes@fsss.edu.br",
-    password: "professor",
-    role: "professor",
-  },
-];
+const STORAGE_KEY = "fsss_user";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? (JSON.parse(raw) as User) : null;
+    } catch {
+      return null;
+    }
+  });
 
-  const login = (email: string, password: string): boolean => {
-    const found = USERS.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-    );
-    if (found) {
-      setUser({ name: found.name, email: found.email, role: found.role });
-      return true;
-    }
-    // Fallback: qualquer credencial válida entra como professor (para facilitar demo)
-    if (email && password.length >= 4) {
-      const name = email.split("@")[0].replace(/\./g, " ");
-      const formatted = name.replace(/\b\w/g, (c) => c.toUpperCase());
-      setUser({ name: `Prof. ${formatted}`, email, role: "professor" });
-      return true;
-    }
-    return false;
+  const login = async (email: string, password: string): Promise<boolean> => {
+    const dbUser = await signIn(email, password);
+    if (!dbUser) return false;
+    const u: User = { id: dbUser.id, name: dbUser.name, email: dbUser.email, role: dbUser.role };
+    setUser(u);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+    return true;
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem(STORAGE_KEY);
+  };
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
