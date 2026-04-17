@@ -1,10 +1,14 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useReservations } from "@/contexts/ReservationContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { Reservation } from "@/data/mockData";
+import type { Reservation } from "@/types";
 import { generateDailyReportPDF } from "@/lib/pdfUtils";
+import { listProfessors, createProfessor } from "@/services/users";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -17,6 +21,8 @@ import {
   LayoutDashboard,
   ChevronLeft,
   ChevronRight,
+  UserPlus,
+  CheckCircle2,
 } from "lucide-react";
 import unnamedLogo from "@/assets/logo.png";
 
@@ -109,9 +115,42 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { reservations } = useReservations();
+  const queryClient = useQueryClient();
 
   const [selectedDate, setSelectedDate] = useState<string>(isoToday());
   const [downloading, setDownloading] = useState(false);
+
+  // ── Estado do formulário de professores ──────────────────────────────────
+  const [profNome, setProfNome] = useState("");
+  const [profEmail, setProfEmail] = useState("");
+  const [profSenha, setProfSenha] = useState("");
+  const [profLoading, setProfLoading] = useState(false);
+  const [profError, setProfError] = useState("");
+  const [profSuccess, setProfSuccess] = useState(false);
+
+  const { data: professors = [] } = useQuery({
+    queryKey: ["professors"],
+    queryFn: listProfessors,
+  });
+
+  const handleCreateProfessor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfError("");
+    setProfSuccess(false);
+    setProfLoading(true);
+    const result = await createProfessor(profNome.trim(), profEmail.trim(), profSenha);
+    setProfLoading(false);
+    if (!result.ok) {
+      setProfError(result.error ?? "Erro ao criar professor.");
+      return;
+    }
+    setProfNome("");
+    setProfEmail("");
+    setProfSenha("");
+    setProfSuccess(true);
+    queryClient.invalidateQueries({ queryKey: ["professors"] });
+    setTimeout(() => setProfSuccess(false), 3000);
+  };
 
   const today = isoToday();
   const { start: weekStart, end: weekEnd } = weekRange(today);
@@ -405,6 +444,111 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+        {/* ── Seção: Gerenciar Professores ─────────────────────────────────── */}
+        <div className="bg-card border border-border rounded overflow-hidden">
+          <div className="border-b border-border px-5 py-4 flex items-center gap-2">
+            <UserPlus className="w-4 h-4 text-primary" />
+            <div>
+              <h2 className="text-base text-foreground">Gerenciar Professores</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Crie logins para novos professores.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Formulário de criação */}
+            <form onSubmit={handleCreateProfessor} className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Novo professor</h3>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Nome completo</Label>
+                <Input
+                  placeholder="Prof. João Silva"
+                  value={profNome}
+                  onChange={(e) => setProfNome(e.target.value)}
+                  required
+                  className="h-9 text-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">E-mail institucional</Label>
+                <Input
+                  type="email"
+                  placeholder="joao.silva@fsss.edu.br"
+                  value={profEmail}
+                  onChange={(e) => setProfEmail(e.target.value)}
+                  required
+                  className="h-9 text-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium">Senha inicial</Label>
+                <Input
+                  type="text"
+                  placeholder="Senha que o professor usará para entrar"
+                  value={profSenha}
+                  onChange={(e) => setProfSenha(e.target.value)}
+                  required
+                  minLength={4}
+                  className="h-9 text-sm font-mono"
+                />
+              </div>
+
+              {profError && (
+                <p className="text-xs text-destructive bg-destructive/8 border border-destructive/20 rounded px-3 py-2">
+                  {profError}
+                </p>
+              )}
+
+              {profSuccess && (
+                <div className="flex items-center gap-2 text-xs text-available bg-available/8 border border-available/20 rounded px-3 py-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  Professor criado com sucesso!
+                </div>
+              )}
+
+              <Button type="submit" disabled={profLoading} className="w-full h-9 text-sm">
+                {profLoading ? "Criando..." : "Criar Professor"}
+              </Button>
+            </form>
+
+            {/* Lista de professores cadastrados */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">
+                Professores cadastrados ({professors.length})
+              </h3>
+              {professors.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nenhum professor cadastrado ainda.</p>
+              ) : (
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  {professors.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between rounded border border-border px-3 py-2.5"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{p.nome}</p>
+                        <p className="text-xs text-muted-foreground">{p.email}</p>
+                      </div>
+                      <span
+                        className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded ${
+                          p.ativo
+                            ? "bg-available/10 text-available"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {p.ativo ? "Ativo" : "Inativo"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );

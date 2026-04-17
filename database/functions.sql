@@ -93,3 +93,54 @@ GRANT SELECT          ON vw_reservas_detalhadas TO anon;
 GRANT SELECT, INSERT  ON reservas               TO anon;
 GRANT SELECT, INSERT  ON reserva_horarios       TO anon;
 GRANT UPDATE (status, cancelado_em) ON reservas TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_criar_usuario: cria um professor com senha hasheada
+-- Chamada pelo painel admin via supabase.rpc('fn_criar_usuario', {...})
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_criar_usuario(
+    p_nome  TEXT,
+    p_email TEXT,
+    p_senha TEXT
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_id UUID;
+BEGIN
+    INSERT INTO usuarios (nome, email, senha_hash, perfil)
+    VALUES (p_nome, p_email, crypt(p_senha, gen_salt('bf', 12)), 'professor')
+    RETURNING id INTO v_id;
+    RETURN v_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_criar_usuario(TEXT, TEXT, TEXT) TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_listar_professores: retorna professores sem expor senha_hash
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_listar_professores()
+RETURNS TABLE (
+    id        UUID,
+    nome      TEXT,
+    email     TEXT,
+    ativo     BOOLEAN,
+    criado_em TIMESTAMPTZ
+)
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+    SELECT id, nome::TEXT, email::TEXT, ativo, criado_em
+    FROM usuarios
+    WHERE perfil = 'professor'
+    ORDER BY nome;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_listar_professores() TO anon;
