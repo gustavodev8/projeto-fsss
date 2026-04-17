@@ -73,6 +73,24 @@ export async function deleteItem(id: string): Promise<{ ok: boolean; error?: str
   return { ok: true };
 }
 
+export async function updateItem(params: {
+  id: string;
+  nome: string;
+  descricao: string;
+  imagemUrl?: string;
+  totalUnidades?: number;
+}): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.rpc("fn_atualizar_item", {
+    p_id: params.id,
+    p_nome: params.nome,
+    p_descricao: params.descricao,
+    p_imagem_url: params.imagemUrl || null,
+    p_total_unidades: params.totalUnidades ?? null,
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 export async function fetchHorarios(): Promise<TimeSlot[]> {
   const { data, error } = await supabase
     .from("horarios")

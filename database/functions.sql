@@ -189,3 +189,78 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION fn_deletar_item(UUID) TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_atualizar_usuario: edita nome, email e opcionalmente a senha de um professor
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_atualizar_usuario(
+    p_id    UUID,
+    p_nome  TEXT,
+    p_email TEXT,
+    p_senha TEXT DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    UPDATE usuarios SET
+        nome       = p_nome,
+        email      = p_email,
+        senha_hash = CASE
+            WHEN p_senha IS NOT NULL AND p_senha != ''
+            THEN crypt(p_senha, gen_salt('bf', 12))
+            ELSE senha_hash
+        END
+    WHERE id = p_id AND perfil = 'professor';
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_atualizar_usuario(UUID, TEXT, TEXT, TEXT) TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_deletar_usuario: remove um professor pelo id
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_deletar_usuario(p_usuario_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    DELETE FROM usuarios WHERE id = p_usuario_id AND perfil = 'professor';
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_deletar_usuario(UUID) TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_atualizar_item: edita os dados de um espaço ou equipamento
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_atualizar_item(
+    p_id             UUID,
+    p_nome           TEXT,
+    p_descricao      TEXT,
+    p_imagem_url     TEXT    DEFAULT NULL,
+    p_total_unidades INTEGER DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    UPDATE itens SET
+        nome           = p_nome,
+        descricao      = p_descricao,
+        imagem_url     = p_imagem_url,
+        total_unidades = p_total_unidades
+    WHERE id = p_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_atualizar_item(UUID, TEXT, TEXT, TEXT, INTEGER) TO anon;

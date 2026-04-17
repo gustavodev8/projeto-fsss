@@ -5,8 +5,8 @@ import { useReservations } from "@/contexts/ReservationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Reservation } from "@/types";
 import { generateDailyReportPDF } from "@/lib/pdfUtils";
-import { listProfessors, createProfessor } from "@/services/users";
-import { fetchAllItems, createItem, deleteItem } from "@/services/items";
+import { listProfessors, createProfessor, updateProfessor, deleteProfessor } from "@/services/users";
+import { fetchAllItems, createItem, deleteItem, updateItem } from "@/services/items";
 import type { ReservableItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,9 @@ import {
   Box,
   Plus,
   Trash2,
+  Pencil,
+  Save,
+  X,
 } from "lucide-react";
 import unnamedLogo from "@/assets/logo.png";
 
@@ -178,6 +181,22 @@ const AdminDashboard = () => {
   const espacosList = allItems.filter((i) => i.category === "espacos");
   const instrumentosList = allItems.filter((i) => i.category === "instrumentos");
 
+  // ── Estado de edição de professores ─────────────────────────────────────
+  const [editingProfId, setEditingProfId] = useState<string | null>(null);
+  const [editProfNome, setEditProfNome] = useState("");
+  const [editProfEmail, setEditProfEmail] = useState("");
+  const [editProfSenha, setEditProfSenha] = useState("");
+  const [editProfLoading, setEditProfLoading] = useState(false);
+
+  // ── Estado de edição de itens ────────────────────────────────────────────
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editItemNome, setEditItemNome] = useState("");
+  const [editItemDescricao, setEditItemDescricao] = useState("");
+  const [editItemImagemUrl, setEditItemImagemUrl] = useState("");
+  const [editItemQtd, setEditItemQtd] = useState(1);
+  const [editItemCategoria, setEditItemCategoria] = useState<"espacos" | "instrumentos">("espacos");
+  const [editItemLoading, setEditItemLoading] = useState(false);
+
   const handleCreateItem = async (e: React.FormEvent) => {
     e.preventDefault();
     setItemError("");
@@ -217,6 +236,63 @@ const AdminDashboard = () => {
     refetchItems();
     queryClient.invalidateQueries({ queryKey: ["items", "espacos"] });
     queryClient.invalidateQueries({ queryKey: ["items", "instrumentos"] });
+  };
+
+  const handleEditItem = (item: ReservableItem) => {
+    setEditingItemId(item.id);
+    setEditItemNome(item.name);
+    setEditItemDescricao(item.description);
+    setEditItemImagemUrl(item.image);
+    setEditItemQtd(item.totalUnits ?? 1);
+    setEditItemCategoria(item.category);
+  };
+
+  const handleSaveItem = async (id: string) => {
+    setEditItemLoading(true);
+    const result = await updateItem({
+      id,
+      nome: editItemNome.trim(),
+      descricao: editItemDescricao.trim(),
+      imagemUrl: editItemImagemUrl.trim() || undefined,
+      totalUnidades: editItemCategoria === "instrumentos" ? editItemQtd : undefined,
+    });
+    setEditItemLoading(false);
+    if (!result.ok) {
+      alert(result.error ?? "Erro ao atualizar item.");
+      return;
+    }
+    setEditingItemId(null);
+    refetchItems();
+    queryClient.invalidateQueries({ queryKey: ["items", editItemCategoria] });
+  };
+
+  const handleEditProfessor = (p: { id: string; nome: string; email: string }) => {
+    setEditingProfId(p.id);
+    setEditProfNome(p.nome);
+    setEditProfEmail(p.email);
+    setEditProfSenha("");
+  };
+
+  const handleSaveProfessor = async (id: string) => {
+    setEditProfLoading(true);
+    const result = await updateProfessor(id, editProfNome.trim(), editProfEmail.trim(), editProfSenha || undefined);
+    setEditProfLoading(false);
+    if (!result.ok) {
+      alert(result.error ?? "Erro ao atualizar professor.");
+      return;
+    }
+    setEditingProfId(null);
+    queryClient.invalidateQueries({ queryKey: ["professors"] });
+  };
+
+  const handleDeleteProfessor = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este professor?")) return;
+    const result = await deleteProfessor(id);
+    if (!result.ok) {
+      alert(result.error ?? "Erro ao excluir professor.");
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["professors"] });
   };
 
   const today = isoToday();
@@ -631,26 +707,47 @@ const AdminDashboard = () => {
                 ))}
               </div>
 
-              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
                 {(itemListTab === "espacos" ? espacosList : instrumentosList).map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between rounded border border-border px-3 py-2.5 gap-2"
+                    className="rounded border border-border px-3 py-2.5"
                   >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
-                      {item.totalUnits && (
-                        <p className="text-xs text-muted-foreground">Qtd: {item.totalUnits}</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleDeleteItem(item.id)}
-                      disabled={deletingId === item.id}
-                      title="Remover"
-                      className="shrink-0 p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors disabled:opacity-40"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {editingItemId === item.id ? (
+                      <div className="space-y-2">
+                        <Input value={editItemNome} onChange={(e) => setEditItemNome(e.target.value)} className="h-8 text-sm" placeholder="Nome" />
+                        <Input value={editItemDescricao} onChange={(e) => setEditItemDescricao(e.target.value)} className="h-8 text-sm" placeholder="Descrição" />
+                        <Input value={editItemImagemUrl} onChange={(e) => setEditItemImagemUrl(e.target.value)} className="h-8 text-sm" placeholder="URL da imagem" />
+                        {item.category === "instrumentos" && (
+                          <Input type="number" min={1} value={editItemQtd} onChange={(e) => setEditItemQtd(Math.max(1, Number(e.target.value)))} className="h-8 text-sm w-24 font-mono" placeholder="Qtd" />
+                        )}
+                        <div className="flex gap-2">
+                          <Button size="sm" className="h-7 text-xs gap-1" onClick={() => handleSaveItem(item.id)} disabled={editItemLoading}>
+                            <Save className="w-3 h-3" />{editItemLoading ? "Salvando..." : "Salvar"}
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setEditingItemId(null)}>
+                            <X className="w-3 h-3" />Cancelar
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{item.name}</p>
+                          {item.totalUnits && (
+                            <p className="text-xs text-muted-foreground">Qtd: {item.totalUnits}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button onClick={() => handleEditItem(item)} title="Editar" className="p-1.5 rounded text-muted-foreground hover:text-primary hover:bg-primary/8 transition-colors">
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => handleDeleteItem(item.id)} disabled={deletingId === item.id} title="Remover" className="p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors disabled:opacity-40">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
                 {(itemListTab === "espacos" ? espacosList : instrumentosList).length === 0 && (
@@ -740,25 +837,45 @@ const AdminDashboard = () => {
               {professors.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nenhum professor cadastrado ainda.</p>
               ) : (
-                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
                   {professors.map((p) => (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between rounded border border-border px-3 py-2.5"
+                      className="rounded border border-border px-3 py-2.5"
                     >
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{p.nome}</p>
-                        <p className="text-xs text-muted-foreground">{p.email}</p>
-                      </div>
-                      <span
-                        className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded ${
-                          p.ativo
-                            ? "bg-available/10 text-available"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {p.ativo ? "Ativo" : "Inativo"}
-                      </span>
+                      {editingProfId === p.id ? (
+                        <div className="space-y-2">
+                          <Input value={editProfNome} onChange={(e) => setEditProfNome(e.target.value)} className="h-8 text-sm" placeholder="Nome completo" />
+                          <Input value={editProfEmail} onChange={(e) => setEditProfEmail(e.target.value)} className="h-8 text-sm" placeholder="E-mail" />
+                          <Input value={editProfSenha} onChange={(e) => setEditProfSenha(e.target.value)} className="h-8 text-sm font-mono" placeholder="Nova senha (deixe vazio para manter)" />
+                          <div className="flex gap-2">
+                            <Button size="sm" className="h-7 text-xs gap-1" onClick={() => handleSaveProfessor(p.id)} disabled={editProfLoading}>
+                              <Save className="w-3 h-3" />{editProfLoading ? "Salvando..." : "Salvar"}
+                            </Button>
+                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setEditingProfId(null)}>
+                              <X className="w-3 h-3" />Cancelar
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{p.nome}</p>
+                            <p className="text-xs text-muted-foreground truncate">{p.email}</p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded ${p.ativo ? "bg-available/10 text-available" : "bg-muted text-muted-foreground"}`}>
+                              {p.ativo ? "Ativo" : "Inativo"}
+                            </span>
+                            <button onClick={() => handleEditProfessor(p)} title="Editar" className="p-1.5 rounded text-muted-foreground hover:text-primary hover:bg-primary/8 transition-colors">
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleDeleteProfessor(p.id)} title="Excluir" className="p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
