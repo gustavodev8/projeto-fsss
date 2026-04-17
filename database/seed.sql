@@ -72,76 +72,68 @@ INSERT INTO horarios (label, hora_inicio, hora_fim, is_intervalo, ordem) VALUES
 -- ─────────────────────────────────────────────────────────────────────────────
 
 INSERT INTO itens (id, nome, descricao, categoria, imagem_url, disponivel, total_unidades) VALUES
-('e0000001-0000-0000-0000-000000000001', 'Sala de Vídeo',
- 'Sala equipada com TV de grande porte e sistema de som para exibição de vídeos e apresentações.',
- 'espacos', 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=300&fit=crop', TRUE, NULL),
-
-('e0000001-0000-0000-0000-000000000002', 'Espaço Irmã Rosa',
- 'Salão multiuso amplo, ideal para reuniões, eventos e atividades em grupo.',
+('e2000000-0000-0000-0000-000000000001', 'Espaço Irmã Rosa',
+ 'Salão multiuso amplo, ideal para eventos, reuniões e atividades institucionais.',
  'espacos', 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop', TRUE, NULL),
 
-('e0000001-0000-0000-0000-000000000003', 'Espaço Irmã Jovina',
- 'Espaço versátil para palestras, dinâmicas e atividades formativas.',
+('e2000000-0000-0000-0000-000000000002', 'Espaço Irmã Lealcy',
+ 'Espaço versátil para palestras, formações e atividades em grupo.',
  'espacos', 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=400&h=300&fit=crop', TRUE, NULL),
 
-('e0000001-0000-0000-0000-000000000004', 'Espaço do Churrasco',
- 'Área externa coberta com churrasqueiras, mesas e espaço para confraternizações.',
- 'espacos', 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=300&fit=crop', TRUE, NULL),
+('e2000000-0000-0000-0000-000000000003', 'Espaço 12 de Maio',
+ 'Salão para eventos institucionais, comemorações e atividades culturais.',
+ 'espacos', 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=300&fit=crop', TRUE, NULL),
 
-('e0000001-0000-0000-0000-000000000005', 'Espaço Verde',
- 'Área aberta com jardim, ideal para atividades ao ar livre e momentos de integração.',
- 'espacos', 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=300&fit=crop', TRUE, NULL),
+('e2000000-0000-0000-0000-000000000004', 'Ginásio de Esportes',
+ 'Ginásio coberto para atividades esportivas, eventos e práticas físicas.',
+ 'espacos', 'https://images.unsplash.com/photo-1546519638405-a9d1b2f72b77?w=400&h=300&fit=crop', TRUE, NULL),
 
-('e0000001-0000-0000-0000-000000000006', 'Sala de Vidro',
- 'Sala moderna com paredes de vidro, climatizada, para reuniões e atendimentos.',
- 'espacos', 'https://images.unsplash.com/photo-1497366754035-f200968a333e?w=400&h=300&fit=crop', TRUE, NULL),
-
-('e0000001-0000-0000-0000-000000000007', 'Biblioteca',
- 'Biblioteca com acervo completo e espaço de leitura e estudo.',
- 'espacos', 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=400&h=300&fit=crop', TRUE, NULL),
-
-('e0000001-0000-0000-0000-000000000008', 'Sala de Informática 1',
- 'Laboratório de informática com 30 computadores e internet de alta velocidade.',
- 'espacos', 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=400&h=300&fit=crop', TRUE, NULL),
-
-('e0000001-0000-0000-0000-000000000009', 'Sala de Informática 2',
- 'Laboratório de informática com 30 computadores e internet de alta velocidade.',
- 'espacos', 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop', TRUE, NULL),
-
-('e0000001-0000-0000-0000-000000000010', 'Laboratório de Química',
- 'Laboratório equipado com bancadas, vidrarias e reagentes para experimentos.',
- 'espacos', 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400&h=300&fit=crop', TRUE, NULL),
-
-('e0000001-0000-0000-0000-000000000011', 'Laboratório de Física',
- 'Laboratório com equipamentos para experimentos de física e demonstrações científicas.',
- 'espacos', 'https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400&h=300&fit=crop', TRUE, NULL),
-
-('e0000001-0000-0000-0000-000000000012', 'Sala de Enfermagem',
- 'Sala equipada para práticas de enfermagem, com materiais e manequins de simulação.',
- 'espacos', 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=300&fit=crop', TRUE, NULL),
-
-('e0000001-0000-0000-0000-000000000013', 'Sala de Podcast',
- 'Estúdio de podcast com isolamento acústico, microfones e mesa de som.',
- 'espacos', 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&h=300&fit=crop', TRUE, NULL);
+('e2000000-0000-0000-0000-000000000005', 'Quadra Maria Imaculada',
+ 'Quadra poliesportiva aberta para atividades físicas e esportivas.',
+ 'espacos', 'https://images.unsplash.com/photo-1519861531473-9200262188bf?w=400&h=300&fit=crop', TRUE, NULL);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- EQUIPAMENTOS (instrumentos)
+-- EQUIPAMENTOS
 -- ─────────────────────────────────────────────────────────────────────────────
 
 INSERT INTO itens (id, nome, descricao, categoria, imagem_url, disponivel, total_unidades) VALUES
-('b0000001-0000-0000-0000-000000000001', 'Microfone',
- 'Microfone com fio para apresentações, aulas e eventos.',
- 'instrumentos', 'https://images.unsplash.com/photo-1516223725307-6f76b9ec8742?w=400&h=300&fit=crop', TRUE, 4),
+('b2000000-0000-0000-0000-000000000001', 'Caixa de Som',
+ 'Caixa de som amplificada para eventos e apresentações.',
+ 'instrumentos', 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop', TRUE, 3),
 
-('b0000001-0000-0000-0000-000000000002', 'Notebook',
- 'Notebook para uso em aulas, apresentações e atividades acadêmicas.',
- 'instrumentos', 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop', TRUE, 10),
+('b2000000-0000-0000-0000-000000000002', 'Datashow',
+ 'Projetor multimídia para apresentações, aulas e eventos.',
+ 'instrumentos', 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=300&fit=crop', TRUE, 4),
 
-('b0000001-0000-0000-0000-000000000003', 'Caixa de Som',
- 'Caixa de som amplificada 500W com entrada USB, Bluetooth e microfone.',
- 'instrumentos', 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop', TRUE, 15),
+('b2000000-0000-0000-0000-000000000003', 'Microfone sem fio',
+ 'Kit microfone sem fio com dois microfones cada.',
+ 'instrumentos', 'https://images.unsplash.com/photo-1516223725307-6f76b9ec8742?w=400&h=300&fit=crop', TRUE, 2),
 
-('b0000001-0000-0000-0000-000000000004', 'Projetor',
- 'Projetor multimídia 3.500 lumens com HDMI e VGA para salas de aula.',
- 'instrumentos', 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=300&fit=crop', TRUE, 5);
+('b2000000-0000-0000-0000-000000000004', 'Cadeiras Brancas',
+ 'Cadeiras brancas para eventos e cerimônias.',
+ 'instrumentos', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop', TRUE, 300),
+
+('b2000000-0000-0000-0000-000000000005', 'Mesa de Madeira',
+ 'Mesa de madeira para eventos, reuniões e atividades.',
+ 'instrumentos', 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=300&fit=crop', TRUE, 7),
+
+('b2000000-0000-0000-0000-000000000006', 'Mesa Branca Plástica',
+ 'Mesa plástica branca leve e resistente para eventos externos e internos.',
+ 'instrumentos', 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=400&h=300&fit=crop', TRUE, 6),
+
+('b2000000-0000-0000-0000-000000000007', 'Púlpito',
+ 'Púlpito para celebrações, solenidades e apresentações oficiais.',
+ 'instrumentos', 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&h=300&fit=crop', TRUE, 2),
+
+('b2000000-0000-0000-0000-000000000008', 'Backdrop',
+ 'Backdrop para cenografia de eventos, formaturas e cerimônias.',
+ 'instrumentos', 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop', TRUE, 1),
+
+('b2000000-0000-0000-0000-000000000009', 'Suporte de Banner',
+ 'Suporte retrátil para banners e comunicação visual em eventos.',
+ 'instrumentos', 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=300&fit=crop', TRUE, 17),
+
+('b2000000-0000-0000-0000-000000000010', 'Biombos',
+ 'Biombos divisórios para organização e ambientação de espaços em eventos.',
+ 'instrumentos', 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop', TRUE, 7);
