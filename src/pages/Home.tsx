@@ -170,10 +170,10 @@ const AdminHub = () => {
 
   return (
     <AdminLayout>
-      <div className="p-6 space-y-6 max-w-5xl">
+      <div className="p-6 space-y-6">
         {/* Título */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">
             Bem-vindo, Administrador
           </p>
           <h1 className="text-xl font-bold text-foreground">Visão geral</h1>
@@ -186,26 +186,33 @@ const AdminHub = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             {
-              icon: <CalendarDays className="w-4 h-4 text-muted-foreground" />,
+              icon: <CalendarDays className="w-4 h-4 text-primary" />,
               label: "Reservas esta semana",
               value: weekRes.length,
               sub: `${todayRes.length} hoje`,
+              color: "bg-primary/8",
             },
             {
-              icon: <Users className="w-4 h-4 text-muted-foreground" />,
+              icon: <Users className="w-4 h-4 text-violet-600" />,
               label: "Professores ativos",
               value: profAtivos,
               sub: `${professors.length} cadastrados`,
+              color: "bg-violet-50",
             },
             {
-              icon: <TrendingUp className="w-4 h-4 text-muted-foreground" />,
+              icon: <TrendingUp className="w-4 h-4 text-emerald-600" />,
               label: "Taxa de ocupação",
               value: `${ocupacao}%`,
               sub: "espaços esta semana",
+              color: "bg-emerald-50",
             },
-          ].map((s) => (
-            <div key={s.label} className="bg-white border border-border rounded-xl p-5">
-              <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+          ].map((s, i) => (
+            <div
+              key={s.label}
+              className="bg-white border border-border rounded-xl p-5 hover:shadow-sm transition-shadow duration-200"
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
+              <div className={`w-9 h-9 rounded-full ${s.color} flex items-center justify-center mb-3`}>
                 {s.icon}
               </div>
               <p className="text-2xl font-bold text-foreground">{s.value}</p>
@@ -224,9 +231,10 @@ const AdminHub = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               {
-                icon: <BarChart2 className="w-6 h-6 text-muted-foreground" />,
+                icon: <BarChart2 className="w-5 h-5 text-primary" />,
+                iconBg: "bg-primary/8",
                 title: "Painel Administrativo",
-                desc: "Visualize relatórios diários, semanais e baixe PDFs das reservas.",
+                desc: "Relatórios diários, semanais e exportação em PDF.",
                 path: "/admin",
                 stat: (
                   <span>
@@ -236,9 +244,10 @@ const AdminHub = () => {
                 ),
               },
               {
-                icon: <Building2 className="w-6 h-6 text-muted-foreground" />,
+                icon: <Building2 className="w-5 h-5 text-violet-600" />,
+                iconBg: "bg-violet-50",
                 title: "Espaços",
-                desc: "Salas de aula, laboratórios, auditórios e áreas externas.",
+                desc: "Salas de aula, laboratórios e auditórios.",
                 path: "/espacos",
                 stat: (
                   <span>
@@ -247,9 +256,10 @@ const AdminHub = () => {
                 ),
               },
               {
-                icon: <Package className="w-6 h-6 text-muted-foreground" />,
+                icon: <Package className="w-5 h-5 text-emerald-600" />,
+                iconBg: "bg-emerald-50",
                 title: "Equipamentos",
-                desc: "Projetores, notebooks, microfones, caixas de som e demais itens.",
+                desc: "Projetores, notebooks, microfones e demais itens.",
                 path: "/instrumentos",
                 stat: (
                   <span>
@@ -258,15 +268,18 @@ const AdminHub = () => {
                   </span>
                 ),
               },
-            ].map((card) => (
+            ].map((card, i) => (
               <button
                 key={card.title}
                 onClick={() => navigate(card.path)}
-                className="bg-white border border-border rounded-xl p-5 text-left hover:border-gray-300 hover:shadow-sm transition-all group relative"
+                className="bg-white border border-border rounded-xl p-5 text-left hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 group relative"
+                style={{ animationDelay: `${i * 80}ms` }}
               >
-                <ArrowRight className="w-4 h-4 text-muted-foreground/50 absolute top-4 right-4 group-hover:text-muted-foreground transition-colors" />
-                {card.icon}
-                <p className="text-sm font-semibold text-foreground mt-3 mb-1">{card.title}</p>
+                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/30 absolute top-4 right-4 group-hover:text-primary/50 group-hover:translate-x-0.5 transition-all duration-150" />
+                <div className={`w-9 h-9 rounded-full ${card.iconBg} flex items-center justify-center mb-3`}>
+                  {card.icon}
+                </div>
+                <p className="text-sm font-semibold text-foreground mb-1">{card.title}</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">{card.desc}</p>
                 <div className="border-t border-border mt-4 pt-3 text-xs text-muted-foreground">
                   {card.stat}
