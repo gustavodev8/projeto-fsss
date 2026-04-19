@@ -39,8 +39,7 @@
     --input: 215 18% 88%;
     --ring: 215 72% 32%;
 
-    /* Raio menor = mais sóbrio/institucional */
-    --radius: 0.25rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 215 16% 26%;
@@ -72,10 +71,9 @@
     @apply select-none;
   }
 
-  /* Headings usam Merriweather para autoridade institucional */
   h1, h2, h3 {
-    font-family: 'Merriweather', serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 }
