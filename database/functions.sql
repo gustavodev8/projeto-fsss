@@ -93,3 +93,174 @@ GRANT SELECT          ON vw_reservas_detalhadas TO anon;
 GRANT SELECT, INSERT  ON reservas               TO anon;
 GRANT SELECT, INSERT  ON reserva_horarios       TO anon;
 GRANT UPDATE (status, cancelado_em) ON reservas TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_criar_usuario: cria um professor com senha hasheada
+-- Chamada pelo painel admin via supabase.rpc('fn_criar_usuario', {...})
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_criar_usuario(
+    p_nome  TEXT,
+    p_email TEXT,
+    p_senha TEXT
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_id UUID;
+BEGIN
+    INSERT INTO usuarios (nome, email, senha_hash, perfil)
+    VALUES (p_nome, p_email, crypt(p_senha, gen_salt('bf', 12)), 'professor')
+    RETURNING id INTO v_id;
+    RETURN v_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_criar_usuario(TEXT, TEXT, TEXT) TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_listar_professores: retorna professores sem expor senha_hash
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_listar_professores()
+RETURNS TABLE (
+    id        UUID,
+    nome      TEXT,
+    email     TEXT,
+    ativo     BOOLEAN,
+    criado_em TIMESTAMPTZ
+)
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+    SELECT id, nome::TEXT, email::TEXT, ativo, criado_em
+    FROM usuarios
+    WHERE perfil = 'professor'
+    ORDER BY nome;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_listar_professores() TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_criar_item: cria um novo espaço ou equipamento
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_criar_item(
+    p_nome           TEXT,
+    p_descricao      TEXT,
+    p_categoria      categoria_item,
+    p_imagem_url     TEXT    DEFAULT NULL,
+    p_total_unidades INTEGER DEFAULT NULL
+)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_id UUID;
+BEGIN
+    INSERT INTO itens (nome, descricao, categoria, imagem_url, disponivel, total_unidades)
+    VALUES (p_nome, p_descricao, p_categoria, p_imagem_url, TRUE, p_total_unidades)
+    RETURNING id INTO v_id;
+    RETURN v_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_criar_item(TEXT, TEXT, categoria_item, TEXT, INTEGER) TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_deletar_item: remove um item (falha se tiver reservas ativas)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_deletar_item(p_item_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    DELETE FROM itens WHERE id = p_item_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_deletar_item(UUID) TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_atualizar_usuario: edita nome, email e opcionalmente a senha de um professor
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_atualizar_usuario(
+    p_id    UUID,
+    p_nome  TEXT,
+    p_email TEXT,
+    p_senha TEXT DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    UPDATE usuarios SET
+        nome       = p_nome,
+        email      = p_email,
+        senha_hash = CASE
+            WHEN p_senha IS NOT NULL AND p_senha != ''
+            THEN crypt(p_senha, gen_salt('bf', 12))
+            ELSE senha_hash
+        END
+    WHERE id = p_id AND perfil = 'professor';
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_atualizar_usuario(UUID, TEXT, TEXT, TEXT) TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_deletar_usuario: remove um professor pelo id
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_deletar_usuario(p_usuario_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    DELETE FROM usuarios WHERE id = p_usuario_id AND perfil = 'professor';
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_deletar_usuario(UUID) TO anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- fn_atualizar_item: edita os dados de um espaço ou equipamento
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION fn_atualizar_item(
+    p_id             UUID,
+    p_nome           TEXT,
+    p_descricao      TEXT,
+    p_imagem_url     TEXT    DEFAULT NULL,
+    p_total_unidades INTEGER DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    UPDATE itens SET
+        nome           = p_nome,
+        descricao      = p_descricao,
+        imagem_url     = p_imagem_url,
+        total_unidades = p_total_unidades
+    WHERE id = p_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION fn_atualizar_item(UUID, TEXT, TEXT, TEXT, INTEGER) TO anon;

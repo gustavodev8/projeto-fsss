@@ -6,11 +6,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ReservationProvider } from "@/contexts/ReservationContext";
 import Login from "./pages/Login";
-import Index from "./pages/Index";
+import Home from "./pages/Home";
 import Listing from "./pages/Listing";
 import ReservationPage from "./pages/ReservationPage";
 import MyReservations from "./pages/MyReservations";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminManage from "./pages/AdminManage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,16 +35,23 @@ const AppRoutes = () => (
   <AuthGate>
     <ReservationProvider>
       <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/espacos" element={<Listing />} />
-        <Route path="/instrumentos" element={<Listing />} />
-        <Route path="/:category/:id" element={<ReservationPage />} />
+        <Route path="/" element={<Home />} />
         <Route path="/minhas-reservas" element={<MyReservations />} />
+        <Route path="/:category/:id" element={<ReservationPage />} />
+        <Route path="/:category" element={<Listing />} />
         <Route
           path="/admin"
           element={
             <AdminGate>
               <AdminDashboard />
+            </AdminGate>
+          }
+        />
+        <Route
+          path="/gerenciar"
+          element={
+            <AdminGate>
+              <AdminManage />
             </AdminGate>
           }
         />

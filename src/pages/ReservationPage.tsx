@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle2, Clock, Sun, Sunset, PackagePlus, Check } from "lucide-react";
+import { ArrowLeft, CheckCircle2, PackagePlus, Check } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -248,12 +248,6 @@ const ReservationPage = () => {
         disabled={isDisabled}
         onClick={() => toggleSlot(slot.label)}
         className={cn(
-<<<<<<< Updated upstream
-          "relative font-mono text-xs py-3 px-2 rounded-lg border-2 transition-all duration-150 text-center font-medium",
-          isOccupied && "bg-muted/50 text-muted-foreground border-border cursor-not-allowed",
-          !isDisabled && !isSelected && "border-available/60 text-available bg-available/5 hover:bg-available/10 hover:border-available",
-          isSelected && "bg-primary text-primary-foreground border-primary shadow-md scale-[1.02]"
-=======
           "relative text-xs py-3 px-2 rounded border transition-colors duration-100 text-center",
           isOccupied &&
             "bg-muted/40 text-muted-foreground/50 border-border cursor-not-allowed",
@@ -261,15 +255,14 @@ const ReservationPage = () => {
             !isSelected &&
             "border-border text-foreground bg-card hover:border-primary/50 hover:bg-primary/5 cursor-pointer",
           isSelected && "bg-primary text-primary-foreground border-primary"
->>>>>>> Stashed changes
         )}
       >
-        <span className="block leading-tight">{slot.label}</span>
+        <span className="block leading-tight font-medium tabular-nums">{slot.label}</span>
         {isOccupied && (
-          <span className="block text-[9px] mt-0.5 opacity-60 font-sans font-normal">Esgotado</span>
+          <span className="block text-[9px] mt-0.5 font-normal">Indisponível</span>
         )}
         {isInstrumento && !isOccupied && reserved > 0 && (
-          <span className="block text-[9px] mt-0.5 font-sans font-normal opacity-80">
+          <span className="block text-[9px] mt-0.5 font-normal opacity-70">
             {remaining} restante{remaining !== 1 ? "s" : ""}
           </span>
         )}
@@ -316,37 +309,19 @@ const ReservationPage = () => {
           </div>
         </div>
 
-<<<<<<< Updated upstream
-        {/* Time slots */}
-        {date && (
-          <div className="bg-card border border-border rounded-lg p-5 mb-6">
-            <div className="flex items-center justify-between mb-5">
-              <Label className="text-base font-semibold">Escolha o horário</Label>
-=======
         {date && allSlots.length > 0 && (
           <div className="bg-card border border-border rounded p-5 mb-6">
             <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
               <Label className="text-sm font-semibold uppercase tracking-wider text-foreground">
                 Horários disponíveis
               </Label>
->>>>>>> Stashed changes
               {selectedSlots.length > 0 && (
-                <span className="flex items-center gap-1.5 text-xs text-primary font-semibold bg-primary/10 px-2.5 py-1 rounded-full">
-                  <Clock className="w-3 h-3" />
+                <span className="text-xs text-primary font-semibold bg-primary/10 border border-primary/20 px-2.5 py-1 rounded">
                   {selectedSlots.length} selecionado{selectedSlots.length > 1 ? "s" : ""}
                 </span>
               )}
             </div>
 
-<<<<<<< Updated upstream
-            <div className="mb-4">
-              <div className="flex items-center gap-1.5 mb-3">
-                <Sun className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manhã</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {morningSlots.map((slot) => <SlotButton key={slot.label} slot={slot} />)}
-=======
             <div className="mb-5">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
                 Manhã
@@ -355,7 +330,6 @@ const ReservationPage = () => {
                 {morningSlots.map((slot) => (
                   <SlotButton key={slot.label} slot={slot} />
                 ))}
->>>>>>> Stashed changes
               </div>
             </div>
 
@@ -368,14 +342,6 @@ const ReservationPage = () => {
             </div>
 
             <div>
-<<<<<<< Updated upstream
-              <div className="flex items-center gap-1.5 mb-3">
-                <Sunset className="w-3.5 h-3.5 text-muted-foreground" />
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tarde</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {afternoonSlots.map((slot) => <SlotButton key={slot.label} slot={slot} />)}
-=======
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
                 Tarde
               </p>
@@ -383,21 +349,20 @@ const ReservationPage = () => {
                 {afternoonSlots.map((slot) => (
                   <SlotButton key={slot.label} slot={slot} />
                 ))}
->>>>>>> Stashed changes
               </div>
             </div>
 
-            <div className="flex items-center gap-4 mt-5 pt-4 border-t border-border">
+            <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border">
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded border-2 border-available bg-available/5" />
+                <div className="w-3 h-3 rounded-sm border border-border bg-card" />
                 <span className="text-[11px] text-muted-foreground">Disponível</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded bg-primary" />
+                <div className="w-3 h-3 rounded-sm bg-primary" />
                 <span className="text-[11px] text-muted-foreground">Selecionado</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded border-2 border-border bg-muted/50" />
+                <div className="w-3 h-3 rounded-sm bg-muted/60" />
                 <span className="text-[11px] text-muted-foreground">Indisponível</span>
               </div>
             </div>
