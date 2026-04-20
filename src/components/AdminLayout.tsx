@@ -72,7 +72,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           fixed md:static inset-y-0 left-0 z-50
           transition-transform duration-200 ease-in-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-          animate-slide-in-left
         `}
       >
         {/* Mobile close button */}
