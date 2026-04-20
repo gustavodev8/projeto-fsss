@@ -107,7 +107,7 @@ export async function uploadItemImage(
   return { url: data.publicUrl };
 }
 
-(): Promise<TimeSlot[]> {
+export async function fetchTimeSlots(): Promise<TimeSlot[]> {
   const { data, error } = await supabase
     .from("horarios")
     .select("*")
