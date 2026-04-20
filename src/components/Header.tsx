@@ -18,9 +18,7 @@ const Header = () => {
           onClick={() => navigate("/")}
           className="flex items-center gap-2.5 hover:opacity-80 transition-opacity shrink-0"
         >
-          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-            <img src={unnamedLogo} alt="FSSS" className="h-4 w-4 object-contain" />
-          </div>
+          <img src={unnamedLogo} alt="FSSS" className="h-7 w-7 object-contain" />
           <div className="text-left hidden sm:block">
             <p className="text-sm font-bold leading-none text-foreground tracking-tight">FSSS</p>
             <p className="text-[10px] text-muted-foreground leading-none mt-0.5">Sistema de Reservas</p>
