@@ -61,15 +61,16 @@ BEGIN
         RAISE EXCEPTION 'FORBIDDEN';
     END IF;
 
-    -- Bloqueia a linha do item para evitar corrida entre transações simultâneas
-    SELECT COALESCE(total_unidades, 1) INTO v_total_units
-    FROM itens
-    WHERE id = p_item_id AND disponivel = TRUE
-    FOR UPDATE;
-
+    -- Bloqueia a linha do item para evitar corrida entre transações simultâneas.
+    -- PERFORM adquire o lock sem atribuir — evita ambiguidade com SELECT INTO.
+    PERFORM id FROM itens WHERE id = p_item_id AND disponivel = TRUE FOR UPDATE;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'ITEM_NOT_FOUND';
     END IF;
+
+    -- Lê o total de unidades (linha já está bloqueada nesta transação)
+    SELECT COALESCE(total_unidades, 1) INTO v_total_units
+    FROM itens WHERE id = p_item_id;
 
     -- Verifica disponibilidade de cada horário
     FOR v_horario IN
