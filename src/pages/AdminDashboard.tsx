@@ -15,6 +15,7 @@ import {
   Package,
   ChevronLeft,
   ChevronRight,
+  FileText,
 } from "lucide-react";
 
 function formatDateDisplay(dateStr: string) {
@@ -50,14 +51,16 @@ const StatCard = ({
   label,
   value,
   sub,
+  iconBg = "bg-gray-100",
 }: {
   icon: React.ReactNode;
   label: string;
   value: string | number;
   sub?: string;
+  iconBg?: string;
 }) => (
-  <div className="bg-white border border-border rounded-xl p-5">
-    <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+  <div className="bg-white border border-border rounded-xl p-5 hover:shadow-sm transition-shadow duration-200">
+    <div className={`w-9 h-9 rounded-full ${iconBg} flex items-center justify-center mb-3`}>
       {icon}
     </div>
     <p className="text-2xl font-bold text-foreground">{value}</p>
@@ -131,25 +134,29 @@ const AdminDashboard = () => {
         {/* Estatísticas */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            icon={<CalendarDays className="w-4 h-4 text-muted-foreground" />}
+            icon={<CalendarDays className="w-4 h-4 text-primary" />}
+            iconBg="bg-primary/8"
             label="Reservas hoje"
             value={stats.today}
             sub={formatDateDisplay(today)}
           />
           <StatCard
-            icon={<BookOpen className="w-4 h-4 text-muted-foreground" />}
+            icon={<BookOpen className="w-4 h-4 text-violet-600" />}
+            iconBg="bg-violet-50"
             label="Esta semana"
             value={stats.week}
             sub={`${formatDateDisplay(weekStart)} – ${formatDateDisplay(weekEnd)}`}
           />
           <StatCard
-            icon={<Package className="w-4 h-4 text-muted-foreground" />}
+            icon={<FileText className="w-4 h-4 text-amber-600" />}
+            iconBg="bg-amber-50"
             label="Total geral"
             value={stats.total}
             sub="todas as reservas"
           />
           <StatCard
-            icon={<Users className="w-4 h-4 text-muted-foreground" />}
+            icon={<Users className="w-4 h-4 text-emerald-600" />}
+            iconBg="bg-emerald-50"
             label="Professores"
             value={stats.professors}
             sub="cadastrados"
@@ -239,7 +246,7 @@ const AdminDashboard = () => {
                       </td>
                       <td className="py-3 px-4 text-sm text-foreground">{r.itemName}</td>
                       <td className="py-3 px-4">
-                        <span className="inline-flex items-center text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full border border-border text-muted-foreground bg-gray-50">
+                        <span className={`inline-flex items-center text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${r.category === "espacos" ? "bg-violet-50 text-violet-700 border border-violet-100" : "bg-emerald-50 text-emerald-700 border border-emerald-100"}`}>
                           {r.category === "espacos" ? "Espaço" : "Equipamento"}
                         </span>
                       </td>

@@ -214,8 +214,8 @@ const AdminManage = () => {
         {/* ── Espaços e equipamentos ─────────────────────────────────────────── */}
         <div className="bg-white border border-border rounded-xl overflow-hidden">
           <div className="border-b border-border px-6 py-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-              <Building2 className="w-4 h-4 text-muted-foreground" />
+            <div className="w-9 h-9 rounded-full bg-violet-50 flex items-center justify-center shrink-0">
+              <Building2 className="w-4 h-4 text-violet-600" />
             </div>
             <div>
               <h2 className="text-base font-semibold text-foreground">Espaços e equipamentos</h2>
@@ -236,10 +236,12 @@ const AdminManage = () => {
                     key={cat}
                     type="button"
                     onClick={() => setItemCategoria(cat)}
-                    className={`flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded border transition-colors ${
+                    className={`flex items-center justify-center gap-1.5 py-2 text-xs font-semibold rounded-lg border transition-all duration-150 ${
                       itemCategoria === cat
-                        ? "bg-foreground text-background border-foreground"
-                        : "border-border text-muted-foreground hover:border-foreground/30"
+                        ? cat === "espacos"
+                          ? "bg-violet-600 text-white border-violet-600"
+                          : "bg-emerald-600 text-white border-emerald-600"
+                        : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
                     }`}
                   >
                     {cat === "espacos" ? (
@@ -323,10 +325,12 @@ const AdminManage = () => {
                   <button
                     key={cat}
                     onClick={() => setItemListTab(cat)}
-                    className={`text-xs font-medium px-3 py-1.5 rounded border transition-colors ${
+                    className={`text-xs font-medium px-3 py-1.5 rounded-lg border transition-all duration-150 ${
                       itemListTab === cat
-                        ? "bg-foreground text-background border-foreground"
-                        : "border-border text-muted-foreground hover:border-foreground/30"
+                        ? cat === "espacos"
+                          ? "bg-violet-600 text-white border-violet-600"
+                          : "bg-emerald-600 text-white border-emerald-600"
+                        : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
                     }`}
                   >
                     {cat === "espacos"
@@ -338,7 +342,7 @@ const AdminManage = () => {
 
               <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
                 {(itemListTab === "espacos" ? espacosList : instrumentosList).map((item) => (
-                  <div key={item.id} className="rounded border border-border">
+                  <div key={item.id} className="rounded-lg border border-border hover:border-border/80 transition-colors">
                     {editingItemId === item.id ? (
                       <div className="p-3 space-y-2">
                         <Input
@@ -433,8 +437,8 @@ const AdminManage = () => {
         {/* ── Professores ────────────────────────────────────────────────────── */}
         <div className="bg-white border border-border rounded-xl overflow-hidden">
           <div className="border-b border-border px-6 py-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-              <UserPlus className="w-4 h-4 text-muted-foreground" />
+            <div className="w-9 h-9 rounded-full bg-primary/8 flex items-center justify-center shrink-0">
+              <UserPlus className="w-4 h-4 text-primary" />
             </div>
             <div>
               <h2 className="text-base font-semibold text-foreground">Professores</h2>
@@ -509,7 +513,7 @@ const AdminManage = () => {
               </div>
               <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
                 {professors.map((p) => (
-                  <div key={p.id} className="rounded border border-border">
+                  <div key={p.id} className="rounded-lg border border-border hover:border-border/80 transition-colors">
                     {editingProfId === p.id ? (
                       <div className="p-3 space-y-2">
                         <Input
@@ -553,7 +557,7 @@ const AdminManage = () => {
                       </div>
                     ) : (
                       <div className="flex items-center gap-3 px-3 py-2.5 group">
-                        <div className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-bold shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white flex items-center justify-center text-xs font-bold shrink-0">
                           {getInitial(p.nome)}
                         </div>
                         <div className="flex-1 min-w-0">
