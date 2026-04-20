@@ -22,30 +22,27 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="bg-card border-b border-border">
-        <div className="h-1 bg-primary w-full" />
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3">
-          <img src={unnamedLogo} alt="Logo FSSS" className="h-9 w-9 object-contain" />
-          <div>
-            <p className="text-sm font-bold leading-tight tracking-tight text-foreground">FSSS</p>
-            <p className="text-[11px] text-muted-foreground leading-tight">
-              Faculdade e Escola — Sistema de Reservas
-            </p>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="w-full max-w-sm animate-slide-up">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 shadow-sm">
+            <img src={unnamedLogo} alt="FSSS" className="h-8 w-8 object-contain" />
           </div>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">FSSS</h1>
+          <p className="text-sm text-muted-foreground mt-1">Sistema de Reservas Institucional</p>
         </div>
-      </header>
 
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-sm">
-          <h1 className="text-2xl text-foreground mb-1">Acesso ao Sistema</h1>
-          <p className="text-sm text-muted-foreground mb-8">
-            Insira suas credenciais institucionais para continuar.
+        {/* Card do formulário */}
+        <div className="bg-white border border-border rounded-2xl p-7 shadow-sm">
+          <h2 className="text-base font-semibold text-foreground mb-1">Entrar na sua conta</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            Use suas credenciais institucionais para continuar.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm font-medium">
+              <Label htmlFor="email" className="text-xs font-medium text-foreground">
                 E-mail institucional
               </Label>
               <Input
@@ -56,12 +53,12 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="h-10"
+                className="h-10 text-sm"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-sm font-medium">
+              <Label htmlFor="password" className="text-xs font-medium text-foreground">
                 Senha
               </Label>
               <Input
@@ -72,46 +69,53 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="h-10"
+                className="h-10 text-sm"
               />
             </div>
 
             {error && (
-              <p className="text-sm text-destructive bg-destructive/8 border border-destructive/20 rounded px-3 py-2">
+              <div className="text-sm text-destructive bg-destructive/6 border border-destructive/15 rounded-xl px-3.5 py-2.5">
                 {error}
-              </p>
+              </div>
             )}
 
             <Button
               type="submit"
-              className="w-full h-10 text-sm font-semibold"
+              className="w-full h-10 text-sm font-semibold rounded-xl mt-1"
               disabled={loading}
             >
               {loading ? "Verificando..." : "Entrar"}
             </Button>
           </form>
+        </div>
 
-          <div className="mt-8 pt-6 border-t border-border">
-            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-2">
-              Credenciais de demonstração
-            </p>
-            <div className="space-y-1.5 text-xs text-muted-foreground">
-              <div className="flex justify-between bg-muted/60 rounded px-3 py-1.5">
-                <span className="font-medium text-foreground">Administrador</span>
-                <span className="font-mono">admin@fsss.edu.br / admin@fsss</span>
-              </div>
-              <div className="flex justify-between bg-muted/60 rounded px-3 py-1.5">
-                <span className="font-medium text-foreground">Professor</span>
-                <span className="font-mono">ana.silva@fsss.edu.br / professor</span>
-              </div>
-            </div>
+        {/* Credenciais de demo */}
+        <div className="mt-4 bg-white border border-border rounded-2xl p-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
+            Credenciais de demonstração
+          </p>
+          <div className="space-y-2">
+            {[
+              { role: "Administrador", email: "admin@fsss.edu.br", pass: "admin@fsss" },
+              { role: "Professor", email: "ana.silva@fsss.edu.br", pass: "professor" },
+            ].map((c) => (
+              <button
+                key={c.role}
+                type="button"
+                onClick={() => { setEmail(c.email); setPassword(c.pass); }}
+                className="w-full flex items-center justify-between bg-muted/50 hover:bg-muted rounded-xl px-3 py-2 transition-colors group"
+              >
+                <span className="text-xs font-semibold text-foreground">{c.role}</span>
+                <span className="text-[11px] font-mono text-muted-foreground group-hover:text-foreground transition-colors">{c.email}</span>
+              </button>
+            ))}
           </div>
         </div>
-      </div>
 
-      <footer className="py-4 text-center text-xs text-muted-foreground border-t border-border">
-        FSSS — Acesso restrito a professores e funcionários autorizados
-      </footer>
+        <p className="text-center text-[11px] text-muted-foreground mt-6">
+          Acesso restrito a professores e funcionários autorizados
+        </p>
+      </div>
     </div>
   );
 };

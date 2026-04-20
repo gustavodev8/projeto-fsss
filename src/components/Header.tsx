@@ -11,70 +11,67 @@ const Header = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="bg-card border-b border-border">
-      {/* Tira de identidade visual institucional */}
-      <div className="h-1 bg-primary w-full" />
-
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Logo + nome */}
+    <header className="bg-white border-b border-border sticky top-0 z-10">
+      <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+        {/* Logo */}
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2.5 text-foreground hover:text-primary transition-colors"
+          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity shrink-0"
         >
-          <img src={unnamedLogo} alt="Logo FSSS" className="h-8 w-8 object-contain" />
-          <div className="text-left">
-            <p className="text-sm font-bold leading-tight tracking-tight">FSSS</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">Sistema de Reservas</p>
+          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+            <img src={unnamedLogo} alt="FSSS" className="h-4 w-4 object-contain" />
+          </div>
+          <div className="text-left hidden sm:block">
+            <p className="text-sm font-bold leading-none text-foreground tracking-tight">FSSS</p>
+            <p className="text-[10px] text-muted-foreground leading-none mt-0.5">Sistema de Reservas</p>
           </div>
         </button>
 
-        {/* Navegação */}
+        {/* Nav */}
         <nav className="flex items-center gap-1">
-          {/* Link Minhas Reservas — apenas professores */}
           {user?.role === "professor" && (
             <button
               onClick={() => navigate("/minhas-reservas")}
-              className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded transition-colors ${
+              className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg transition-colors ${
                 isActive("/minhas-reservas")
                   ? "text-primary bg-primary/8 font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
               }`}
             >
-              <CalendarDays className="w-4 h-4" />
+              <CalendarDays className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Minhas Reservas</span>
             </button>
           )}
 
-          {/* Link Painel Admin — apenas admin */}
           {user?.role === "admin" && (
             <button
-              onClick={() => navigate("/admin")}
-              className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded transition-colors ${
+              onClick={() => navigate("/")}
+              className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg transition-colors ${
                 isActive("/admin")
                   ? "text-primary bg-primary/8 font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
               }`}
             >
-              <LayoutDashboard className="w-4 h-4" />
+              <LayoutDashboard className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Painel Admin</span>
             </button>
           )}
 
-          {/* Divisor */}
-          <span className="w-px h-4 bg-border mx-1 hidden sm:block" />
+          <div className="w-px h-4 bg-border mx-1 hidden sm:block" />
 
-          {/* Nome do usuário */}
-          <span className="text-sm text-foreground font-medium hidden sm:inline px-2">
-            {user?.name}
-          </span>
+          <div className="hidden sm:flex items-center gap-1.5 px-2">
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+              {user?.name?.trim()[0]?.toUpperCase() ?? "U"}
+            </div>
+            <span className="text-sm text-foreground font-medium">{user?.name}</span>
+          </div>
 
-          {/* Logout */}
           <button
             onClick={logout}
             title="Sair"
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded hover:bg-muted"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-lg hover:bg-accent"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
             <span className="hidden sm:inline text-xs">Sair</span>
           </button>
         </nav>
