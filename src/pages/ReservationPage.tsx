@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, CheckCircle2, PackagePlus, Check } from "lucide-react";
+import { ArrowLeft, CheckCircle2, PackagePlus, Check, Building2, Package, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -62,6 +62,8 @@ const ReservationPage = () => {
   const [selectedInstruments, setSelectedInstruments] = useState<InstrumentSelection[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [imgError, setImgError] = useState(false);
 
   const reservedQtyForSlot = useMemo(() => {
     if (!date || !item) return {} as Record<string, number>;
@@ -129,6 +131,7 @@ const ReservationPage = () => {
   }, [selectedSlots, reservedQtyForSlot, item]);
 
   const toggleSlot = (label: string) => {
+    setSubmitError("");
     setSelectedSlots((prev) => {
       const next = prev.includes(label)
         ? prev.filter((s) => s !== label)
@@ -181,12 +184,13 @@ const ReservationPage = () => {
   const handleConfirm = async () => {
     if (!item || !date || selectedSlots.length === 0 || !user?.id) return;
     setSubmitting(true);
+    setSubmitError("");
 
     const dateStr = format(date, "yyyy-MM-dd");
     const groupId =
       !isInstrumento && selectedInstruments.length > 0 ? crypto.randomUUID() : undefined;
 
-    await createReservationRpc({
+    const mainResult = await createReservationRpc({
       usuarioId: user.id,
       itemId: item.id,
       data: dateStr,
@@ -195,8 +199,14 @@ const ReservationPage = () => {
       grupoId: groupId ?? null,
     });
 
+    if (mainResult.error) {
+      setSubmitError(mainResult.error);
+      setSubmitting(false);
+      return;
+    }
+
     for (const si of selectedInstruments) {
-      await createReservationRpc({
+      const instResult = await createReservationRpc({
         usuarioId: user.id,
         itemId: si.id,
         data: dateStr,
@@ -204,6 +214,12 @@ const ReservationPage = () => {
         quantidade: si.quantity,
         grupoId: groupId ?? null,
       });
+      if (instResult.error) {
+        setSubmitError(`Espaço reservado, mas houve um erro com um equipamento: ${instResult.error}`);
+        await reload();
+        setSubmitting(false);
+        return;
+      }
     }
 
     await reload();
@@ -215,9 +231,17 @@ const ReservationPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <p className="text-center mt-12 text-muted-foreground">
-          {id ? "Carregando..." : "Item não encontrado."}
-        </p>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
+            {isInstrumento
+              ? <Package className="w-6 h-6 text-muted-foreground/40" />
+              : <Building2 className="w-6 h-6 text-muted-foreground/40" />
+            }
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {id ? "Carregando..." : "Item não encontrado."}
+          </p>
+        </div>
       </div>
     );
   }
@@ -248,13 +272,13 @@ const ReservationPage = () => {
         disabled={isDisabled}
         onClick={() => toggleSlot(slot.label)}
         className={cn(
-          "relative text-xs py-3 px-2 rounded border transition-colors duration-100 text-center",
+          "relative text-xs py-3 px-2 rounded-lg border transition-colors duration-100 text-center",
           isOccupied &&
             "bg-muted/40 text-muted-foreground/50 border-border cursor-not-allowed",
           !isDisabled &&
             !isSelected &&
             "border-border text-foreground bg-card hover:border-primary/50 hover:bg-primary/5 cursor-pointer",
-          isSelected && "bg-primary text-primary-foreground border-primary"
+          isSelected && "bg-primary text-primary-foreground border-primary shadow-sm"
         )}
       >
         <span className="block leading-tight font-medium tabular-nums">{slot.label}</span>
@@ -276,22 +300,41 @@ const ReservationPage = () => {
       <main className="max-w-2xl mx-auto px-4 py-6">
         <button
           onClick={() => navigate(`/${category}`)}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-5 transition-colors group"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           Voltar
         </button>
 
-        <div className="bg-card border border-border rounded-lg overflow-hidden mb-6">
-          <img src={item.image} alt={item.name} className="w-full h-48 object-cover" />
-          <div className="p-4">
+        {/* Item card */}
+        <div className="bg-card border border-border rounded-xl overflow-hidden mb-5 shadow-sm">
+          <div className="relative h-52 bg-muted overflow-hidden">
+            {imgError || !item.image ? (
+              <div className="w-full h-full flex items-center justify-center bg-muted">
+                {isInstrumento
+                  ? <Package className="w-12 h-12 text-muted-foreground/20" />
+                  : <Building2 className="w-12 h-12 text-muted-foreground/20" />
+                }
+              </div>
+            ) : (
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-full h-full object-cover"
+                onError={() => setImgError(true)}
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+          </div>
+          <div className="p-5">
             <h1 className="text-xl font-bold text-foreground">{item.name}</h1>
             <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-lg p-4 mb-6">
-          <Label className="text-base font-semibold mb-4 block">Escolha a data</Label>
+        {/* Date picker */}
+        <div className="bg-card border border-border rounded-xl p-5 mb-5">
+          <Label className="text-sm font-semibold mb-4 block">Escolha a data</Label>
           <div className="flex justify-center">
             <Calendar
               mode="single"
@@ -301,6 +344,7 @@ const ReservationPage = () => {
                 setSelectedSlots([]);
                 setQuantity(1);
                 setSelectedInstruments([]);
+                setSubmitError("");
               }}
               disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
               locale={ptBR}
@@ -309,14 +353,15 @@ const ReservationPage = () => {
           </div>
         </div>
 
+        {/* Time slots */}
         {date && allSlots.length > 0 && (
-          <div className="bg-card border border-border rounded p-5 mb-6">
+          <div className="bg-card border border-border rounded-xl p-5 mb-5">
             <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
               <Label className="text-sm font-semibold uppercase tracking-wider text-foreground">
                 Horários disponíveis
               </Label>
               {selectedSlots.length > 0 && (
-                <span className="text-xs text-primary font-semibold bg-primary/10 border border-primary/20 px-2.5 py-1 rounded">
+                <span className="text-xs text-primary font-semibold bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-lg">
                   {selectedSlots.length} selecionado{selectedSlots.length > 1 ? "s" : ""}
                 </span>
               )}
@@ -369,9 +414,10 @@ const ReservationPage = () => {
           </div>
         )}
 
+        {/* Quantity (instruments) */}
         {isInstrumento && date && selectedSlots.length > 0 && (
-          <div className="bg-card border border-border rounded-lg p-4 mb-6">
-            <Label className="text-base font-semibold mb-1 block">Quantidade</Label>
+          <div className="bg-card border border-border rounded-xl p-5 mb-5">
+            <Label className="text-sm font-semibold mb-1 block">Quantidade</Label>
             <p className="text-xs text-muted-foreground mb-3">
               {availableQtyForSelection}{" "}
               {availableQtyForSelection === 1
@@ -394,12 +440,13 @@ const ReservationPage = () => {
           </div>
         )}
 
+        {/* Instruments addon (spaces only) */}
         {!isInstrumento && date && selectedSlots.length > 0 && instrumentosDb.length > 0 && (
-          <div className="bg-card border border-border rounded-lg p-5 mb-6">
+          <div className="bg-card border border-border rounded-xl p-5 mb-5">
             <div className="flex items-center gap-2 mb-1">
               <PackagePlus className="w-4 h-4 text-primary" />
-              <Label className="text-base font-semibold">
-                Deseja reservar algum instrumento?
+              <Label className="text-sm font-semibold">
+                Deseja reservar algum equipamento?
               </Label>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
@@ -418,7 +465,7 @@ const ReservationPage = () => {
                     key={inst.id}
                     onClick={() => !isUnavailable && toggleInstrument(inst.id)}
                     className={cn(
-                      "flex items-center justify-between rounded-lg border-2 px-4 py-3 transition-all",
+                      "flex items-center justify-between rounded-xl border-2 px-4 py-3 transition-all",
                       isUnavailable &&
                         "opacity-50 cursor-not-allowed border-border bg-muted/30",
                       !isUnavailable &&
@@ -474,16 +521,23 @@ const ReservationPage = () => {
         )}
       </main>
 
+      {/* Sticky confirm bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-4 py-3 z-10">
-        <div className="max-w-2xl mx-auto">
-          {canConfirm && (
-            <p className="text-xs text-muted-foreground text-center mb-2">
+        <div className="max-w-2xl mx-auto space-y-2">
+          {submitError && (
+            <div className="flex items-start gap-2 text-xs text-destructive bg-destructive/8 border border-destructive/20 rounded-lg px-3 py-2">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              <span>{submitError}</span>
+            </div>
+          )}
+          {canConfirm && !submitError && (
+            <p className="text-xs text-muted-foreground text-center">
               {format(date!, "dd/MM/yyyy")} · {selectedSlots.length} horário
               {selectedSlots.length > 1 ? "s" : ""}
               {isInstrumento && ` · ${quantity} unidade${quantity > 1 ? "s" : ""}`}
               {!isInstrumento &&
                 selectedInstruments.length > 0 &&
-                ` · ${selectedInstruments.length} instrumento${selectedInstruments.length > 1 ? "s" : ""}`}
+                ` · ${selectedInstruments.length} equipamento${selectedInstruments.length > 1 ? "s" : ""}`}
             </p>
           )}
           <Button onClick={handleConfirm} disabled={!canConfirm} className="w-full" size="lg">
@@ -492,6 +546,7 @@ const ReservationPage = () => {
         </div>
       </div>
 
+      {/* Success dialog */}
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader className="items-center text-center">
@@ -499,7 +554,7 @@ const ReservationPage = () => {
             <DialogTitle className="text-xl">Reserva confirmada!</DialogTitle>
             <DialogDescription className="text-left space-y-1 mt-3 w-full">
               <span className="block">
-                <strong>Espaço:</strong> {item.name}
+                <strong>{isInstrumento ? "Equipamento" : "Espaço"}:</strong> {item.name}
               </span>
               <span className="block">
                 <strong>Data:</strong> {date ? format(date, "dd/MM/yyyy") : ""}
@@ -514,7 +569,7 @@ const ReservationPage = () => {
               )}
               {!isInstrumento && selectedInstruments.length > 0 && (
                 <div className="pt-1 mt-1 border-t border-border">
-                  <p className="font-semibold mb-1">Instrumentos:</p>
+                  <p className="font-semibold mb-1">Equipamentos:</p>
                   {selectedInstruments.map((si) => {
                     const inst = instrumentosDb.find((i) => i.id === si.id);
                     return inst ? (

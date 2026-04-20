@@ -31,7 +31,7 @@ export async function createReservationRpc(params: {
   horarioLabels: string[];
   quantidade?: number;
   grupoId?: string | null;
-}): Promise<string | null> {
+}): Promise<{ id: string | null; error?: string }> {
   const { data, error } = await supabase.rpc("fn_criar_reserva", {
     p_usuario_id: params.usuarioId,
     p_item_id: params.itemId,
@@ -42,10 +42,22 @@ export async function createReservationRpc(params: {
   });
 
   if (error) {
-    console.error("createReservationRpc:", error);
-    return null;
+    const msg = error.message ?? "";
+    if (msg.includes("SLOT_UNAVAILABLE:")) {
+      const slot = msg.split("SLOT_UNAVAILABLE:")[1]?.trim() ?? "";
+      return {
+        id: null,
+        error: slot
+          ? `O horário "${slot}" já foi reservado. Atualize a página e escolha outro horário.`
+          : "Um dos horários selecionados não está mais disponível.",
+      };
+    }
+    if (msg.includes("ITEM_NOT_FOUND")) {
+      return { id: null, error: "Este item não está mais disponível para reserva." };
+    }
+    return { id: null, error: "Não foi possível criar a reserva. Tente novamente." };
   }
-  return data as string;
+  return { id: data as string };
 }
 
 export async function cancelReservationById(reservaId: string): Promise<void> {

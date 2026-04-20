@@ -4,6 +4,7 @@ import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   listProfessors,
   createProfessor,
@@ -29,6 +30,8 @@ import {
 
 const AdminManage = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const adminId = user!.id;
 
   // ── Estado: itens ──────────────────────────────────────────────────────────
   const [itemCategoria, setItemCategoria] = useState<"espacos" | "instrumentos">("espacos");
@@ -78,6 +81,7 @@ const AdminManage = () => {
     }
 
     const result = await createItem({
+      adminId,
       nome: itemNome.trim(),
       descricao: itemDescricao.trim(),
       categoria: itemCategoria,
@@ -104,7 +108,7 @@ const AdminManage = () => {
   const handleDeleteItem = async (id: string) => {
     if (!confirm("Tem certeza que deseja remover este item?")) return;
     setDeletingId(id);
-    const result = await deleteItem(id);
+    const result = await deleteItem(adminId, id);
     setDeletingId(null);
     if (!result.ok) {
       alert("Não foi possível remover. Verifique se não há reservas ativas para este item.");
@@ -127,6 +131,7 @@ const AdminManage = () => {
   const handleSaveItem = async (id: string) => {
     setEditItemLoading(true);
     const result = await updateItem({
+      adminId,
       id,
       nome: editItemNome.trim(),
       descricao: editItemDescricao.trim(),
@@ -166,7 +171,7 @@ const AdminManage = () => {
     setProfError("");
     setProfSuccess(false);
     setProfLoading(true);
-    const result = await createProfessor(profNome.trim(), profEmail.trim(), profSenha);
+    const result = await createProfessor(adminId, profNome.trim(), profEmail.trim(), profSenha);
     setProfLoading(false);
     if (!result.ok) {
       setProfError(result.error ?? "Erro ao criar professor.");
@@ -190,6 +195,7 @@ const AdminManage = () => {
   const handleSaveProfessor = async (id: string) => {
     setEditProfLoading(true);
     const result = await updateProfessor(
+      adminId,
       id,
       editProfNome.trim(),
       editProfEmail.trim(),
@@ -206,7 +212,7 @@ const AdminManage = () => {
 
   const handleDeleteProfessor = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este professor?")) return;
-    const result = await deleteProfessor(id);
+    const result = await deleteProfessor(adminId, id);
     if (!result.ok) {
       alert(result.error ?? "Erro ao excluir professor.");
       return;

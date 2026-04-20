@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -7,6 +8,8 @@ import {
   Package,
   Settings,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import unnamedLogo from "@/assets/logo.png";
 
@@ -37,6 +40,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const initials =
     user?.name
@@ -46,15 +50,43 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       .map((w) => w[0].toUpperCase())
       .join("") ?? "AD";
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    setSidebarOpen(false);
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-[#f4f5f7]">
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
-      <aside className="w-[220px] shrink-0 flex flex-col animate-slide-in-left bg-white border-r border-border">
+      <aside
+        className={`
+          w-[220px] shrink-0 flex flex-col bg-white border-r border-border
+          fixed md:static inset-y-0 left-0 z-50
+          transition-transform duration-200 ease-in-out
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+          animate-slide-in-left
+        `}
+      >
+        {/* Mobile close button */}
+        <button
+          className="absolute top-3 right-3 md:hidden p-1.5 rounded-lg hover:bg-accent text-muted-foreground transition-colors"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <X className="w-4 h-4" />
+        </button>
 
         {/* Logo */}
         <div className="px-5 pt-5 pb-4">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => handleNavigate("/")}
             className="flex items-center gap-2.5 hover:opacity-80 transition-opacity w-full"
           >
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -82,7 +114,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                   return (
                     <button
                       key={item.label}
-                      onClick={() => navigate(item.path)}
+                      onClick={() => handleNavigate(item.path)}
                       className={`w-full flex items-center gap-2.5 px-2.5 py-2 text-[13px] rounded-lg transition-all duration-150 text-left group relative ${
                         active
                           ? "bg-primary text-white font-semibold shadow-sm"
@@ -123,9 +155,23 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       </aside>
 
       {/* ── Conteúdo ─────────────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="animate-slide-up">
-          {children}
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+        {/* Mobile top bar */}
+        <div className="md:hidden flex items-center h-14 px-4 bg-white border-b border-border shrink-0">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-lg hover:bg-accent text-muted-foreground transition-colors mr-3"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <img src={unnamedLogo} alt="FSSS" className="h-6 w-6 object-contain mr-2" />
+          <span className="text-sm font-bold text-foreground">FSSS</span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="animate-slide-up">
+            {children}
+          </div>
         </div>
       </div>
     </div>

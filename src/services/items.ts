@@ -32,6 +32,7 @@ export async function fetchItemById(id: string): Promise<ReservableItem | null> 
     .from("itens")
     .select("*")
     .eq("id", id)
+    .eq("disponivel", true)
     .single();
 
   if (error || !data) return null;
@@ -42,6 +43,7 @@ export async function fetchAllItems(): Promise<ReservableItem[]> {
   const { data, error } = await supabase
     .from("itens")
     .select("*")
+    .eq("disponivel", true)
     .order("categoria")
     .order("nome");
 
@@ -50,6 +52,7 @@ export async function fetchAllItems(): Promise<ReservableItem[]> {
 }
 
 export async function createItem(params: {
+  adminId: string;
   nome: string;
   descricao: string;
   categoria: "espacos" | "instrumentos";
@@ -57,6 +60,7 @@ export async function createItem(params: {
   totalUnidades?: number;
 }): Promise<{ ok: boolean; error?: string }> {
   const { error } = await supabase.rpc("fn_criar_item", {
+    p_admin_id: params.adminId,
     p_nome: params.nome,
     p_descricao: params.descricao,
     p_categoria: params.categoria,
@@ -67,13 +71,20 @@ export async function createItem(params: {
   return { ok: true };
 }
 
-export async function deleteItem(id: string): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await supabase.rpc("fn_deletar_item", { p_item_id: id });
+export async function deleteItem(
+  adminId: string,
+  id: string
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.rpc("fn_deletar_item", {
+    p_admin_id: adminId,
+    p_item_id: id,
+  });
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
 
 export async function updateItem(params: {
+  adminId: string;
   id: string;
   nome: string;
   descricao: string;
@@ -81,6 +92,7 @@ export async function updateItem(params: {
   totalUnidades?: number;
 }): Promise<{ ok: boolean; error?: string }> {
   const { error } = await supabase.rpc("fn_atualizar_item", {
+    p_admin_id: params.adminId,
     p_id: params.id,
     p_nome: params.nome,
     p_descricao: params.descricao,
@@ -107,7 +119,7 @@ export async function uploadItemImage(
   return { url: data.publicUrl };
 }
 
-export async function fetchTimeSlots(): Promise<TimeSlot[]> {
+export async function fetchHorarios(): Promise<TimeSlot[]> {
   const { data, error } = await supabase
     .from("horarios")
     .select("*")

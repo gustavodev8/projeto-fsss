@@ -16,26 +16,46 @@ interface AuthContextType {
   logout: () => void;
 }
 
-const STORAGE_KEY = "fsss_user";
+const STORAGE_KEY = "fsss_session";
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+
+interface StoredSession {
+  user: User;
+  expiresAt: number;
+}
+
+function loadSession(): User | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const session = JSON.parse(raw) as StoredSession;
+    if (Date.now() > session.expiresAt) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return session.user;
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);
+    return null;
+  }
+}
+
+function saveSession(user: User): void {
+  const session: StoredSession = { user, expiresAt: Date.now() + SESSION_TTL_MS };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+}
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as User) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState<User | null>(loadSession);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     const dbUser = await signIn(email, password);
     if (!dbUser) return false;
     const u: User = { id: dbUser.id, name: dbUser.name, email: dbUser.email, role: dbUser.role };
     setUser(u);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+    saveSession(u);
     return true;
   };
 

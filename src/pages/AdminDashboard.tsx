@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useReservations } from "@/contexts/ReservationContext";
 import { generateDailyReportPDF } from "@/lib/pdfUtils";
@@ -18,6 +18,8 @@ import {
   History,
   Search,
 } from "lucide-react";
+
+const HIST_PAGE_SIZE = 25;
 
 function formatDateDisplay(dateStr: string) {
   const [y, m, d] = dateStr.split("-");
@@ -74,7 +76,6 @@ const StatCard = ({
 
 const AdminDashboard = () => {
   const { reservations } = useReservations();
-  // Capturado uma vez ao entrar na plataforma — não muda durante a sessão
   const sessionToday = useRef(isoToday()).current;
 
   const [selectedDate, setSelectedDate] = useState(sessionToday);
@@ -82,6 +83,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<"pedidos" | "historico">("pedidos");
   const [histSearch, setHistSearch] = useState("");
   const [histCategory, setHistCategory] = useState<"all" | "espacos" | "instrumentos">("all");
+  const [histPage, setHistPage] = useState(1);
 
   const { data: professors = [] } = useQuery({
     queryKey: ["professors"],
@@ -116,6 +118,16 @@ const AdminDashboard = () => {
         return matchCat && matchSearch;
       });
   }, [reservations, histSearch, histCategory]);
+
+  useEffect(() => {
+    setHistPage(1);
+  }, [histSearch, histCategory]);
+
+  const histTotalPages = Math.ceil(histFiltered.length / HIST_PAGE_SIZE);
+  const histPaged = useMemo(
+    () => histFiltered.slice((histPage - 1) * HIST_PAGE_SIZE, histPage * HIST_PAGE_SIZE),
+    [histFiltered, histPage]
+  );
 
   const displayedDateLabel = useMemo(() => {
     const d = new Date(selectedDate + "T12:00:00");
@@ -205,7 +217,6 @@ const AdminDashboard = () => {
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
-                {/* Hoje: referência é o dia de entrada na plataforma */}
                 {selectedDate !== sessionToday && (
                   <button
                     onClick={() => setSelectedDate(sessionToday)}
@@ -269,7 +280,6 @@ const AdminDashboard = () => {
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                {/* Busca */}
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                   <input
@@ -280,7 +290,6 @@ const AdminDashboard = () => {
                     className="h-8 pl-8 pr-3 text-xs border border-border rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/20 w-52"
                   />
                 </div>
-                {/* Filtro de categoria */}
                 <div className="flex gap-1 border border-border rounded-lg overflow-hidden">
                   {([
                     { key: "all", label: "Todos" },
@@ -309,31 +318,58 @@ const AdminDashboard = () => {
                 <p className="text-sm font-medium text-foreground">Nenhuma reserva encontrada.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border bg-gray-50/50">
-                      {["Data", "Professor", "Item reservado", "Tipo", "Horário", "Qtd."].map((h) => (
-                        <th key={h} className="py-2.5 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {histFiltered.map((r) => (
-                      <tr key={r.id} className="border-b border-border hover:bg-gray-50/80 transition-colors">
-                        <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">{formatDateDisplay(r.date)}</td>
-                        <td className="py-3 px-4 text-sm font-medium text-foreground">{r.userName ?? r.userEmail ?? "—"}</td>
-                        <td className="py-3 px-4 text-sm text-foreground">{r.itemName}</td>
-                        <td className="py-3 px-4"><TypeBadge category={r.category} /></td>
-                        <td className="py-3 px-4 text-sm text-foreground">
-                          {r.slots[0]}{r.slots.length > 1 && ` +${r.slots.length - 1}`}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-muted-foreground">{r.quantity ?? "—"}</td>
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/50">
+                        {["Data", "Professor", "Item reservado", "Tipo", "Horário", "Qtd."].map((h) => (
+                          <th key={h} className="py-2.5 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {histPaged.map((r) => (
+                        <tr key={r.id} className="border-b border-border hover:bg-gray-50/80 transition-colors">
+                          <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">{formatDateDisplay(r.date)}</td>
+                          <td className="py-3 px-4 text-sm font-medium text-foreground">{r.userName ?? r.userEmail ?? "—"}</td>
+                          <td className="py-3 px-4 text-sm text-foreground">{r.itemName}</td>
+                          <td className="py-3 px-4"><TypeBadge category={r.category} /></td>
+                          <td className="py-3 px-4 text-sm text-foreground">
+                            {r.slots[0]}{r.slots.length > 1 && ` +${r.slots.length - 1}`}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-muted-foreground">{r.quantity ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Paginação */}
+                {histTotalPages > 1 && (
+                  <div className="flex items-center justify-between px-6 py-3 border-t border-border">
+                    <p className="text-xs text-muted-foreground">
+                      Página {histPage} de {histTotalPages} · {histFiltered.length} resultados
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setHistPage((p) => Math.max(1, p - 1))}
+                        disabled={histPage === 1}
+                        className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setHistPage((p) => Math.min(histTotalPages, p + 1))}
+                        disabled={histPage === histTotalPages}
+                        className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

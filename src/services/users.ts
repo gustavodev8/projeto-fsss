@@ -15,11 +15,13 @@ export async function listProfessors(): Promise<Professor[]> {
 }
 
 export async function createProfessor(
+  adminId: string,
   nome: string,
   email: string,
   senha: string
 ): Promise<{ ok: boolean; error?: string }> {
   const { error } = await supabase.rpc("fn_criar_usuario", {
+    p_admin_id: adminId,
     p_nome: nome,
     p_email: email,
     p_senha: senha,
@@ -29,12 +31,14 @@ export async function createProfessor(
 }
 
 export async function updateProfessor(
+  adminId: string,
   id: string,
   nome: string,
   email: string,
   senha?: string
 ): Promise<{ ok: boolean; error?: string }> {
   const { error } = await supabase.rpc("fn_atualizar_usuario", {
+    p_admin_id: adminId,
     p_id: id,
     p_nome: nome,
     p_email: email,
@@ -44,8 +48,14 @@ export async function updateProfessor(
   return { ok: true };
 }
 
-export async function deleteProfessor(id: string): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await supabase.rpc("fn_deletar_usuario", { p_usuario_id: id });
+export async function deleteProfessor(
+  adminId: string,
+  id: string
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.rpc("fn_deletar_usuario", {
+    p_admin_id: adminId,
+    p_usuario_id: id,
+  });
   if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
