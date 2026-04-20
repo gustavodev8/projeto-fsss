@@ -91,7 +91,23 @@ export async function updateItem(params: {
   return { ok: true };
 }
 
-export async function fetchHorarios(): Promise<TimeSlot[]> {
+export async function uploadItemImage(
+  file: File
+): Promise<{ url: string | null; error?: string }> {
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const path = `itens/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from("item-images")
+    .upload(path, file, { upsert: false, contentType: file.type });
+
+  if (error) return { url: null, error: error.message };
+
+  const { data } = supabase.storage.from("item-images").getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
+(): Promise<TimeSlot[]> {
   const { data, error } = await supabase
     .from("horarios")
     .select("*")

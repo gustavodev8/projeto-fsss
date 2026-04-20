@@ -11,7 +11,7 @@ import {
   deleteProfessor,
 } from "@/services/users";
 import type { Professor } from "@/services/users";
-import { fetchAllItems, createItem, deleteItem, updateItem } from "@/services/items";
+import { fetchAllItems, createItem, deleteItem, updateItem, uploadItemImage } from "@/services/items";
 import type { ReservableItem } from "@/types";
 import {
   Building2,
@@ -23,6 +23,8 @@ import {
   X,
   CheckCircle2,
   UserPlus,
+  ImageUp,
+  Link,
 } from "lucide-react";
 
 const AdminManage = () => {
@@ -33,6 +35,9 @@ const AdminManage = () => {
   const [itemNome, setItemNome] = useState("");
   const [itemDescricao, setItemDescricao] = useState("");
   const [itemImagemUrl, setItemImagemUrl] = useState("");
+  const [itemImageFile, setItemImageFile] = useState<File | null>(null);
+  const [itemImagePreview, setItemImagePreview] = useState("");
+  const [itemImageMode, setItemImageMode] = useState<"upload" | "url">("upload");
   const [itemQtd, setItemQtd] = useState(1);
   const [itemLoading, setItemLoading] = useState(false);
   const [itemError, setItemError] = useState("");
@@ -59,11 +64,24 @@ const AdminManage = () => {
     setItemError("");
     setItemSuccess(false);
     setItemLoading(true);
+
+    let finalImageUrl: string | undefined = itemImagemUrl.trim() || undefined;
+
+    if (itemImageFile) {
+      const { url, error: uploadErr } = await uploadItemImage(itemImageFile);
+      if (uploadErr || !url) {
+        setItemError("Erro ao enviar imagem: " + (uploadErr ?? "tente novamente."));
+        setItemLoading(false);
+        return;
+      }
+      finalImageUrl = url;
+    }
+
     const result = await createItem({
       nome: itemNome.trim(),
       descricao: itemDescricao.trim(),
       categoria: itemCategoria,
-      imagemUrl: itemImagemUrl.trim() || undefined,
+      imagemUrl: finalImageUrl,
       totalUnidades: itemCategoria === "instrumentos" ? itemQtd : undefined,
     });
     setItemLoading(false);
@@ -74,6 +92,8 @@ const AdminManage = () => {
     setItemNome("");
     setItemDescricao("");
     setItemImagemUrl("");
+    setItemImageFile(null);
+    setItemImagePreview("");
     setItemQtd(1);
     setItemSuccess(true);
     refetchItems();
@@ -279,17 +299,72 @@ const AdminManage = () => {
                   className="h-9 text-sm"
                 />
               </div>
+              {/* Imagem — upload ou URL */}
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium">
-                  URL da imagem{" "}
-                  <span className="font-normal text-muted-foreground">(opcional)</span>
-                </Label>
-                <Input
-                  value={itemImagemUrl}
-                  onChange={(e) => setItemImagemUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="h-9 text-sm"
-                />
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium">
+                    Imagem <span className="font-normal text-muted-foreground">(opcional)</span>
+                  </Label>
+                  <div className="flex gap-1 border border-border rounded-lg overflow-hidden text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => { setItemImageMode("upload"); setItemImagemUrl(""); }}
+                      className={`flex items-center gap-1 px-2 py-0.5 transition-colors ${itemImageMode === "upload" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      <ImageUp className="w-3 h-3" /> Upload
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setItemImageMode("url"); setItemImageFile(null); setItemImagePreview(""); }}
+                      className={`flex items-center gap-1 px-2 py-0.5 transition-colors ${itemImageMode === "url" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      <Link className="w-3 h-3" /> URL
+                    </button>
+                  </div>
+                </div>
+
+                {itemImageMode === "upload" ? (
+                  <div>
+                    <label className={`flex flex-col items-center justify-center w-full h-28 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${itemImagePreview ? "border-primary/40 bg-primary/4" : "border-border hover:border-primary/30 hover:bg-muted/30"}`}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setItemImageFile(file);
+                          setItemImagePreview(URL.createObjectURL(file));
+                        }}
+                      />
+                      {itemImagePreview ? (
+                        <img src={itemImagePreview} alt="preview" className="h-full w-full object-cover rounded-xl" />
+                      ) : (
+                        <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                          <ImageUp className="w-6 h-6" />
+                          <span className="text-xs">Clique para selecionar</span>
+                          <span className="text-[10px]">PNG, JPG, WEBP</span>
+                        </div>
+                      )}
+                    </label>
+                    {itemImageFile && (
+                      <button
+                        type="button"
+                        onClick={() => { setItemImageFile(null); setItemImagePreview(""); }}
+                        className="mt-1 text-[11px] text-muted-foreground hover:text-destructive flex items-center gap-1"
+                      >
+                        <X className="w-3 h-3" /> Remover imagem
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <Input
+                    value={itemImagemUrl}
+                    onChange={(e) => setItemImagemUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="h-9 text-sm"
+                  />
+                )}
               </div>
               {itemCategoria === "instrumentos" && (
                 <div className="space-y-1.5">
