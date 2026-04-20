@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,49 +6,49 @@
 
 @layer base {
   :root {
-    /* Fundo levemente frio — limpo e institucional */
-    --background: 210 20% 98%;
-    --foreground: 215 35% 12%;
+    /* Fundo quente e neutro — palete Claude */
+    --background: 36 25% 97%;
+    --foreground: 220 25% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 35% 12%;
+    --card-foreground: 220 25% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 35% 12%;
+    --popover-foreground: 220 25% 10%;
 
     /* Azul naval institucional */
-    --primary: 215 72% 32%;
+    --primary: 215 70% 34%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 18% 95%;
-    --secondary-foreground: 215 35% 12%;
+    --secondary: 36 20% 94%;
+    --secondary-foreground: 220 25% 10%;
 
-    --muted: 210 18% 95%;
-    --muted-foreground: 215 16% 46%;
+    --muted: 36 20% 94%;
+    --muted-foreground: 220 12% 48%;
 
-    --accent: 210 18% 93%;
-    --accent-foreground: 215 35% 12%;
+    --accent: 220 14% 94%;
+    --accent-foreground: 220 25% 10%;
 
     --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --available: 142 60% 32%;
+    --available: 142 55% 34%;
     --unavailable: 0 65% 48%;
 
-    --border: 215 18% 88%;
-    --input: 215 18% 88%;
-    --ring: 215 72% 32%;
+    --border: 220 16% 91%;
+    --input: 220 16% 91%;
+    --ring: 215 70% 34%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 215 16% 26%;
-    --sidebar-primary: 215 35% 12%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 215 18% 95%;
-    --sidebar-accent-foreground: 215 35% 12%;
-    --sidebar-border: 215 18% 88%;
-    --sidebar-ring: 215 72% 32%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 12% 30%;
+    --sidebar-primary: 215 70% 34%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 94%;
+    --sidebar-accent-foreground: 220 25% 10%;
+    --sidebar-border: 220 16% 91%;
+    --sidebar-ring: 215 70% 34%;
   }
 }
 
@@ -62,7 +62,9 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -74,21 +76,21 @@
   h1, h2, h3 {
     font-family: 'Inter', sans-serif;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
 }
 
 @layer utilities {
   .animate-fade-in {
-    animation: fadeIn 0.22s ease-out both;
+    animation: fadeIn 0.2s ease-out both;
   }
 
   .animate-slide-up {
-    animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .animate-slide-in-left {
-    animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: slideInLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
 
@@ -98,11 +100,11 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-8px); }
+  from { opacity: 0; transform: translateX(-6px); }
   to   { opacity: 1; transform: translateX(0); }
 }
