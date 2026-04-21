@@ -194,18 +194,18 @@ const AdminHub = () => {
               color: "bg-primary/8",
             },
             {
-              icon: <Users className="w-5 h-5 text-violet-600" />,
+              icon: <Users className="w-5 h-5 text-primary" />,
               label: "Professores ativos",
               value: profAtivos,
               sub: `${professors.length} cadastrados`,
-              color: "bg-violet-50",
+              color: "bg-primary/8",
             },
             {
-              icon: <TrendingUp className="w-5 h-5 text-emerald-600" />,
+              icon: <TrendingUp className="w-5 h-5 text-primary" />,
               label: "Taxa de ocupação",
               value: `${ocupacao}%`,
               sub: "espaços esta semana",
-              color: "bg-emerald-50",
+              color: "bg-primary/8",
             },
           ].map((s, i) => (
             <div
@@ -245,8 +245,8 @@ const AdminHub = () => {
                 ),
               },
               {
-                icon: <Building2 className="w-5 h-5 text-violet-600" />,
-                iconBg: "bg-violet-50",
+                icon: <Building2 className="w-5 h-5 text-primary" />,
+                iconBg: "bg-primary/8",
                 title: "Espaços",
                 desc: "Salas de aula, laboratórios e auditórios.",
                 path: "/espacos",
@@ -257,8 +257,8 @@ const AdminHub = () => {
                 ),
               },
               {
-                icon: <Package className="w-5 h-5 text-emerald-600" />,
-                iconBg: "bg-emerald-50",
+                icon: <Package className="w-5 h-5 text-primary" />,
+                iconBg: "bg-primary/8",
                 title: "Equipamentos",
                 desc: "Projetores, notebooks, microfones e demais itens.",
                 path: "/instrumentos",
