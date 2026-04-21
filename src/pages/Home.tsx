@@ -187,21 +187,21 @@ const AdminHub = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {[
             {
-              icon: <CalendarDays className="w-5 h-5 text-primary" />,
+              icon: <CalendarDays className="w-6 h-6 text-primary" />,
               label: "Reservas esta semana",
               value: weekRes.length,
               sub: `${todayRes.length} hoje`,
               color: "bg-primary/8",
             },
             {
-              icon: <Users className="w-5 h-5 text-primary" />,
+              icon: <Users className="w-6 h-6 text-primary" />,
               label: "Professores ativos",
               value: profAtivos,
               sub: `${professors.length} cadastrados`,
               color: "bg-primary/8",
             },
             {
-              icon: <TrendingUp className="w-5 h-5 text-primary" />,
+              icon: <TrendingUp className="w-6 h-6 text-primary" />,
               label: "Taxa de ocupação",
               value: `${ocupacao}%`,
               sub: "espaços esta semana",
@@ -213,11 +213,11 @@ const AdminHub = () => {
               className="bg-white border border-border rounded-xl p-6 hover:shadow-sm transition-shadow duration-200"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <div className={`w-10 h-10 rounded-full ${s.color} flex items-center justify-center mb-4`}>
+              <div className={`w-11 h-11 rounded-full ${s.color} flex items-center justify-center mb-4`}>
                 {s.icon}
               </div>
-              <p className="text-3xl font-bold text-foreground">{s.value}</p>
-              <p className="text-[15px] font-medium text-foreground mt-1">{s.label}</p>
+              <p className="text-4xl font-bold text-foreground tracking-tight">{s.value}</p>
+              <p className="text-base font-semibold text-foreground mt-1.5">{s.label}</p>
               <p className="text-sm text-muted-foreground mt-0.5">{s.sub}</p>
             </div>
           ))}
@@ -232,7 +232,7 @@ const AdminHub = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {[
               {
-                icon: <BarChart2 className="w-5 h-5 text-primary" />,
+                icon: <BarChart2 className="w-6 h-6 text-primary" />,
                 iconBg: "bg-primary/8",
                 title: "Painel Administrativo",
                 desc: "Relatórios diários, semanais e exportação em PDF.",
@@ -245,7 +245,7 @@ const AdminHub = () => {
                 ),
               },
               {
-                icon: <Building2 className="w-5 h-5 text-primary" />,
+                icon: <Building2 className="w-6 h-6 text-primary" />,
                 iconBg: "bg-primary/8",
                 title: "Espaços",
                 desc: "Salas de aula, laboratórios e auditórios.",
@@ -257,7 +257,7 @@ const AdminHub = () => {
                 ),
               },
               {
-                icon: <Package className="w-5 h-5 text-primary" />,
+                icon: <Package className="w-6 h-6 text-primary" />,
                 iconBg: "bg-primary/8",
                 title: "Equipamentos",
                 desc: "Projetores, notebooks, microfones e demais itens.",
@@ -277,12 +277,12 @@ const AdminHub = () => {
                 style={{ animationDelay: `${i * 80}ms` }}
               >
                 <ArrowRight className="w-4 h-4 text-muted-foreground/30 absolute top-6 right-6 group-hover:text-primary/50 group-hover:translate-x-0.5 transition-all duration-150" />
-                <div className={`w-10 h-10 rounded-full ${card.iconBg} flex items-center justify-center mb-4`}>
+                <div className={`w-11 h-11 rounded-full ${card.iconBg} flex items-center justify-center mb-4`}>
                   {card.icon}
                 </div>
-                <p className="text-[15px] font-semibold text-foreground mb-1">{card.title}</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
-                <div className="border-t border-border mt-4 pt-3.5 text-sm text-muted-foreground">
+                <p className="text-base font-semibold text-foreground mb-1">{card.title}</p>
+                <p className="text-[13px] text-muted-foreground leading-relaxed">{card.desc}</p>
+                <div className="border-t border-border mt-4 pt-3 text-sm text-muted-foreground">
                   {card.stat}
                 </div>
               </button>
