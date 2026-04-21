@@ -2,36 +2,36 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  LayoutGrid,
-  BarChart2,
-  Building2,
-  Package,
-  Settings,
-  LogOut,
-  Menu,
+  SquaresFour,
+  ChartBar,
+  Buildings,
+  Cube,
+  Gear,
+  SignOut,
+  List,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import unnamedLogo from "@/assets/logo.png";
 
 const navSections = [
   {
     label: "Geral",
     items: [
-      { label: "Dashboard", path: "/", icon: LayoutGrid },
-      { label: "Painel Admin", path: "/admin", icon: BarChart2 },
+      { label: "Dashboard", path: "/", icon: SquaresFour },
+      { label: "Painel Admin", path: "/admin", icon: ChartBar },
     ],
   },
   {
     label: "Reservas",
     items: [
-      { label: "Espaços", path: "/espacos", icon: Building2 },
-      { label: "Equipamentos", path: "/instrumentos", icon: Package },
+      { label: "Espaços", path: "/espacos", icon: Buildings },
+      { label: "Equipamentos", path: "/instrumentos", icon: Cube },
     ],
   },
   {
     label: "Sistema",
     items: [
-      { label: "Configurações", path: "/gerenciar", icon: Settings },
+      { label: "Configurações", path: "/gerenciar", icon: Gear },
     ],
   },
 ] as const;
@@ -120,9 +120,12 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                           : "text-muted-foreground hover:text-foreground hover:bg-accent"
                       }`}
                     >
-                      <item.icon className={`w-4 h-4 shrink-0 transition-transform duration-150 ${
-                        active ? "text-white" : "text-primary group-hover:scale-110"
-                      }`} />
+                      <item.icon
+                        weight="bold"
+                        className={`w-4 h-4 shrink-0 transition-transform duration-150 ${
+                          active ? "text-white" : "text-primary group-hover:scale-110"
+                        }`}
+                      />
                       <span className="truncate flex-1">{item.label}</span>
                     </button>
                   );
@@ -147,7 +150,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               title="Sair"
               className="p-1 text-muted-foreground/50 hover:text-destructive transition-colors shrink-0"
             >
-              <LogOut className="w-4 h-4" />
+              <SignOut weight="bold" className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -161,7 +164,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             onClick={() => setSidebarOpen(true)}
             className="p-2 rounded-lg hover:bg-accent text-muted-foreground transition-colors mr-3"
           >
-            <Menu className="w-5 h-5" />
+            <List weight="bold" className="w-5 h-5" />
           </button>
           <img src={unnamedLogo} alt="FSSS" className="h-6 w-6 object-contain mr-2" />
           <span className="text-sm font-bold text-foreground">FSSS</span>
