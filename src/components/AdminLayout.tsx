@@ -38,8 +38,8 @@ const navSections = [
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeSection: "dashboard" | "gerenciar";
-  onSectionChange: (section: "dashboard" | "gerenciar") => void;
+  activeSection?: "dashboard" | "gerenciar";
+  onSectionChange?: (section: "dashboard" | "gerenciar") => void;
 }
 
 const AdminLayout = ({ children, activeSection, onSectionChange }: AdminLayoutProps) => {
@@ -57,9 +57,9 @@ const AdminLayout = ({ children, activeSection, onSectionChange }: AdminLayoutPr
       .join("") ?? "AD";
 
   const handleNavigate = (path: string) => {
-    if (path === "/admin") {
+    if (path === "/admin" && onSectionChange) {
       onSectionChange("dashboard");
-    } else if (path === "/gerenciar") {
+    } else if (path === "/gerenciar" && onSectionChange) {
       onSectionChange("gerenciar");
     } else {
       navigate(path);
@@ -123,7 +123,7 @@ const AdminLayout = ({ children, activeSection, onSectionChange }: AdminLayoutPr
                 {section.items.map((item) => {
                   const active =
                     item.path === "/admin"
-                      ? activeSection === "dashboard"
+                      ? activeSection === "dashboard" || (!activeSection && location.pathname === "/admin")
                       : item.path === "/gerenciar"
                       ? activeSection === "gerenciar"
                       : location.pathname === item.path;
