@@ -341,10 +341,8 @@ const ReservationPage = () => {
 
           </div>
 
-          {/* ── RIGHT: date picker + time slots + quantity ── */}
-          <div className="space-y-5">
-
-            {/* Date picker */}
+          {/* ── RIGHT: date picker only ── */}
+          <div>
             <div className="bg-card border border-border rounded-xl p-5">
               <Label className="text-sm font-semibold mb-4 block">Escolha a data</Label>
               <div className="flex justify-center">
@@ -364,92 +362,91 @@ const ReservationPage = () => {
                 />
               </div>
             </div>
-
-            {/* Time slots */}
-            {date && allSlots.length > 0 && (
-              <div className="bg-card border border-border rounded-xl p-5">
-                <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
-                  <Label className="text-sm font-semibold uppercase tracking-wider text-foreground">
-                    Horários disponíveis
-                  </Label>
-                  {selectedSlots.length > 0 && (
-                    <span className="text-xs text-primary font-semibold bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-lg">
-                      {selectedSlots.length} selecionado{selectedSlots.length > 1 ? "s" : ""}
-                    </span>
-                  )}
-                </div>
-
-                <div className="mb-5">
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
-                    Manhã
-                  </p>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {morningSlots.map((slot) => (
-                      <SlotButton key={slot.label} slot={slot} />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 my-4">
-                  <div className="flex-1 h-px bg-border" />
-                  <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">
-                    Almoço · 12:20 – 13:00
-                  </span>
-                  <div className="flex-1 h-px bg-border" />
-                </div>
-
-                <div>
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
-                    Tarde
-                  </p>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {afternoonSlots.map((slot) => (
-                      <SlotButton key={slot.label} slot={slot} />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-sm border border-border bg-card" />
-                    <span className="text-[11px] text-muted-foreground">Disponível</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-sm bg-primary" />
-                    <span className="text-[11px] text-muted-foreground">Selecionado</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-sm bg-muted/60" />
-                    <span className="text-[11px] text-muted-foreground">Indisponível</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Quantity (instruments) */}
-            {isInstrumento && date && selectedSlots.length > 0 && (
-              <div className="bg-card border border-border rounded-xl p-5">
-                <Label className="text-sm font-semibold mb-1 block">Quantidade</Label>
-                <p className="text-xs text-muted-foreground mb-3">
-                  {availableQtyForSelection}{" "}
-                  {availableQtyForSelection === 1 ? "unidade disponível" : "unidades disponíveis"}{" "}
-                  para os horários selecionados
-                </p>
-                <Input
-                  type="number"
-                  min={1}
-                  max={availableQtyForSelection}
-                  value={quantity}
-                  onChange={(e) =>
-                    setQuantity(Math.max(1, Math.min(availableQtyForSelection, Number(e.target.value))))
-                  }
-                  className="w-24 font-mono"
-                />
-              </div>
-            )}
-
           </div>
         </div>
+
+        {/* ── FULL WIDTH: time slots ── */}
+        {date && allSlots.length > 0 && (
+          <div className="bg-card border border-border rounded-xl p-5 mt-6">
+            <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
+              <Label className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                Horários disponíveis
+              </Label>
+              {selectedSlots.length > 0 && (
+                <span className="text-xs text-primary font-semibold bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-lg">
+                  {selectedSlots.length} selecionado{selectedSlots.length > 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+
+            <div className="mb-5">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
+                Manhã
+              </p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+                {morningSlots.map((slot) => (
+                  <SlotButton key={slot.label} slot={slot} />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 my-4">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">
+                Almoço · 12:20 – 13:00
+              </span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            <div>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
+                Tarde
+              </p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+                {afternoonSlots.map((slot) => (
+                  <SlotButton key={slot.label} slot={slot} />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border">
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-sm border border-border bg-card" />
+                <span className="text-[11px] text-muted-foreground">Disponível</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-sm bg-primary" />
+                <span className="text-[11px] text-muted-foreground">Selecionado</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-sm bg-muted/60" />
+                <span className="text-[11px] text-muted-foreground">Indisponível</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── FULL WIDTH: quantity (instruments) ── */}
+        {isInstrumento && date && selectedSlots.length > 0 && (
+          <div className="bg-card border border-border rounded-xl p-5 mt-6">
+            <Label className="text-sm font-semibold mb-1 block">Quantidade</Label>
+            <p className="text-xs text-muted-foreground mb-3">
+              {availableQtyForSelection}{" "}
+              {availableQtyForSelection === 1 ? "unidade disponível" : "unidades disponíveis"}{" "}
+              para os horários selecionados
+            </p>
+            <Input
+              type="number"
+              min={1}
+              max={availableQtyForSelection}
+              value={quantity}
+              onChange={(e) =>
+                setQuantity(Math.max(1, Math.min(availableQtyForSelection, Number(e.target.value))))
+              }
+              className="w-24 font-mono"
+            />
+          </div>
+        )}
 
         {/* ── FULL WIDTH: equipment addon (spaces only) ── */}
         {!isInstrumento && date && selectedSlots.length > 0 && instrumentosDb.length > 0 && (
