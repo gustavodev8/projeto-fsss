@@ -210,10 +210,10 @@ const AdminHub = () => {
           ].map((s, i) => (
             <div
               key={s.label}
-              className="bg-white border border-border rounded-xl p-6 hover:shadow-sm transition-shadow duration-200"
+              className="bg-white border border-border rounded-xl p-6 flex flex-col items-start hover:shadow-sm transition-shadow duration-200"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <div className={`w-10 h-10 rounded-full ${s.color} flex items-center justify-center mb-4`}>
+              <div className={`w-10 h-10 rounded-full ${s.color} flex items-center justify-center mb-4 shrink-0`}>
                 {s.icon}
               </div>
               <p className="text-3xl font-bold text-foreground">{s.value}</p>
@@ -273,16 +273,16 @@ const AdminHub = () => {
               <button
                 key={card.title}
                 onClick={() => navigate(card.path)}
-                className="bg-white border border-border rounded-xl p-6 text-left hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 group relative"
+                className="bg-white border border-border rounded-xl p-6 flex flex-col items-start w-full hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 group relative"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
                 <ArrowRight className="w-4 h-4 text-muted-foreground/30 absolute top-6 right-6 group-hover:text-primary/50 group-hover:translate-x-0.5 transition-all duration-150" />
-                <div className={`w-10 h-10 rounded-full ${card.iconBg} flex items-center justify-center mb-4`}>
+                <div className={`w-10 h-10 rounded-full ${card.iconBg} flex items-center justify-center mb-4 shrink-0`}>
                   {card.icon}
                 </div>
-                <p className="text-[15px] font-semibold text-foreground mb-1">{card.title}</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
-                <div className="border-t border-border mt-4 pt-3.5 text-sm text-muted-foreground">
+                <p className="text-[15px] font-semibold text-foreground mb-1 w-full">{card.title}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed w-full">{card.desc}</p>
+                <div className="border-t border-border mt-4 pt-3.5 text-sm text-muted-foreground w-full">
                   {card.stat}
                 </div>
               </button>
