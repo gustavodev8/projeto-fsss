@@ -101,33 +101,33 @@ const ProfessorHub = () => {
         </div>
 
         {myUpcoming.length > 0 && (
-          <div className="bg-card border border-border rounded-xl overflow-hidden">
-            <div className="border-b border-border px-5 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          <div className="bg-white border border-border rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
+            <div className="border-b border-border px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
                 <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                <h2 className="text-sm font-semibold text-foreground">
+                <h2 className="text-base font-semibold text-foreground">
                   Suas próximas reservas
                 </h2>
               </div>
               <button
                 onClick={() => navigate("/minhas-reservas")}
-                className="text-xs text-primary hover:underline font-medium"
+                className="text-sm text-primary hover:underline font-medium"
               >
                 Ver todas
               </button>
             </div>
             <div className="divide-y divide-border">
               {myUpcoming.slice(0, 3).map((r) => (
-                <div key={r.id} className="px-5 py-3 flex items-center justify-between">
+                <div key={r.id} className="px-6 py-4 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-foreground">{r.itemName}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-base font-medium text-foreground">{r.itemName}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {r.date.split("-").reverse().join("/")} · {r.slots[0]}
                       {r.slots.length > 1 &&
                         ` +${r.slots.length - 1} horário${r.slots.length > 2 ? "s" : ""}`}
                     </p>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-[#D1FAE5] text-[#065F46]">
+                  <span className="text-xs px-3 py-1 rounded-full font-medium bg-[#D1FAE5] text-[#065F46]">
                     Confirmada
                   </span>
                 </div>
