@@ -297,233 +297,233 @@ const ReservationPage = () => {
   return (
     <div className="min-h-screen bg-background pb-24">
       <Header />
-      <main className="max-w-2xl mx-auto px-4 py-6">
+      <main className="max-w-[1100px] mx-auto px-6 py-6">
+
+        {/* Back */}
         <button
           onClick={() => navigate(`/${category}`)}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-5 transition-colors group"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           Voltar
         </button>
 
-        {/* Item card */}
-        <div className="bg-card border border-border rounded-xl overflow-hidden mb-5 shadow-sm">
-          <div className="relative h-52 bg-muted overflow-hidden">
-            {imgError || !item.image ? (
-              <div className="w-full h-full flex items-center justify-center bg-muted">
-                {isInstrumento
-                  ? <Package className="w-12 h-12 text-muted-foreground/20" />
-                  : <Building2 className="w-12 h-12 text-muted-foreground/20" />
-                }
+        <div className="grid lg:grid-cols-[1fr_420px] gap-6 items-start">
+
+          {/* ── LEFT: item info + equipment addon ── */}
+          <div className="space-y-5">
+
+            {/* Item card */}
+            <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+              <div className="relative h-72 bg-muted overflow-hidden">
+                {imgError || !item.image ? (
+                  <div className="w-full h-full flex items-center justify-center bg-muted">
+                    {isInstrumento
+                      ? <Package className="w-14 h-14 text-muted-foreground/20" />
+                      : <Building2 className="w-14 h-14 text-muted-foreground/20" />
+                    }
+                  </div>
+                ) : (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                    onError={() => setImgError(true)}
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               </div>
-            ) : (
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-full object-cover"
-                onError={() => setImgError(true)}
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-          </div>
-          <div className="p-5">
-            <h1 className="text-xl font-bold text-foreground">{item.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
-          </div>
-        </div>
-
-        {/* Date picker */}
-        <div className="bg-card border border-border rounded-xl p-5 mb-5">
-          <Label className="text-sm font-semibold mb-4 block">Escolha a data</Label>
-          <div className="flex justify-center">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(d) => {
-                setDate(d);
-                setSelectedSlots([]);
-                setQuantity(1);
-                setSelectedInstruments([]);
-                setSubmitError("");
-              }}
-              disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
-              locale={ptBR}
-              className="pointer-events-auto"
-            />
-          </div>
-        </div>
-
-        {/* Time slots */}
-        {date && allSlots.length > 0 && (
-          <div className="bg-card border border-border rounded-xl p-5 mb-5">
-            <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
-              <Label className="text-sm font-semibold uppercase tracking-wider text-foreground">
-                Horários disponíveis
-              </Label>
-              {selectedSlots.length > 0 && (
-                <span className="text-xs text-primary font-semibold bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-lg">
-                  {selectedSlots.length} selecionado{selectedSlots.length > 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
-
-            <div className="mb-5">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
-                Manhã
-              </p>
-              <div className="grid grid-cols-3 gap-1.5">
-                {morningSlots.map((slot) => (
-                  <SlotButton key={slot.label} slot={slot} />
-                ))}
+              <div className="p-6">
+                <h1 className="text-xl font-bold text-foreground">{item.name}</h1>
+                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{item.description}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 my-4">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">
-                Almoço · 12:20 – 13:00
-              </span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
+            {/* Instruments addon (spaces only) */}
+            {!isInstrumento && date && selectedSlots.length > 0 && instrumentosDb.length > 0 && (
+              <div className="bg-card border border-border rounded-xl p-5">
+                <div className="flex items-center gap-2 mb-1">
+                  <PackagePlus className="w-4 h-4 text-primary" />
+                  <Label className="text-sm font-semibold">
+                    Deseja reservar algum equipamento?
+                  </Label>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Adicione equipamentos para usar no espaço reservado.
+                </p>
 
-            <div>
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
-                Tarde
-              </p>
-              <div className="grid grid-cols-3 gap-1.5">
-                {afternoonSlots.map((slot) => (
-                  <SlotButton key={slot.label} slot={slot} />
-                ))}
-              </div>
-            </div>
+                <div className="space-y-2">
+                  {instrumentosDb.map((inst) => {
+                    const avail = instAvailable[inst.id] ?? 0;
+                    const sel = selectedInstruments.find((si) => si.id === inst.id);
+                    const isChecked = !!sel;
+                    const isUnavailable = avail <= 0;
 
-            <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border">
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm border border-border bg-card" />
-                <span className="text-[11px] text-muted-foreground">Disponível</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm bg-primary" />
-                <span className="text-[11px] text-muted-foreground">Selecionado</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm bg-muted/60" />
-                <span className="text-[11px] text-muted-foreground">Indisponível</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Quantity (instruments) */}
-        {isInstrumento && date && selectedSlots.length > 0 && (
-          <div className="bg-card border border-border rounded-xl p-5 mb-5">
-            <Label className="text-sm font-semibold mb-1 block">Quantidade</Label>
-            <p className="text-xs text-muted-foreground mb-3">
-              {availableQtyForSelection}{" "}
-              {availableQtyForSelection === 1
-                ? "unidade disponível"
-                : "unidades disponíveis"}{" "}
-              para os horários selecionados
-            </p>
-            <Input
-              type="number"
-              min={1}
-              max={availableQtyForSelection}
-              value={quantity}
-              onChange={(e) =>
-                setQuantity(
-                  Math.max(1, Math.min(availableQtyForSelection, Number(e.target.value)))
-                )
-              }
-              className="w-24 font-mono"
-            />
-          </div>
-        )}
-
-        {/* Instruments addon (spaces only) */}
-        {!isInstrumento && date && selectedSlots.length > 0 && instrumentosDb.length > 0 && (
-          <div className="bg-card border border-border rounded-xl p-5 mb-5">
-            <div className="flex items-center gap-2 mb-1">
-              <PackagePlus className="w-4 h-4 text-primary" />
-              <Label className="text-sm font-semibold">
-                Deseja reservar algum equipamento?
-              </Label>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Adicione equipamentos para usar no espaço reservado.
-            </p>
-
-            <div className="space-y-2">
-              {instrumentosDb.map((inst) => {
-                const avail = instAvailable[inst.id] ?? 0;
-                const sel = selectedInstruments.find((si) => si.id === inst.id);
-                const isChecked = !!sel;
-                const isUnavailable = avail <= 0;
-
-                return (
-                  <div
-                    key={inst.id}
-                    onClick={() => !isUnavailable && toggleInstrument(inst.id)}
-                    className={cn(
-                      "flex items-center justify-between rounded-xl border-2 px-4 py-3 transition-all",
-                      isUnavailable &&
-                        "opacity-50 cursor-not-allowed border-border bg-muted/30",
-                      !isUnavailable &&
-                        !isChecked &&
-                        "border-border hover:border-primary/40 cursor-pointer",
-                      isChecked && "border-primary bg-primary/5 cursor-pointer"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
+                    return (
                       <div
+                        key={inst.id}
+                        onClick={() => !isUnavailable && toggleInstrument(inst.id)}
                         className={cn(
-                          "w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all",
-                          isChecked
-                            ? "bg-primary border-primary"
-                            : "border-muted-foreground/40"
+                          "flex items-center justify-between rounded-xl border-2 px-4 py-3 transition-all",
+                          isUnavailable && "opacity-50 cursor-not-allowed border-border bg-muted/30",
+                          !isUnavailable && !isChecked && "border-border hover:border-primary/40 cursor-pointer",
+                          isChecked && "border-primary bg-primary/5 cursor-pointer"
                         )}
                       >
-                        {isChecked && <Check className="w-3 h-3 text-white" />}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{inst.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {isUnavailable
-                            ? "Esgotado para os horários selecionados"
-                            : `${avail} unidade${avail !== 1 ? "s" : ""} disponível${avail !== 1 ? "is" : ""}`}
-                        </p>
-                      </div>
-                    </div>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={cn(
+                              "w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all",
+                              isChecked ? "bg-primary border-primary" : "border-muted-foreground/40"
+                            )}
+                          >
+                            {isChecked && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{inst.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {isUnavailable
+                                ? "Esgotado para os horários selecionados"
+                                : `${avail} unidade${avail !== 1 ? "s" : ""} disponível${avail !== 1 ? "is" : ""}`}
+                            </p>
+                          </div>
+                        </div>
 
-                    {isChecked && (
-                      <div
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center gap-2 ml-3"
-                      >
-                        <span className="text-xs text-muted-foreground">Qtd:</span>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={avail}
-                          value={sel!.quantity}
-                          onChange={(e) =>
-                            updateInstrumentQty(inst.id, Number(e.target.value))
-                          }
-                          className="w-16 h-8 font-mono text-sm text-center"
-                        />
+                        {isChecked && (
+                          <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 ml-3">
+                            <span className="text-xs text-muted-foreground">Qtd:</span>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={avail}
+                              value={sel!.quantity}
+                              onChange={(e) => updateInstrumentQty(inst.id, Number(e.target.value))}
+                              className="w-16 h-8 font-mono text-sm text-center"
+                            />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* ── RIGHT: date picker + time slots + quantity ── */}
+          <div className="space-y-5">
+
+            {/* Date picker */}
+            <div className="bg-card border border-border rounded-xl p-5">
+              <Label className="text-sm font-semibold mb-4 block">Escolha a data</Label>
+              <div className="flex justify-center">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(d) => {
+                    setDate(d);
+                    setSelectedSlots([]);
+                    setQuantity(1);
+                    setSelectedInstruments([]);
+                    setSubmitError("");
+                  }}
+                  disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                  locale={ptBR}
+                  className="pointer-events-auto"
+                />
+              </div>
+            </div>
+
+            {/* Time slots */}
+            {date && allSlots.length > 0 && (
+              <div className="bg-card border border-border rounded-xl p-5">
+                <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
+                  <Label className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                    Horários disponíveis
+                  </Label>
+                  {selectedSlots.length > 0 && (
+                    <span className="text-xs text-primary font-semibold bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-lg">
+                      {selectedSlots.length} selecionado{selectedSlots.length > 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
+
+                <div className="mb-5">
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
+                    Manhã
+                  </p>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {morningSlots.map((slot) => (
+                      <SlotButton key={slot.label} slot={slot} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 my-4">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">
+                    Almoço · 12:20 – 13:00
+                  </span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+
+                <div>
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
+                    Tarde
+                  </p>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {afternoonSlots.map((slot) => (
+                      <SlotButton key={slot.label} slot={slot} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded-sm border border-border bg-card" />
+                    <span className="text-[11px] text-muted-foreground">Disponível</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded-sm bg-primary" />
+                    <span className="text-[11px] text-muted-foreground">Selecionado</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 rounded-sm bg-muted/60" />
+                    <span className="text-[11px] text-muted-foreground">Indisponível</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Quantity (instruments) */}
+            {isInstrumento && date && selectedSlots.length > 0 && (
+              <div className="bg-card border border-border rounded-xl p-5">
+                <Label className="text-sm font-semibold mb-1 block">Quantidade</Label>
+                <p className="text-xs text-muted-foreground mb-3">
+                  {availableQtyForSelection}{" "}
+                  {availableQtyForSelection === 1 ? "unidade disponível" : "unidades disponíveis"}{" "}
+                  para os horários selecionados
+                </p>
+                <Input
+                  type="number"
+                  min={1}
+                  max={availableQtyForSelection}
+                  value={quantity}
+                  onChange={(e) =>
+                    setQuantity(Math.max(1, Math.min(availableQtyForSelection, Number(e.target.value))))
+                  }
+                  className="w-24 font-mono"
+                />
+              </div>
+            )}
+
+          </div>
+        </div>
       </main>
 
       {/* Sticky confirm bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-4 py-3 z-10">
-        <div className="max-w-2xl mx-auto space-y-2">
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-6 py-3 z-10">
+        <div className="max-w-[1100px] mx-auto space-y-2">
           {submitError && (
             <div className="flex items-start gap-2 text-xs text-destructive bg-destructive/8 border border-destructive/20 rounded-lg px-3 py-2">
               <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
