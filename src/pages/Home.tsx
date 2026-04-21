@@ -6,16 +6,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useReservations } from "@/contexts/ReservationContext";
 import { listProfessors } from "@/services/users";
 import { fetchAllItems } from "@/services/items";
+import { DoorOpen, Package, CalendarDays } from "lucide-react";
 import {
-  DoorOpen,
-  Package,
-  CalendarDays,
-  Building2,
-  Users,
-  BarChart2,
-  ArrowRight,
-  TrendingUp,
-} from "lucide-react";
+  CalendarBlank,
+  UsersThree,
+  TrendUp,
+  ChartBar,
+  Buildings,
+  Cube,
+  ArrowRight as PhArrowRight,
+} from "@phosphor-icons/react";
 
 function weekRange(iso: string) {
   const d = new Date(iso + "T12:00:00");
@@ -101,33 +101,33 @@ const ProfessorHub = () => {
         </div>
 
         {myUpcoming.length > 0 && (
-          <div className="bg-card border border-border rounded-xl overflow-hidden">
-            <div className="border-b border-border px-5 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          <div className="bg-white border border-border rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
+            <div className="border-b border-border px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
                 <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                <h2 className="text-sm font-semibold text-foreground">
+                <h2 className="text-base font-semibold text-foreground">
                   Suas próximas reservas
                 </h2>
               </div>
               <button
                 onClick={() => navigate("/minhas-reservas")}
-                className="text-xs text-primary hover:underline font-medium"
+                className="text-sm text-primary hover:underline font-medium"
               >
                 Ver todas
               </button>
             </div>
             <div className="divide-y divide-border">
               {myUpcoming.slice(0, 3).map((r) => (
-                <div key={r.id} className="px-5 py-3 flex items-center justify-between">
+                <div key={r.id} className="px-6 py-4 flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-foreground">{r.itemName}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-base font-medium text-foreground">{r.itemName}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {r.date.split("-").reverse().join("/")} · {r.slots[0]}
                       {r.slots.length > 1 &&
                         ` +${r.slots.length - 1} horário${r.slots.length > 2 ? "s" : ""}`}
                     </p>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-[#D1FAE5] text-[#065F46]">
+                  <span className="text-xs px-3 py-1 rounded-full font-medium bg-[#D1FAE5] text-[#065F46]">
                     Confirmada
                   </span>
                 </div>
@@ -171,14 +171,14 @@ const AdminHub = () => {
 
   return (
     <AdminLayout>
-      <div className="p-8 space-y-8">
+      <div className="p-8 space-y-7">
         {/* Título */}
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
             Bem-vindo, Administrador
           </p>
-          <h1 className="text-3xl font-bold text-foreground">Visão geral</h1>
-          <p className="text-base text-muted-foreground mt-1">
+          <h1 className="text-[1.65rem] font-bold text-foreground">Visão geral</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Resumo de desempenho do sistema de reservas.
           </p>
         </div>
@@ -187,37 +187,34 @@ const AdminHub = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {[
             {
-              icon: <CalendarDays className="w-6 h-6 text-primary" />,
+              icon: <CalendarBlank weight="bold" className="w-6 h-6 text-primary" />,
               label: "Reservas esta semana",
               value: weekRes.length,
               sub: `${todayRes.length} hoje`,
-              color: "bg-primary/8",
             },
             {
-              icon: <Users className="w-6 h-6 text-violet-600" />,
+              icon: <UsersThree weight="bold" className="w-6 h-6 text-primary" />,
               label: "Professores ativos",
               value: profAtivos,
               sub: `${professors.length} cadastrados`,
-              color: "bg-violet-50",
             },
             {
-              icon: <TrendingUp className="w-6 h-6 text-emerald-600" />,
+              icon: <TrendUp weight="bold" className="w-6 h-6 text-primary" />,
               label: "Taxa de ocupação",
               value: `${ocupacao}%`,
               sub: "espaços esta semana",
-              color: "bg-emerald-50",
             },
           ].map((s, i) => (
             <div
               key={s.label}
-              className="bg-white border border-border rounded-xl p-7 hover:shadow-sm transition-shadow duration-200"
+              className="bg-white border border-border rounded-xl p-6 hover:shadow-sm transition-shadow duration-200"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <div className={`w-13 h-13 rounded-full ${s.color} flex items-center justify-center mb-4 w-12 h-12`}>
+              <div className="w-11 h-11 rounded-xl bg-primary/8 flex items-center justify-center mb-5">
                 {s.icon}
               </div>
-              <p className="text-4xl font-bold text-foreground">{s.value}</p>
-              <p className="text-base font-medium text-foreground mt-1">{s.label}</p>
+              <p className="text-4xl font-bold text-foreground tracking-tight leading-none">{s.value}</p>
+              <p className="text-[15px] font-semibold text-foreground mt-3 leading-tight">{s.label}</p>
               <p className="text-sm text-muted-foreground mt-1">{s.sub}</p>
             </div>
           ))}
@@ -226,14 +223,13 @@ const AdminHub = () => {
         {/* Acesso rápido */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-foreground">Acesso rápido</h2>
+            <h2 className="text-[15px] font-semibold text-foreground">Acesso rápido</h2>
             <span className="text-sm text-muted-foreground">Selecione um módulo para começar</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {[
               {
-                icon: <BarChart2 className="w-6 h-6 text-primary" />,
-                iconBg: "bg-primary/8",
+                icon: <ChartBar weight="bold" className="w-6 h-6 text-primary" />,
                 title: "Painel Administrativo",
                 desc: "Relatórios diários, semanais e exportação em PDF.",
                 path: "/admin",
@@ -245,8 +241,7 @@ const AdminHub = () => {
                 ),
               },
               {
-                icon: <Building2 className="w-6 h-6 text-violet-600" />,
-                iconBg: "bg-violet-50",
+                icon: <Buildings weight="bold" className="w-6 h-6 text-primary" />,
                 title: "Espaços",
                 desc: "Salas de aula, laboratórios e auditórios.",
                 path: "/espacos",
@@ -257,8 +252,7 @@ const AdminHub = () => {
                 ),
               },
               {
-                icon: <Package className="w-6 h-6 text-emerald-600" />,
-                iconBg: "bg-emerald-50",
+                icon: <Cube weight="bold" className="w-6 h-6 text-primary" />,
                 title: "Equipamentos",
                 desc: "Projetores, notebooks, microfones e demais itens.",
                 path: "/instrumentos",
@@ -273,16 +267,26 @@ const AdminHub = () => {
               <button
                 key={card.title}
                 onClick={() => navigate(card.path)}
-                className="bg-white border border-border rounded-xl p-7 text-left hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 group relative"
+                className="bg-white border border-border rounded-xl p-6 text-left hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 group flex flex-col"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <ArrowRight className="w-4 h-4 text-muted-foreground/30 absolute top-5 right-5 group-hover:text-primary/50 group-hover:translate-x-0.5 transition-all duration-150" />
-                <div className={`w-12 h-12 rounded-full ${card.iconBg} flex items-center justify-center mb-4`}>
-                  {card.icon}
+                {/* Ícone + seta na mesma linha */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="w-11 h-11 rounded-xl bg-primary/8 flex items-center justify-center">
+                    {card.icon}
+                  </div>
+                  <PhArrowRight
+                    weight="bold"
+                    className="w-4 h-4 text-muted-foreground/25 group-hover:text-primary/60 group-hover:translate-x-0.5 transition-all duration-150"
+                  />
                 </div>
-                <p className="text-base font-semibold text-foreground mb-1.5">{card.title}</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">{card.desc}</p>
-                <div className="border-t border-border mt-5 pt-4 text-sm text-muted-foreground">
+
+                {/* Texto */}
+                <p className="text-[15px] font-semibold text-foreground leading-tight">{card.title}</p>
+                <p className="text-[13px] text-muted-foreground mt-1 leading-relaxed flex-1">{card.desc}</p>
+
+                {/* Stat */}
+                <div className="border-t border-border/70 mt-4 pt-3 text-sm text-muted-foreground">
                   {card.stat}
                 </div>
               </button>
