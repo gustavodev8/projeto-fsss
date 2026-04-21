@@ -308,9 +308,9 @@ const ReservationPage = () => {
           Voltar
         </button>
 
-        <div className="grid lg:grid-cols-[1fr_420px] gap-6 items-start">
+        <div className="grid lg:grid-cols-2 gap-6 items-start">
 
-          {/* ── LEFT: item info + equipment addon ── */}
+          {/* ── LEFT: item info ── */}
           <div className="space-y-5">
 
             {/* Item card */}
@@ -339,75 +339,6 @@ const ReservationPage = () => {
               </div>
             </div>
 
-            {/* Instruments addon (spaces only) */}
-            {!isInstrumento && date && selectedSlots.length > 0 && instrumentosDb.length > 0 && (
-              <div className="bg-card border border-border rounded-xl p-5">
-                <div className="flex items-center gap-2 mb-1">
-                  <PackagePlus className="w-4 h-4 text-primary" />
-                  <Label className="text-sm font-semibold">
-                    Deseja reservar algum equipamento?
-                  </Label>
-                </div>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Adicione equipamentos para usar no espaço reservado.
-                </p>
-
-                <div className="space-y-2">
-                  {instrumentosDb.map((inst) => {
-                    const avail = instAvailable[inst.id] ?? 0;
-                    const sel = selectedInstruments.find((si) => si.id === inst.id);
-                    const isChecked = !!sel;
-                    const isUnavailable = avail <= 0;
-
-                    return (
-                      <div
-                        key={inst.id}
-                        onClick={() => !isUnavailable && toggleInstrument(inst.id)}
-                        className={cn(
-                          "flex items-center justify-between rounded-xl border-2 px-4 py-3 transition-all",
-                          isUnavailable && "opacity-50 cursor-not-allowed border-border bg-muted/30",
-                          !isUnavailable && !isChecked && "border-border hover:border-primary/40 cursor-pointer",
-                          isChecked && "border-primary bg-primary/5 cursor-pointer"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={cn(
-                              "w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all",
-                              isChecked ? "bg-primary border-primary" : "border-muted-foreground/40"
-                            )}
-                          >
-                            {isChecked && <Check className="w-3 h-3 text-white" />}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{inst.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {isUnavailable
-                                ? "Esgotado para os horários selecionados"
-                                : `${avail} unidade${avail !== 1 ? "s" : ""} disponível${avail !== 1 ? "is" : ""}`}
-                            </p>
-                          </div>
-                        </div>
-
-                        {isChecked && (
-                          <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 ml-3">
-                            <span className="text-xs text-muted-foreground">Qtd:</span>
-                            <Input
-                              type="number"
-                              min={1}
-                              max={avail}
-                              value={sel!.quantity}
-                              onChange={(e) => updateInstrumentQty(inst.id, Number(e.target.value))}
-                              className="w-16 h-8 font-mono text-sm text-center"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* ── RIGHT: date picker + time slots + quantity ── */}
@@ -519,6 +450,76 @@ const ReservationPage = () => {
 
           </div>
         </div>
+
+        {/* ── FULL WIDTH: equipment addon (spaces only) ── */}
+        {!isInstrumento && date && selectedSlots.length > 0 && instrumentosDb.length > 0 && (
+          <div className="bg-card border border-border rounded-xl p-5 mt-6">
+            <div className="flex items-center gap-2 mb-1">
+              <PackagePlus className="w-4 h-4 text-primary" />
+              <Label className="text-sm font-semibold">
+                Deseja reservar algum equipamento?
+              </Label>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Adicione equipamentos para usar no espaço reservado.
+            </p>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {instrumentosDb.map((inst) => {
+                const avail = instAvailable[inst.id] ?? 0;
+                const sel = selectedInstruments.find((si) => si.id === inst.id);
+                const isChecked = !!sel;
+                const isUnavailable = avail <= 0;
+
+                return (
+                  <div
+                    key={inst.id}
+                    onClick={() => !isUnavailable && toggleInstrument(inst.id)}
+                    className={cn(
+                      "flex items-center justify-between rounded-xl border-2 px-4 py-3 transition-all",
+                      isUnavailable && "opacity-50 cursor-not-allowed border-border bg-muted/30",
+                      !isUnavailable && !isChecked && "border-border hover:border-primary/40 cursor-pointer",
+                      isChecked && "border-primary bg-primary/5 cursor-pointer"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={cn(
+                          "w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all",
+                          isChecked ? "bg-primary border-primary" : "border-muted-foreground/40"
+                        )}
+                      >
+                        {isChecked && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{inst.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {isUnavailable
+                            ? "Esgotado para os horários selecionados"
+                            : `${avail} unidade${avail !== 1 ? "s" : ""} disponível${avail !== 1 ? "is" : ""}`}
+                        </p>
+                      </div>
+                    </div>
+
+                    {isChecked && (
+                      <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 ml-3">
+                        <span className="text-xs text-muted-foreground">Qtd:</span>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={avail}
+                          value={sel!.quantity}
+                          onChange={(e) => updateInstrumentQty(inst.id, Number(e.target.value))}
+                          className="w-16 h-8 font-mono text-sm text-center"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Sticky confirm bar */}
