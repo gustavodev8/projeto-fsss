@@ -121,7 +121,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                       }`}
                     >
                       <item.icon className={`w-4 h-4 shrink-0 transition-transform duration-150 ${
-                        active ? "text-white" : "group-hover:scale-110"
+                        active ? "text-white" : "text-primary group-hover:scale-110"
                       }`} />
                       <span className="truncate flex-1">{item.label}</span>
                     </button>
