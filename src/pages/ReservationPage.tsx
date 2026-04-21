@@ -248,6 +248,15 @@ const ReservationPage = () => {
 
   const canConfirm = !!date && selectedSlots.length > 0 && !submitting;
 
+  const groupByBreaks = (slots: TimeSlot[]): TimeSlot[][] => {
+    const groups: TimeSlot[][] = [[]];
+    for (const s of slots) {
+      if (s.isBreak) groups.push([]);
+      else groups[groups.length - 1].push(s);
+    }
+    return groups.filter((g) => g.length > 0);
+  };
+
   const SlotButton = ({ slot }: { slot: TimeSlot }) => {
     const isOccupied = occupiedSlots.has(slot.label);
     const isSelected = selectedSlots.includes(slot.label);
@@ -383,11 +392,22 @@ const ReservationPage = () => {
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
                 Manhã
               </p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
-                {morningSlots.map((slot) => (
-                  <SlotButton key={slot.label} slot={slot} />
-                ))}
-              </div>
+              {groupByBreaks(morningSlots).map((group, gi) => (
+                <div key={gi}>
+                  {gi > 0 && (
+                    <div className="flex items-center gap-2 my-2">
+                      <div className="flex-1 h-px bg-border" />
+                      <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">Intervalo</span>
+                      <div className="flex-1 h-px bg-border" />
+                    </div>
+                  )}
+                  <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+                    {group.map((slot) => (
+                      <SlotButton key={slot.label} slot={slot} />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="flex items-center gap-2 my-4">
@@ -402,11 +422,22 @@ const ReservationPage = () => {
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
                 Tarde
               </p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
-                {afternoonSlots.map((slot) => (
-                  <SlotButton key={slot.label} slot={slot} />
-                ))}
-              </div>
+              {groupByBreaks(afternoonSlots).map((group, gi) => (
+                <div key={gi}>
+                  {gi > 0 && (
+                    <div className="flex items-center gap-2 my-2">
+                      <div className="flex-1 h-px bg-border" />
+                      <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">Intervalo</span>
+                      <div className="flex-1 h-px bg-border" />
+                    </div>
+                  )}
+                  <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+                    {group.map((slot) => (
+                      <SlotButton key={slot.label} slot={slot} />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border">
