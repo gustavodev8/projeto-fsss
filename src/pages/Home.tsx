@@ -69,29 +69,30 @@ const ProfessorHub = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#F3F4F6]">
       <Header />
-      <main className="max-w-3xl mx-auto px-4 py-10">
-        <div className="mb-8">
+      <main className="max-w-[1200px] mx-auto px-6 py-10">
+        <div className="mb-6">
           <p className="text-sm text-muted-foreground mb-0.5">
             {greeting()},{" "}
             <span className="font-medium text-foreground">{user?.name}</span>
           </p>
-          <h1 className="text-2xl text-foreground">O que deseja reservar?</h1>
+          <h1 className="text-2xl font-extrabold text-[#0D1F3C]">O que deseja reservar?</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Selecione uma categoria para verificar disponibilidade e realizar sua reserva.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           {professorCategories.map((cat) => (
             <button
               key={cat.key}
               onClick={() => navigate(cat.path)}
-              className="bg-card border border-border rounded-xl p-6 text-left hover:border-primary/50 hover:shadow-sm transition-all group"
+              className="bg-white border border-border rounded-xl p-6 min-h-[140px] text-left transition-all duration-[180ms] hover:-translate-y-1 shadow-[0_2px_12px_rgba(0,0,0,0.07)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.10)] group cursor-pointer"
+              style={{ borderLeftColor: '#1A56DB', borderLeftWidth: '4px' }}
             >
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                <cat.icon className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-full bg-[#E8F0FE] flex items-center justify-center mb-4">
+                <cat.icon className="w-5 h-5 text-[#1A56DB]" strokeWidth={2.5} />
               </div>
               <h2 className="text-base font-semibold text-foreground mb-1">{cat.label}</h2>
               <p className="text-sm text-muted-foreground">{cat.subtitle}</p>
@@ -126,7 +127,7 @@ const ProfessorHub = () => {
                         ` +${r.slots.length - 1} horário${r.slots.length > 2 ? "s" : ""}`}
                     </p>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded-full border border-available/50 text-available font-medium">
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-[#D1FAE5] text-[#065F46]">
                     Confirmada
                   </span>
                 </div>

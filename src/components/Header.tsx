@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, CalendarDays, LayoutDashboard } from "lucide-react";
+import { LogOut, CalendarDays, LayoutDashboard, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import unnamedLogo from "@/assets/logo.png";
 
@@ -58,8 +58,8 @@ const Header = () => {
           <div className="w-px h-4 bg-border mx-1 hidden sm:block" />
 
           <div className="hidden sm:flex items-center gap-1.5 px-2">
-            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-              {user?.name?.trim()[0]?.toUpperCase() ?? "U"}
+            <div className="w-9 h-9 rounded-full bg-[#E8F0FE] flex items-center justify-center text-[#1A56DB]">
+              <User className="w-5 h-5" />
             </div>
             <span className="text-sm text-foreground font-medium">{user?.name}</span>
           </div>
