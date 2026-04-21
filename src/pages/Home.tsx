@@ -146,8 +146,45 @@ const ProfessorHub = () => {
           ))}
         </div>
 
+        {/* Upcoming reservations */}
+        {myUpcoming.length > 0 && (
+          <div className="bg-white border border-border rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.05)] mb-6">
+            <div className="border-b border-border px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <CalendarDays className="w-4 h-4 text-muted-foreground" />
+                <h2 className="text-base font-semibold text-foreground">
+                  Suas próximas reservas
+                </h2>
+              </div>
+              <button
+                onClick={() => navigate("/minhas-reservas")}
+                className="text-sm text-primary hover:underline font-medium"
+              >
+                Ver todas
+              </button>
+            </div>
+            <div className="divide-y divide-border">
+              {myUpcoming.slice(0, 3).map((r) => (
+                <div key={r.id} className="px-6 py-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-base font-medium text-foreground">{r.itemName}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      {r.date.split("-").reverse().join("/")} · {r.slots[0]}
+                      {r.slots.length > 1 &&
+                        ` +${r.slots.length - 1} horário${r.slots.length > 2 ? "s" : ""}`}
+                    </p>
+                  </div>
+                  <span className="text-xs px-3 py-1 rounded-full font-medium bg-[#D1FAE5] text-[#065F46]">
+                    Confirmada
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Calendar card */}
-        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.05)] mb-6">
+        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
           <div className="grid lg:grid-cols-[1fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border">
 
             {/* ── Left: Monthly calendar ── */}
@@ -318,42 +355,6 @@ const ProfessorHub = () => {
           </div>
         </div>
 
-        {/* Upcoming reservations */}
-        {myUpcoming.length > 0 && (
-          <div className="bg-white border border-border rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
-            <div className="border-b border-border px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                <h2 className="text-base font-semibold text-foreground">
-                  Suas próximas reservas
-                </h2>
-              </div>
-              <button
-                onClick={() => navigate("/minhas-reservas")}
-                className="text-sm text-primary hover:underline font-medium"
-              >
-                Ver todas
-              </button>
-            </div>
-            <div className="divide-y divide-border">
-              {myUpcoming.slice(0, 3).map((r) => (
-                <div key={r.id} className="px-6 py-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-base font-medium text-foreground">{r.itemName}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      {r.date.split("-").reverse().join("/")} · {r.slots[0]}
-                      {r.slots.length > 1 &&
-                        ` +${r.slots.length - 1} horário${r.slots.length > 2 ? "s" : ""}`}
-                    </p>
-                  </div>
-                  <span className="text-xs px-3 py-1 rounded-full font-medium bg-[#D1FAE5] text-[#065F46]">
-                    Confirmada
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </main>
     </div>
   );
