@@ -118,7 +118,7 @@ const MyReservations = () => {
                     <div className="flex items-center gap-2 shrink-0">
                       <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${
                         tab === "upcoming"
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                          ? "bg-primary/10 text-primary border border-primary/20"
                           : "bg-muted text-muted-foreground"
                       }`}>
                         {tab === "upcoming" ? "Confirmada" : "Concluída"}
@@ -162,7 +162,7 @@ const MyReservations = () => {
                     <div className="flex items-center gap-2 shrink-0">
                       <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${
                         tab === "upcoming"
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                          ? "bg-primary/10 text-primary border border-primary/20"
                           : "bg-muted text-muted-foreground"
                       }`}>
                         {tab === "upcoming" ? "Confirmada" : "Concluída"}

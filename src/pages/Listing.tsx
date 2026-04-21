@@ -44,10 +44,10 @@ const Listing = () => {
 
         {/* Header da página */}
         <div className="flex items-start gap-5 mb-8">
-          <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${isEspacos ? "bg-violet-50" : "bg-emerald-50"}`}>
+          <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 bg-primary/10">
             {isEspacos
-              ? <Building2 className="w-7 h-7 text-violet-600" />
-              : <Package className="w-7 h-7 text-emerald-600" />
+              ? <Building2 className="w-7 h-7 text-primary" />
+              : <Package className="w-7 h-7 text-primary" />
             }
           </div>
           <div>
@@ -90,10 +90,10 @@ const Listing = () => {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-24">
-            <div className={`w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center ${isEspacos ? "bg-violet-50" : "bg-emerald-50"}`}>
+            <div className="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center bg-primary/10">
               {isEspacos
-                ? <Building2 className="w-7 h-7 text-violet-400" />
-                : <Package className="w-7 h-7 text-emerald-400" />
+                ? <Building2 className="w-7 h-7 text-primary" />
+                : <Package className="w-7 h-7 text-primary" />
               }
             </div>
             <p className="text-base font-medium text-foreground mb-1">Nenhum resultado encontrado</p>
@@ -121,7 +121,7 @@ const Listing = () => {
                   <div className="absolute top-3 right-3">
                     <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${
                       item.available
-                        ? "bg-emerald-500/90 text-white"
+                        ? "bg-primary/90 text-white"
                         : "bg-red-500/90 text-white"
                     }`}>
                       <span className="w-1.5 h-1.5 rounded-full bg-white/80" />

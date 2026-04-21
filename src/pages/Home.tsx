@@ -391,20 +391,21 @@ const AdminHub = () => {
 
   return (
     <AdminLayout>
-      <div className="p-8 space-y-7">
+      <div className="p-8 space-y-8 bg-primary/[0.01] min-h-full">
         {/* Título */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
+        <div className="relative">
+          <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-primary/70 mb-1.5">
             Bem-vindo, Administrador
           </p>
-          <h1 className="text-[1.65rem] font-bold text-foreground">Visão geral</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Resumo de desempenho do sistema de reservas.
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Visão Geral</h1>
+          <p className="text-base text-slate-600 mt-1 max-w-2xl font-medium">
+            Resumo de desempenho e monitoramento do sistema de reservas institucional.
           </p>
+          <div className="absolute -left-8 top-0 bottom-0 w-1 bg-primary/20 rounded-r-full" />
         </div>
 
         {/* Estatísticas */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
             {
               icon: <CalendarBlank weight="bold" className="w-6 h-6 text-primary" />,
@@ -427,59 +428,59 @@ const AdminHub = () => {
           ].map((s, i) => (
             <div
               key={s.label}
-              className="bg-white border border-border rounded-xl p-6 hover:shadow-sm transition-shadow duration-200"
+              className="bg-white border border-primary/10 rounded-2xl p-6 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden group"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <div className="w-11 h-11 rounded-xl bg-primary/8 flex items-center justify-center mb-5">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/[0.03] rounded-bl-[4rem] -mr-6 -mt-6 transition-transform group-hover:scale-110" />
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 shadow-sm border border-primary/5">
                 {s.icon}
               </div>
-              <p className="text-4xl font-bold text-foreground tracking-tight leading-none">{s.value}</p>
-              <p className="text-[15px] font-semibold text-foreground mt-3 leading-tight">{s.label}</p>
-              <p className="text-sm text-muted-foreground mt-1">{s.sub}</p>
+              <p className="text-4xl font-extrabold text-slate-900 tracking-tighter leading-none">{s.value}</p>
+              <p className="text-[15px] font-bold text-slate-800 mt-3.5 leading-tight">{s.label}</p>
+              <p className="text-[12px] font-bold text-primary/60 mt-1.5 uppercase tracking-wider">{s.sub}</p>
             </div>
           ))}
         </div>
 
         {/* Acesso rápido */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[15px] font-semibold text-foreground">Acesso rápido</h2>
-            <span className="text-sm text-muted-foreground">Selecione um módulo para começar</span>
+        <div className="pt-1">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-bold text-slate-900">Acesso Rápido</h2>
+            <span className="text-[11px] font-bold text-primary/60 uppercase tracking-widest">Ações do Sistema</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
               {
                 icon: <ChartBar weight="bold" className="w-6 h-6 text-primary" />,
                 title: "Painel Administrativo",
-                desc: "Relatórios diários, semanais e exportação em PDF.",
+                desc: "Relatórios diários, semanais e exportação em PDF de todas as reservas.",
                 path: "/admin",
                 stat: (
-                  <span>
-                    <span className="font-semibold text-foreground">{todayRes.length}</span> hoje ·{" "}
-                    <span className="font-semibold text-foreground">{reservations.length}</span> total
+                  <span className="font-bold">
+                    <span className="text-primary">{todayRes.length}</span> hoje ·{" "}
+                    <span className="text-primary">{reservations.length}</span> total
                   </span>
                 ),
               },
               {
                 icon: <Buildings weight="bold" className="w-6 h-6 text-primary" />,
                 title: "Espaços",
-                desc: "Salas de aula, laboratórios e auditórios.",
+                desc: "Gestão completa de salas de aula, laboratórios e auditórios.",
                 path: "/espacos",
                 stat: (
-                  <span>
-                    <span className="font-semibold text-foreground">{numEspacos}</span> cadastrados
+                  <span className="font-bold">
+                    <span className="text-primary">{numEspacos}</span> cadastrados
                   </span>
                 ),
               },
               {
                 icon: <Cube weight="bold" className="w-6 h-6 text-primary" />,
                 title: "Equipamentos",
-                desc: "Projetores, notebooks, microfones e demais itens.",
+                desc: "Monitoramento e controle de projetores, notebooks e microfones.",
                 path: "/instrumentos",
                 stat: (
-                  <span>
-                    <span className="font-semibold text-foreground">{numInstrumentos}</span>{" "}
-                    disponíveis
+                  <span className="font-bold">
+                    <span className="text-primary">{numInstrumentos}</span> disponíveis
                   </span>
                 ),
               },
@@ -487,26 +488,24 @@ const AdminHub = () => {
               <button
                 key={card.title}
                 onClick={() => navigate(card.path)}
-                className="bg-white border border-border rounded-xl p-6 text-left hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 group flex flex-col"
+                className="bg-white border border-primary/10 rounded-2xl p-7 text-left hover:border-primary/30 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 group flex flex-col relative"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                {/* Ícone + seta na mesma linha */}
-                <div className="flex items-center justify-between mb-5">
-                  <div className="w-11 h-11 rounded-xl bg-primary/8 flex items-center justify-center">
-                    {card.icon}
-                  </div>
-                  <PhArrowRight
-                    weight="bold"
-                    className="w-4 h-4 text-muted-foreground/25 group-hover:text-primary/60 group-hover:translate-x-0.5 transition-all duration-150"
-                  />
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                   <PhArrowRight weight="bold" className="w-4 h-4 text-primary" />
+                </div>
+
+                {/* Ícone */}
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 shadow-sm border border-primary/5">
+                  {card.icon}
                 </div>
 
                 {/* Texto */}
-                <p className="text-[15px] font-semibold text-foreground leading-tight">{card.title}</p>
-                <p className="text-[13px] text-muted-foreground mt-1 leading-relaxed flex-1">{card.desc}</p>
+                <p className="text-[17px] font-bold text-slate-900 leading-tight mb-2 group-hover:text-primary transition-colors">{card.title}</p>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed flex-1">{card.desc}</p>
 
                 {/* Stat */}
-                <div className="border-t border-border/70 mt-4 pt-3 text-sm text-muted-foreground">
+                <div className="border-t border-primary/5 mt-5 pt-4 text-[13px] text-slate-400">
                   {card.stat}
                 </div>
               </button>

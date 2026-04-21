@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useReservations } from "@/contexts/ReservationContext";
 import { generateDailyReportPDF } from "@/lib/pdfUtils";
@@ -8,16 +8,16 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  CalendarDays,
-  Download,
+  CalendarBlank,
+  DownloadSimple,
   Users,
   BookOpen,
   FileText,
-  ChevronLeft,
-  ChevronRight,
-  History,
-  Search,
-} from "lucide-react";
+  CaretLeft,
+  CaretRight,
+  ClockCounterClockwise,
+  MagnifyingGlass,
+} from "@phosphor-icons/react";
 
 const HIST_PAGE_SIZE = 25;
 
@@ -50,10 +50,10 @@ function weekRange(iso: string) {
 }
 
 const TypeBadge = ({ category }: { category: string }) => (
-  <span className={`inline-flex items-center text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${
+  <span className={`inline-flex items-center text-[11px] font-bold uppercase px-2.5 py-1 rounded-full ${
     category === "espacos"
-      ? "bg-violet-50 text-violet-700 border border-violet-100"
-      : "bg-emerald-50 text-emerald-700 border border-emerald-100"
+      ? "bg-primary/10 text-primary border border-primary/20"
+      : "bg-primary/10 text-primary border border-primary/20"
   }`}>
     {category === "espacos" ? "Espaço" : "Equipamento"}
   </span>
@@ -64,13 +64,15 @@ const StatCard = ({
 }: {
   icon: React.ReactNode; label: string; value: string | number; sub?: string; iconBg?: string;
 }) => (
-  <div className="bg-white border border-border rounded-xl p-5 hover:shadow-sm transition-shadow duration-200">
-    <div className={`w-9 h-9 rounded-full ${iconBg} flex items-center justify-center mb-3`}>
-      {icon}
+  <div className="bg-white border border-border rounded-xl p-6 hover:shadow-md transition-all duration-200 flex flex-col items-start">
+    <div className={`w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center mb-4 shadow-sm border border-primary/5`}>
+      {React.cloneElement(icon as React.ReactElement, { className: "w-6 h-6" })}
     </div>
-    <p className="text-2xl font-bold text-foreground">{value}</p>
-    <p className="text-sm font-medium text-foreground mt-0.5">{label}</p>
-    {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
+    <div className="space-y-1">
+      <p className="text-3xl font-extrabold text-foreground tracking-tight leading-none">{value}</p>
+      <p className="text-base font-bold text-foreground leading-tight">{label}</p>
+      {sub && <p className="text-sm font-medium text-muted-foreground">{sub}</p>}
+    </div>
   </div>
 );
 
@@ -148,28 +150,28 @@ const AdminDashboard = () => {
       <div className="p-6 space-y-6">
         {/* Título */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary/70 mb-1.5">
             Painel Administrativo
           </p>
-          <h1 className="text-xl font-bold text-foreground">Gerencie e monitore todas as reservas</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Gerencie e monitore todas as reservas</h1>
+          <p className="text-base font-medium text-muted-foreground mt-1">
             Acompanhe métricas em tempo real, exporte relatórios e visualize o histórico completo.
           </p>
         </div>
 
         {/* Estatísticas */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={<CalendarDays className="w-4 h-4 text-primary" />} iconBg="bg-primary/8" label="Reservas hoje" value={stats.today} sub={formatDateDisplay(today)} />
-          <StatCard icon={<BookOpen className="w-4 h-4 text-violet-600" />} iconBg="bg-violet-50" label="Esta semana" value={stats.week} sub={`${formatDateDisplay(weekStart)} – ${formatDateDisplay(weekEnd)}`} />
-          <StatCard icon={<FileText className="w-4 h-4 text-amber-600" />} iconBg="bg-amber-50" label="Total geral" value={stats.total} sub="todas as reservas" />
-          <StatCard icon={<Users className="w-4 h-4 text-emerald-600" />} iconBg="bg-emerald-50" label="Professores" value={stats.professors} sub="cadastrados" />
+          <StatCard icon={<CalendarBlank weight="bold" className="w-4 h-4 text-primary" />} iconBg="bg-primary/8" label="Reservas hoje" value={stats.today} sub={formatDateDisplay(today)} />
+          <StatCard icon={<BookOpen weight="bold" className="w-4 h-4 text-primary" />} iconBg="bg-primary/8" label="Esta semana" value={stats.week} sub={`${formatDateDisplay(weekStart)} – ${formatDateDisplay(weekEnd)}`} />
+          <StatCard icon={<FileText weight="bold" className="w-4 h-4 text-primary" />} iconBg="bg-primary/8" label="Total geral" value={stats.total} sub="todas as reservas" />
+          <StatCard icon={<Users weight="bold" className="w-4 h-4 text-primary" />} iconBg="bg-primary/8" label="Professores" value={stats.professors} sub="cadastrados" />
         </div>
 
         {/* Tabs */}
         <div className="flex gap-1 bg-white border border-border rounded-xl p-1 w-fit">
           {([
-            { key: "pedidos", label: "Pedidos por dia", icon: CalendarDays },
-            { key: "historico", label: "Histórico completo", icon: History },
+            { key: "pedidos", label: "Pedidos por dia", icon: CalendarBlank },
+            { key: "historico", label: "Histórico completo", icon: ClockCounterClockwise },
           ] as const).map((t) => (
             <button
               key={t.key}
@@ -180,7 +182,7 @@ const AdminDashboard = () => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <t.icon className="w-3.5 h-3.5" />
+              <t.icon weight="bold" className="w-3.5 h-3.5" />
               {t.label}
             </button>
           ))}
@@ -188,7 +190,7 @@ const AdminDashboard = () => {
 
         {/* ── Aba: Pedidos por dia ────────────────────────────────────────────── */}
         {activeTab === "pedidos" && (
-          <div className="bg-white border border-border rounded-xl overflow-hidden animate-fade-in">
+          <div className="bg-white border border-border rounded-xl overflow-hidden animate-fade-in shadow-sm">
             <div className="border-b border-border px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-foreground">Pedidos do dia</h2>
@@ -202,7 +204,7 @@ const AdminDashboard = () => {
                     onClick={() => setSelectedDate((prev) => addDays(prev, -1))}
                     className="px-2 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <CaretLeft weight="bold" className="w-4 h-4" />
                   </button>
                   <input
                     type="date"
@@ -214,7 +216,7 @@ const AdminDashboard = () => {
                     onClick={() => setSelectedDate((prev) => addDays(prev, 1))}
                     className="px-2 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <CaretRight weight="bold" className="w-4 h-4" />
                   </button>
                 </div>
                 {selectedDate !== sessionToday && (
@@ -231,7 +233,7 @@ const AdminDashboard = () => {
                   disabled={downloading}
                   className="flex items-center gap-1.5 text-xs rounded-lg"
                 >
-                  <Download className="w-3.5 h-3.5" />
+                  <DownloadSimple weight="bold" className="w-3.5 h-3.5" />
                   {downloading ? "Gerando..." : "Baixar PDF"}
                 </Button>
               </div>
@@ -239,7 +241,7 @@ const AdminDashboard = () => {
 
             {dayReservations.length === 0 ? (
               <div className="py-16 text-center">
-                <CalendarDays className="w-8 h-8 mx-auto mb-2 text-muted-foreground opacity-30" />
+                <CalendarBlank weight="bold" className="w-8 h-8 mx-auto mb-2 text-muted-foreground opacity-30" />
                 <p className="text-sm font-medium text-foreground">Nenhum pedido neste dia.</p>
               </div>
             ) : (
@@ -248,18 +250,18 @@ const AdminDashboard = () => {
                   <thead>
                     <tr className="border-b border-border bg-gray-50/50">
                       {["Professor / Responsável", "Item reservado", "Tipo", "Horário", "Qtd."].map((h) => (
-                        <th key={h} className="py-2.5 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
+                        <th key={h} className="py-3 px-4 text-left text-sm font-bold text-muted-foreground uppercase tracking-wider">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {dayReservations.map((r) => (
                       <tr key={r.id} className="border-b border-border hover:bg-gray-50/80 transition-colors">
-                        <td className="py-3 px-4 text-sm font-medium text-foreground">{r.userName ?? r.userEmail ?? "—"}</td>
-                        <td className="py-3 px-4 text-sm text-foreground">{r.itemName}</td>
-                        <td className="py-3 px-4"><TypeBadge category={r.category} /></td>
-                        <td className="py-3 px-4 text-sm text-foreground">{r.slots.join(" · ")}</td>
-                        <td className="py-3 px-4 text-sm text-muted-foreground">{r.quantity ?? "—"}</td>
+                        <td className="py-4 px-4 text-[15px] font-semibold text-foreground">{r.userName ?? r.userEmail ?? "—"}</td>
+                        <td className="py-4 px-4 text-[15px] text-foreground">{r.itemName}</td>
+                        <td className="py-4 px-4"><TypeBadge category={r.category} /></td>
+                        <td className="py-4 px-4 text-[15px] font-medium text-foreground">{r.slots.join(" · ")}</td>
+                        <td className="py-4 px-4 text-[15px] text-muted-foreground font-mono">{r.quantity ?? "—"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -271,7 +273,7 @@ const AdminDashboard = () => {
 
         {/* ── Aba: Histórico completo ─────────────────────────────────────────── */}
         {activeTab === "historico" && (
-          <div className="bg-white border border-border rounded-xl overflow-hidden animate-fade-in">
+          <div className="bg-white border border-border rounded-xl overflow-hidden animate-fade-in shadow-sm">
             <div className="border-b border-border px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-foreground">Histórico completo</h2>
@@ -281,16 +283,16 @@ const AdminDashboard = () => {
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+                  <MagnifyingGlass weight="bold" className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   <input
                     type="text"
                     placeholder="Buscar professor ou item..."
                     value={histSearch}
                     onChange={(e) => setHistSearch(e.target.value)}
-                    className="h-8 pl-8 pr-3 text-xs border border-border rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/20 w-52"
+                    className="h-9 pl-9 pr-3 text-sm border border-border rounded-lg bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/20 w-52"
                   />
                 </div>
-                <div className="flex gap-1 border border-border rounded-lg overflow-hidden">
+                <div className="flex gap-1 border border-border rounded-lg overflow-hidden p-0.5">
                   {([
                     { key: "all", label: "Todos" },
                     { key: "espacos", label: "Espaços" },
@@ -299,7 +301,7 @@ const AdminDashboard = () => {
                     <button
                       key={f.key}
                       onClick={() => setHistCategory(f.key)}
-                      className={`px-2.5 py-1 text-xs font-medium transition-colors ${
+                      className={`px-3 py-1 text-xs font-bold uppercase transition-colors rounded ${
                         histCategory === f.key
                           ? "bg-foreground text-background"
                           : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -314,7 +316,7 @@ const AdminDashboard = () => {
 
             {histFiltered.length === 0 ? (
               <div className="py-16 text-center">
-                <History className="w-8 h-8 mx-auto mb-2 text-muted-foreground opacity-30" />
+                <ClockCounterClockwise weight="bold" className="w-8 h-8 mx-auto mb-2 text-muted-foreground opacity-30" />
                 <p className="text-sm font-medium text-foreground">Nenhuma reserva encontrada.</p>
               </div>
             ) : (
@@ -324,21 +326,21 @@ const AdminDashboard = () => {
                     <thead>
                       <tr className="border-b border-border bg-gray-50/50">
                         {["Data", "Professor", "Item reservado", "Tipo", "Horário", "Qtd."].map((h) => (
-                          <th key={h} className="py-2.5 px-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">{h}</th>
+                          <th key={h} className="py-3 px-4 text-left text-sm font-bold text-muted-foreground uppercase tracking-wider">{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {histPaged.map((r) => (
                         <tr key={r.id} className="border-b border-border hover:bg-gray-50/80 transition-colors">
-                          <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">{formatDateDisplay(r.date)}</td>
-                          <td className="py-3 px-4 text-sm font-medium text-foreground">{r.userName ?? r.userEmail ?? "—"}</td>
-                          <td className="py-3 px-4 text-sm text-foreground">{r.itemName}</td>
-                          <td className="py-3 px-4"><TypeBadge category={r.category} /></td>
-                          <td className="py-3 px-4 text-sm text-foreground">
+                          <td className="py-4 px-4 text-xs font-bold text-muted-foreground whitespace-nowrap uppercase tracking-tighter">{formatDateDisplay(r.date)}</td>
+                          <td className="py-4 px-4 text-[15px] font-semibold text-foreground">{r.userName ?? r.userEmail ?? "—"}</td>
+                          <td className="py-4 px-4 text-[15px] text-foreground">{r.itemName}</td>
+                          <td className="py-4 px-4"><TypeBadge category={r.category} /></td>
+                          <td className="py-4 px-4 text-[15px] font-medium text-foreground">
                             {r.slots[0]}{r.slots.length > 1 && ` +${r.slots.length - 1}`}
                           </td>
-                          <td className="py-3 px-4 text-sm text-muted-foreground">{r.quantity ?? "—"}</td>
+                          <td className="py-4 px-4 text-[15px] text-muted-foreground font-mono">{r.quantity ?? "—"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -357,14 +359,14 @@ const AdminDashboard = () => {
                         disabled={histPage === 1}
                         className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
-                        <ChevronLeft className="w-4 h-4" />
+                        <CaretLeft weight="bold" className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setHistPage((p) => Math.min(histTotalPages, p + 1))}
                         disabled={histPage === histTotalPages}
                         className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
-                        <ChevronRight className="w-4 h-4" />
+                        <CaretRight weight="bold" className="w-4 h-4" />
                       </button>
                     </div>
                   </div>

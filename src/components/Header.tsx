@@ -1,5 +1,10 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, CalendarDays, LayoutDashboard, User } from "lucide-react";
+import {
+  SignOut,
+  CalendarBlank,
+  SquaresFour,
+  User,
+} from "@phosphor-icons/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import unnamedLogo from "@/assets/logo.png";
 
@@ -36,7 +41,7 @@ const Header = () => {
                   : "text-muted-foreground hover:text-foreground hover:bg-accent"
               }`}
             >
-              <CalendarDays className="w-4 h-4" />
+              <CalendarBlank weight="bold" className="w-4 h-4" />
               <span className="hidden sm:inline">Minhas Reservas</span>
             </button>
           )}
@@ -50,7 +55,7 @@ const Header = () => {
                   : "text-muted-foreground hover:text-foreground hover:bg-accent"
               }`}
             >
-              <LayoutDashboard className="w-4 h-4" />
+              <SquaresFour weight="bold" className="w-4 h-4" />
               <span className="hidden sm:inline">Painel Admin</span>
             </button>
           )}
@@ -59,7 +64,7 @@ const Header = () => {
 
           <div className="hidden sm:flex items-center gap-2 pl-1 pr-2">
             <div className="w-7 h-7 rounded-full bg-[#E8F0FE] flex items-center justify-center text-[#1A56DB] shrink-0">
-              <User className="w-4 h-4" />
+              <User weight="bold" className="w-4 h-4" />
             </div>
             <span className="text-sm text-foreground font-medium">{user?.name}</span>
           </div>
@@ -69,7 +74,7 @@ const Header = () => {
             title="Sair"
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg hover:bg-accent"
           >
-            <LogOut className="w-4 h-4" />
+            <SignOut weight="bold" className="w-4 h-4" />
             <span className="hidden sm:inline text-sm">Sair</span>
           </button>
         </nav>

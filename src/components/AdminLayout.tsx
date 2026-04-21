@@ -68,7 +68,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
       <aside
         className={`
-          w-[248px] shrink-0 flex flex-col bg-white border-r border-border
+          w-[270px] shrink-0 flex flex-col bg-white border-r border-border
           fixed md:static inset-y-0 left-0 z-50
           transition-transform duration-200 ease-in-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
@@ -79,42 +79,42 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           className="absolute top-3 right-3 md:hidden p-1.5 rounded-lg hover:bg-accent text-muted-foreground transition-colors"
           onClick={() => setSidebarOpen(false)}
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5" />
         </button>
 
         {/* Logo */}
-        <div className="px-6 pt-6 pb-5">
+        <div className="px-6 pt-7 pb-6">
           <button
             onClick={() => handleNavigate("/")}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity w-full"
+            className="flex items-center gap-3.5 hover:opacity-80 transition-opacity w-full"
           >
-            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <img src={unnamedLogo} alt="FSSS" className="h-6 w-6 object-contain" />
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <img src={unnamedLogo} alt="FSSS" className="h-7 w-7 object-contain" />
             </div>
             <div className="text-left">
-              <p className="text-[15px] font-bold text-foreground leading-none">FSSS</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5 leading-none">Sistema de Reservas</p>
+              <p className="text-base font-bold text-foreground leading-none">FSSS</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-none">Sistema de Reservas</p>
             </div>
           </button>
 
-          <div className="mt-5 h-px bg-border" />
+          <div className="mt-6 h-px bg-border" />
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 space-y-5 pb-3">
+        <nav className="flex-1 overflow-y-auto px-4 space-y-6 pb-4">
           {navSections.map((section, si) => (
             <div key={section.label} style={{ animationDelay: `${si * 60}ms` }} className="animate-fade-in">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 px-2 mb-1.5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 px-2 mb-2">
                 {section.label}
               </p>
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {section.items.map((item) => {
                   const active = location.pathname === item.path;
                   return (
                     <button
                       key={item.label}
                       onClick={() => handleNavigate(item.path)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-150 text-left group relative ${
+                      className={`w-full flex items-center gap-3.5 px-3 py-3 text-[15px] rounded-lg transition-all duration-150 text-left group relative ${
                         active
                           ? "bg-primary text-white font-semibold shadow-sm"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -122,7 +122,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                     >
                       <item.icon
                         weight="bold"
-                        className={`w-4 h-4 shrink-0 transition-transform duration-150 ${
+                        className={`w-5 h-5 shrink-0 transition-transform duration-150 ${
                           active ? "text-white" : "text-primary group-hover:scale-110"
                         }`}
                       />
@@ -136,21 +136,21 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         </nav>
 
         {/* User */}
-        <div className="px-3 py-3 border-t border-border">
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-accent transition-colors group">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-xs font-bold text-white shrink-0">
+        <div className="px-4 py-4 border-t border-border">
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors group">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-sm font-bold text-white shrink-0">
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-foreground truncate leading-tight">{user?.name}</p>
-              <p className="text-[10px] text-muted-foreground truncate leading-tight mt-0.5">{user?.email}</p>
+              <p className="text-sm font-semibold text-foreground truncate leading-tight">{user?.name}</p>
+              <p className="text-xs text-muted-foreground truncate leading-tight mt-1">{user?.email}</p>
             </div>
             <button
               onClick={logout}
               title="Sair"
-              className="p-1 text-muted-foreground/50 hover:text-destructive transition-colors shrink-0"
+              className="p-1.5 text-muted-foreground/50 hover:text-destructive transition-colors shrink-0"
             >
-              <SignOut weight="bold" className="w-4 h-4" />
+              <SignOut weight="bold" className="w-5 h-5" />
             </button>
           </div>
         </div>

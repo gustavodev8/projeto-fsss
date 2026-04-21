@@ -7,7 +7,7 @@ import { createReservationRpc } from "@/services/reservations";
 import { useReservations } from "@/contexts/ReservationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle2, PackagePlus, Check, Building2, Package, AlertCircle } from "lucide-react";
@@ -317,14 +317,12 @@ const ReservationPage = () => {
           Voltar
         </button>
 
-        <div className="grid lg:grid-cols-2 gap-6 items-start">
+        <div className="grid lg:grid-cols-2 gap-6 items-stretch">
 
           {/* ── LEFT: item info ── */}
-          <div className="space-y-5">
-
-            {/* Item card */}
-            <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
-              <div className="relative h-72 bg-muted overflow-hidden">
+          <div className="flex flex-col h-full">
+            <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm h-full flex flex-col">
+              <div className="relative h-72 bg-muted overflow-hidden shrink-0">
                 {imgError || !item.image ? (
                   <div className="w-full h-full flex items-center justify-center bg-muted">
                     {isInstrumento
@@ -342,19 +340,22 @@ const ReservationPage = () => {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               </div>
-              <div className="p-6">
+              <div className="p-6 flex-1 flex flex-col justify-center">
                 <h1 className="text-xl font-bold text-foreground">{item.name}</h1>
                 <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{item.description}</p>
               </div>
             </div>
-
           </div>
 
-          {/* ── RIGHT: date picker only ── */}
-          <div>
-            <div className="bg-card border border-border rounded-xl p-5">
-              <Label className="text-sm font-semibold mb-4 block">Escolha a data</Label>
-              <div className="flex justify-center">
+          {/* ── RIGHT: date picker ── */}
+          <div className="flex flex-col h-full">
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm h-full flex flex-col">
+              <div className="mb-6">
+                <Label className="text-base font-bold text-foreground block">Escolha a data</Label>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Selecione o dia para verificar a disponibilidade</p>
+              </div>
+              
+              <div className="flex-1 flex items-center justify-center bg-muted/30 rounded-lg border border-border/50 p-2">
                 <Calendar
                   mode="single"
                   selected={date}
@@ -367,7 +368,26 @@ const ReservationPage = () => {
                   }}
                   disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
                   locale={ptBR}
-                  className="pointer-events-auto"
+                  className="w-full"
+                  classNames={{
+                    months: "w-full",
+                    month: "w-full space-y-4",
+                    table: "w-full border-collapse",
+                    head_row: "flex w-full justify-between mb-2",
+                    head_cell: "text-muted-foreground rounded-md w-10 font-bold text-[10px] uppercase tracking-widest text-center",
+                    row: "flex w-full justify-between mt-2",
+                    cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
+                    day: cn(
+                      buttonVariants({ variant: "ghost" }),
+                      "h-10 w-10 sm:h-12 sm:w-12 p-0 font-medium aria-selected:opacity-100 hover:bg-primary/10 hover:text-primary transition-all rounded-lg"
+                    ),
+                    day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground shadow-md shadow-primary/20",
+                    day_today: "bg-accent text-accent-foreground font-bold",
+                    nav_button: cn(
+                      buttonVariants({ variant: "outline" }),
+                      "h-8 w-8 bg-background p-0 border-border hover:bg-muted transition-colors"
+                    ),
+                  }}
                 />
               </div>
             </div>
@@ -376,82 +396,96 @@ const ReservationPage = () => {
 
         {/* ── FULL WIDTH: time slots ── */}
         {date && allSlots.length > 0 && (
-          <div className="bg-card border border-border rounded-xl p-5 mt-6">
-            <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
-              <Label className="text-sm font-semibold uppercase tracking-wider text-foreground">
-                Horários disponíveis
-              </Label>
-              {selectedSlots.length > 0 && (
-                <span className="text-xs text-primary font-semibold bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-lg">
-                  {selectedSlots.length} selecionado{selectedSlots.length > 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
+          <div className="bg-card border border-border rounded-xl p-8 mt-6 shadow-sm">
+            <div className="max-w-4xl">
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-foreground">Horários Disponíveis</h2>
+                <p className="text-xs text-muted-foreground mt-1">Selecione os períodos desejados para sua reserva</p>
+              </div>
 
-            <div className="mb-5">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
-                Manhã
-              </p>
-              {groupByBreaks(morningSlots).map((group, gi) => (
-                <div key={gi}>
-                  {gi > 0 && (
-                    <div className="flex items-center gap-2 my-2">
-                      <div className="flex-1 h-px bg-border" />
-                      <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">Intervalo</span>
-                      <div className="flex-1 h-px bg-border" />
-                    </div>
-                  )}
-                  <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
-                    {group.map((slot) => (
-                      <SlotButton key={slot.label} slot={slot} />
+              <div className="grid md:grid-cols-2 gap-x-12 gap-y-8 relative">
+                {/* Vertical Divider (Desktop) */}
+                <div className="hidden md:block absolute left-1/2 top-2 bottom-2 w-px bg-border/40 -translate-x-1/2" />
+
+                {/* Turno Manhã */}
+                <div className="space-y-5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">Turno Manhã</h3>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {groupByBreaks(morningSlots).map((group, gi) => (
+                      <div key={gi} className="space-y-2">
+                        {gi > 0 && (
+                          <div className="flex items-center gap-3 py-1">
+                            <div className="h-[1px] flex-1 bg-border/40" />
+                            <span className="text-[9px] text-muted-foreground/60 font-bold uppercase tracking-widest">Intervalo</span>
+                            <div className="h-[1px] flex-1 bg-border/40" />
+                          </div>
+                        )}
+                        <div className="grid grid-cols-2 gap-2">
+                          {group.map((slot) => (
+                            <SlotButton key={slot.label} slot={slot} />
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="flex items-center gap-2 my-4">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">
-                Almoço · 12:20 – 13:00
-              </span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
+                {/* Turno Tarde */}
+                <div className="space-y-5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">Turno Tarde</h3>
+                  </div>
 
-            <div>
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">
-                Tarde
-              </p>
-              {groupByBreaks(afternoonSlots).map((group, gi) => (
-                <div key={gi}>
-                  {gi > 0 && (
-                    <div className="flex items-center gap-2 my-2">
-                      <div className="flex-1 h-px bg-border" />
-                      <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider px-1">Intervalo</span>
-                      <div className="flex-1 h-px bg-border" />
-                    </div>
-                  )}
-                  <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
-                    {group.map((slot) => (
-                      <SlotButton key={slot.label} slot={slot} />
+                  <div className="space-y-4">
+                    {groupByBreaks(afternoonSlots).map((group, gi) => (
+                      <div key={gi} className="space-y-2">
+                        {gi > 0 && (
+                          <div className="flex items-center gap-3 py-1">
+                            <div className="h-[1px] flex-1 bg-border/40" />
+                            <span className="text-[9px] text-muted-foreground/60 font-bold uppercase tracking-widest">Intervalo</span>
+                            <div className="h-[1px] flex-1 bg-border/40" />
+                          </div>
+                        )}
+                        <div className="grid grid-cols-2 gap-2">
+                          {group.map((slot) => (
+                            <SlotButton key={slot.label} slot={slot} />
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border">
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm border border-border bg-card" />
-                <span className="text-[11px] text-muted-foreground">Disponível</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm bg-primary" />
-                <span className="text-[11px] text-muted-foreground">Selecionado</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm bg-muted/60" />
-                <span className="text-[11px] text-muted-foreground">Indisponível</span>
+              {/* Legend & Selection Count */}
+              <div className="mt-10 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="flex flex-wrap items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full border border-border bg-card shadow-inner" />
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Disponível</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary" />
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Selecionado</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-muted/60" />
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Ocupado</span>
+                  </div>
+                </div>
+
+                {selectedSlots.length > 0 && (
+                  <div className="bg-primary/5 border border-primary/10 px-4 py-2 rounded-lg">
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
+                      {selectedSlots.length} {selectedSlots.length > 1 ? "Horários Selecionados" : "Horário Selecionado"}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
