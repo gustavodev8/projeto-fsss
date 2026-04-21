@@ -278,9 +278,9 @@ const ProfessorHub = () => {
             </div>
 
             {/* ── Right: Day detail ── */}
-            <div className="p-6 flex flex-col min-h-[340px]">
+            <div className="p-6 flex flex-col h-[420px] lg:h-auto">
               {/* Detail header */}
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-4 shrink-0">
                 <CalendarBlank weight="bold" className="w-4 h-4 text-primary shrink-0" />
                 <span className="text-base font-semibold text-foreground">
                   {selectedDayFmt}
@@ -299,7 +299,7 @@ const ProfessorHub = () => {
                   <p className="text-xs text-muted-foreground/60">O espaço está totalmente disponível</p>
                 </div>
               ) : (
-                <div className="space-y-2 overflow-y-auto flex-1">
+                <div className="space-y-2 overflow-y-auto flex-1 pr-1 custom-scrollbar max-h-[320px]">
                   {selectedDayRes.map((r) => {
                     const isOwn = r.userEmail === user?.email;
                     const initials = r.userName
@@ -312,7 +312,7 @@ const ProfessorHub = () => {
                     return (
                       <div
                         key={r.id}
-                        className={`rounded-xl border p-3.5 transition-colors ${
+                        className={`rounded-xl border p-3.5 transition-colors shrink-0 ${
                           isOwn
                             ? "border-primary/25 bg-primary/5"
                             : "border-border bg-[#FAFAFA]"
