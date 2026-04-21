@@ -276,7 +276,7 @@ const AdminHub = () => {
                 className="bg-white border border-border rounded-xl p-6 text-left hover:border-primary/30 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 group relative"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
-                <ArrowRight className="w-4 h-4 text-muted-foreground/30 absolute top-5 right-5 group-hover:text-primary/50 group-hover:translate-x-0.5 transition-all duration-150" />
+                <ArrowRight className="w-4 h-4 text-muted-foreground/30 absolute top-6 right-6 group-hover:text-primary/50 group-hover:translate-x-0.5 transition-all duration-150" />
                 <div className={`w-10 h-10 rounded-full ${card.iconBg} flex items-center justify-center mb-4`}>
                   {card.icon}
                 </div>

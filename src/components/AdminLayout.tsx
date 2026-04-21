@@ -83,7 +83,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         </button>
 
         {/* Logo */}
-        <div className="px-5 pt-6 pb-5">
+        <div className="px-6 pt-6 pb-5">
           <button
             onClick={() => handleNavigate("/")}
             className="flex items-center gap-3 hover:opacity-80 transition-opacity w-full"
@@ -134,7 +134,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
         {/* User */}
         <div className="px-3 py-3 border-t border-border">
-          <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-accent transition-colors group">
+          <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-accent transition-colors group">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-xs font-bold text-white shrink-0">
               {initials}
             </div>
