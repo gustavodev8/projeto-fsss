@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
@@ -15,7 +16,19 @@ import {
   Buildings,
   Cube,
   ArrowRight as PhArrowRight,
+  CaretLeft,
+  CaretRight,
 } from "@phosphor-icons/react";
+
+const MONTH_NAMES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+const DAY_NAMES = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+
+function toISO(year: number, month: number, day: number) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
 
 function weekRange(iso: string) {
   const d = new Date(iso + "T12:00:00");
@@ -57,9 +70,39 @@ const ProfessorHub = () => {
   const { reservations } = useReservations();
 
   const today = new Date().toISOString().split("T")[0];
+
+  // Calendar state
+  const nowDate = new Date();
+  const [calYear, setCalYear] = useState(nowDate.getFullYear());
+  const [calMonth, setCalMonth] = useState(nowDate.getMonth());
+  const [selectedDay, setSelectedDay] = useState<string>(today);
+
   const myUpcoming = reservations.filter(
     (r) => r.userEmail === user?.email && r.date >= today
   );
+
+  // Build date → reservations index
+  const resByDate: Record<string, typeof reservations> = {};
+  for (const r of reservations) {
+    (resByDate[r.date] ??= []).push(r);
+  }
+
+  // Calendar math
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const rawFirstDow = new Date(calYear, calMonth, 1).getDay();
+  const startOffset = rawFirstDow === 0 ? 6 : rawFirstDow - 1; // Monday = 0
+
+  const prevMonth = () => {
+    if (calMonth === 0) { setCalYear((y) => y - 1); setCalMonth(11); }
+    else setCalMonth((m) => m - 1);
+  };
+  const nextMonth = () => {
+    if (calMonth === 11) { setCalYear((y) => y + 1); setCalMonth(0); }
+    else setCalMonth((m) => m + 1);
+  };
+
+  const selectedDayRes = resByDate[selectedDay] ?? [];
+  const selectedDayFmt = selectedDay.split("-").reverse().join("/");
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -72,6 +115,8 @@ const ProfessorHub = () => {
     <div className="min-h-screen bg-[#F3F4F6]">
       <Header />
       <main className="max-w-[1200px] mx-auto px-6 py-10">
+
+        {/* Greeting */}
         <div className="mb-6">
           <p className="text-sm text-muted-foreground mb-0.5">
             {greeting()},{" "}
@@ -83,13 +128,14 @@ const ProfessorHub = () => {
           </p>
         </div>
 
+        {/* Action cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           {professorCategories.map((cat) => (
             <button
               key={cat.key}
               onClick={() => navigate(cat.path)}
               className="bg-white border border-border rounded-xl p-6 min-h-[140px] text-left transition-all duration-[180ms] hover:-translate-y-1 shadow-[0_2px_12px_rgba(0,0,0,0.07)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.10)] group cursor-pointer"
-              style={{ borderLeftColor: '#1A56DB', borderLeftWidth: '4px' }}
+              style={{ borderLeftColor: "#1A56DB", borderLeftWidth: "4px" }}
             >
               <div className="w-10 h-10 rounded-full bg-[#E8F0FE] flex items-center justify-center mb-4">
                 <cat.icon className="w-5 h-5 text-[#1A56DB]" strokeWidth={2.5} />
@@ -100,6 +146,179 @@ const ProfessorHub = () => {
           ))}
         </div>
 
+        {/* Calendar card */}
+        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.05)] mb-6">
+          <div className="grid lg:grid-cols-[1fr_1fr] divide-y lg:divide-y-0 lg:divide-x divide-border">
+
+            {/* ── Left: Monthly calendar ── */}
+            <div className="p-6">
+              {/* Month header */}
+              <div className="flex items-center justify-between mb-5">
+                <span className="text-base font-semibold text-foreground">
+                  {MONTH_NAMES[calMonth]} {calYear}
+                </span>
+                <div className="flex items-center gap-0.5">
+                  <button
+                    onClick={prevMonth}
+                    className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <CaretLeft weight="bold" className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={nextMonth}
+                    className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <CaretRight weight="bold" className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Day-of-week headers */}
+              <div className="grid grid-cols-7 mb-1">
+                {DAY_NAMES.map((d) => (
+                  <div
+                    key={d}
+                    className="text-center text-[11px] font-semibold text-muted-foreground/60 py-1 select-none"
+                  >
+                    {d}
+                  </div>
+                ))}
+              </div>
+
+              {/* Day cells */}
+              <div className="grid grid-cols-7 gap-y-0.5">
+                {Array.from({ length: startOffset }, (_, i) => (
+                  <div key={`blank-${i}`} />
+                ))}
+                {Array.from({ length: daysInMonth }, (_, i) => {
+                  const day = i + 1;
+                  const iso = toISO(calYear, calMonth, day);
+                  const hasRes = (resByDate[iso]?.length ?? 0) > 0;
+                  const isToday = iso === today;
+                  const isSelected = iso === selectedDay;
+                  const colIndex = (startOffset + i) % 7;
+                  const isWeekend = colIndex >= 5;
+
+                  return (
+                    <button
+                      key={day}
+                      onClick={() => setSelectedDay(iso)}
+                      className={`
+                        relative flex flex-col items-center justify-center h-9 rounded-lg text-[13px] font-medium transition-all duration-150 select-none
+                        ${isSelected
+                          ? "bg-primary text-white shadow-sm"
+                          : isToday
+                          ? "ring-2 ring-primary/40 text-primary font-semibold"
+                          : isWeekend
+                          ? "text-muted-foreground/40 hover:bg-accent"
+                          : "text-foreground hover:bg-accent"}
+                      `}
+                    >
+                      {day}
+                      {hasRes && (
+                        <span
+                          className={`absolute bottom-1 w-1 h-1 rounded-full ${
+                            isSelected ? "bg-white/70" : "bg-primary"
+                          }`}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="flex items-center gap-4 mt-5 pt-4 border-t border-border">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+                  <span className="text-[11px] text-muted-foreground">Possui reservas</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded-md ring-2 ring-primary/40 inline-block" />
+                  <span className="text-[11px] text-muted-foreground">Hoje</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Right: Day detail ── */}
+            <div className="p-6 flex flex-col min-h-[340px]">
+              {/* Detail header */}
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarBlank weight="bold" className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-base font-semibold text-foreground">
+                  {selectedDayFmt}
+                </span>
+                {selectedDayRes.length > 0 && (
+                  <span className="ml-auto text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
+                    {selectedDayRes.length} reserva{selectedDayRes.length > 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
+
+              {selectedDayRes.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center py-6 gap-2">
+                  <CalendarBlank weight="thin" className="w-10 h-10 text-muted-foreground/25" />
+                  <p className="text-sm font-medium text-muted-foreground">Nenhuma reserva neste dia</p>
+                  <p className="text-xs text-muted-foreground/60">O espaço está totalmente disponível</p>
+                </div>
+              ) : (
+                <div className="space-y-2 overflow-y-auto flex-1">
+                  {selectedDayRes.map((r) => {
+                    const isOwn = r.userEmail === user?.email;
+                    const initials = r.userName
+                      ?.split(" ")
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .map((w) => w[0].toUpperCase())
+                      .join("") ?? "?";
+
+                    return (
+                      <div
+                        key={r.id}
+                        className={`rounded-xl border p-3.5 transition-colors ${
+                          isOwn
+                            ? "border-primary/25 bg-primary/5"
+                            : "border-border bg-[#FAFAFA]"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2.5">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-foreground leading-tight truncate">
+                              {r.itemName}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {r.slots[0]}
+                              {r.slots.length > 1 && (
+                                <span className="text-muted-foreground/60">
+                                  {" "}+{r.slots.length - 1} horário{r.slots.length > 2 ? "s" : ""}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          {isOwn && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/15 text-primary font-bold shrink-0">
+                              Você
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/70 to-primary flex items-center justify-center text-[9px] font-bold text-white shrink-0">
+                            {initials}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {r.userName ?? r.userEmail}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Upcoming reservations */}
         {myUpcoming.length > 0 && (
           <div className="bg-white border border-border rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.05)]">
             <div className="border-b border-border px-6 py-4 flex items-center justify-between">
