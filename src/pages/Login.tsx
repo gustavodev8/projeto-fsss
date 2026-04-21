@@ -27,8 +27,8 @@ const Login = () => {
       {/* ── Painel esquerdo — identidade visual (desktop) ── */}
       <div className="hidden lg:flex w-[44%] bg-primary flex-col justify-between p-14 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center">
-            <img src={unnamedLogo} alt="Logo FSSS" className="h-7 w-7 object-contain brightness-0 invert" />
+          <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-sm">
+            <img src={unnamedLogo} alt="Logo FSSS" className="h-9 w-9 object-contain" />
           </div>
           <div>
             <p className="text-base font-bold text-white leading-tight">FSSS</p>
