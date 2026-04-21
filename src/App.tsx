@@ -10,8 +10,7 @@ import Home from "./pages/Home";
 import Listing from "./pages/Listing";
 import ReservationPage from "./pages/ReservationPage";
 import MyReservations from "./pages/MyReservations";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminManage from "./pages/AdminManage";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,18 +42,11 @@ const AppRoutes = () => (
           path="/admin"
           element={
             <AdminGate>
-              <AdminDashboard />
+              <AdminPanel />
             </AdminGate>
           }
         />
-        <Route
-          path="/gerenciar"
-          element={
-            <AdminGate>
-              <AdminManage />
-            </AdminGate>
-          }
-        />
+        <Route path="/gerenciar" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ReservationProvider>

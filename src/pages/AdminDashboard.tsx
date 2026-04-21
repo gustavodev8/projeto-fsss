@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useReservations } from "@/contexts/ReservationContext";
 import { generateDailyReportPDF } from "@/lib/pdfUtils";
 import { listProfessors } from "@/services/users";
-import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -146,8 +145,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <AdminLayout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {/* Título */}
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-primary/70 mb-1.5">
@@ -375,8 +373,7 @@ const AdminDashboard = () => {
             )}
           </div>
         )}
-      </div>
-    </AdminLayout>
+    </div>
   );
 };
 

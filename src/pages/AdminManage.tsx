@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import AdminLayout from "@/components/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -223,8 +222,7 @@ const AdminManage = () => {
   const getInitial = (name: string) => name.trim()[0]?.toUpperCase() ?? "?";
 
   return (
-    <AdminLayout>
-      <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8">
         {/* Título */}
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.15em] text-primary/70 mb-1.5">
@@ -676,8 +674,7 @@ const AdminManage = () => {
             </div>
           </div>
         </div>
-      </div>
-    </AdminLayout>
+    </div>
   );
 };
 

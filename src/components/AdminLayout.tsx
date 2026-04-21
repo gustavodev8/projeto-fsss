@@ -36,7 +36,13 @@ const navSections = [
   },
 ] as const;
 
-const AdminLayout = ({ children }: { children: React.ReactNode }) => {
+interface AdminLayoutProps {
+  children: React.ReactNode;
+  activeSection: "dashboard" | "gerenciar";
+  onSectionChange: (section: "dashboard" | "gerenciar") => void;
+}
+
+const AdminLayout = ({ children, activeSection, onSectionChange }: AdminLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -51,7 +57,13 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       .join("") ?? "AD";
 
   const handleNavigate = (path: string) => {
-    navigate(path);
+    if (path === "/admin") {
+      onSectionChange("dashboard");
+    } else if (path === "/gerenciar") {
+      onSectionChange("gerenciar");
+    } else {
+      navigate(path);
+    }
     setSidebarOpen(false);
   };
 
@@ -109,7 +121,12 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               </p>
               <div className="space-y-1">
                 {section.items.map((item) => {
-                  const active = location.pathname === item.path;
+                  const active =
+                    item.path === "/admin"
+                      ? activeSection === "dashboard"
+                      : item.path === "/gerenciar"
+                      ? activeSection === "gerenciar"
+                      : location.pathname === item.path;
                   return (
                     <button
                       key={item.label}
