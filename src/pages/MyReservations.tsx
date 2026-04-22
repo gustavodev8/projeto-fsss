@@ -37,16 +37,25 @@ const MyReservations = () => {
       const g = groupMap.get(r.groupId)!;
       if (r.category === "espacos") g.space = r;
       else g.instruments.push(r);
+      
       if (!seenGroups.has(r.groupId)) {
         seenGroups.add(r.groupId);
-        result.push({ type: "group", groupId: r.groupId, space: g.space!, instruments: g.instruments });
+        result.push({ type: "group", groupId: r.groupId, space: {} as Reservation, instruments: [] });
       }
     });
 
-    return result;
+    // Preenche os dados dos grupos corretamente
+    return result.map(item => {
+      if (item.type === "group") {
+        const g = groupMap.get(item.groupId)!;
+        return { ...item, space: g.space || g.instruments[0], instruments: g.instruments };
+      }
+      return item;
+    });
   }, [displayed]);
 
   const formatDate = (d: string) => {
+    if (!d || !d.includes("-")) return d;
     const [y, m, dNum] = d.split("-");
     return `${dNum}/${m}/${y}`;
   };
@@ -77,7 +86,7 @@ const MyReservations = () => {
                 onClick={() => setTab(t)}
                 className={`px-5 py-2 text-sm font-bold rounded-lg transition-all ${
                   tab === t
-                    ? "bg-white text-primary shadow-sm"
+                    ? "bg-primary text-white shadow-sm"
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
@@ -97,14 +106,16 @@ const MyReservations = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5">
-            {displayItems.map((item) => {
+            {displayItems.map((item, idx) => {
               const isGroup = item.type === "group";
               const mainRes = isGroup ? item.space : item.reservation;
               const instruments = isGroup ? item.instruments : [];
 
+              if (!mainRes || !mainRes.itemName) return null;
+
               return (
                 <div 
-                  key={isGroup ? item.groupId : mainRes.id} 
+                  key={isGroup ? `group-${item.groupId}` : `single-${mainRes.id}-${idx}`} 
                   className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-200 overflow-hidden group"
                 >
                   <div className="p-6">
@@ -143,7 +154,7 @@ const MyReservations = () => {
                             </div>
                             <div>
                               <p className="text-[9px] font-black uppercase tracking-tighter text-slate-400">Horários</p>
-                              <p className="text-base font-bold text-slate-800">{mainRes.slots.join(" · ")}</p>
+                              <p className="text-base font-bold text-slate-800">{mainRes.slots?.join(" · ") || "—"}</p>
                             </div>
                           </div>
 
