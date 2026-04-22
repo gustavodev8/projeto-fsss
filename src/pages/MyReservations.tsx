@@ -5,7 +5,8 @@ import { useReservations } from "@/contexts/ReservationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Reservation } from "@/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CalendarX, Package, Clock, Calendar, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CalendarX, Package, Clock, Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type DisplayItem =
   | { type: "single"; reservation: Reservation }
@@ -16,8 +17,9 @@ const MyReservations = () => {
   const { reservations, cancelReservation, cancelGroup } = useReservations();
   const { user } = useAuth();
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
-  const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
+  const today = new Date().toLocaleDateString("en-CA");
   const myReservations = reservations.filter((r) => r.userEmail === user?.email);
   const upcoming = myReservations.filter((r) => r.date >= today);
   const past = myReservations.filter((r) => r.date < today);
@@ -55,6 +57,10 @@ const MyReservations = () => {
     }).filter(Boolean) as DisplayItem[];
   }, [displayed]);
 
+  const toggleGroup = (id: string) => {
+    setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   const formatDate = (d: string) => {
     if (!d || !d.includes("-")) return d || "—";
     const [y, m, dNum] = d.split("-");
@@ -62,10 +68,10 @@ const MyReservations = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header />
 
-      <main className="max-w-3xl mx-auto px-6 py-10">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-10">
         <button
           onClick={() => navigate("/")}
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-primary mb-6 transition-all group"
@@ -74,14 +80,18 @@ const MyReservations = () => {
           Voltar
         </button>
 
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Minhas Reservas</h1>
-          <div className="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-10">
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Minhas Reservas</h1>
+            <p className="text-slate-500 font-medium text-sm sm:text-base">Gestão de agendamentos institucionais.</p>
+          </div>
+          
+          <div className="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200 shadow-sm w-full sm:w-auto">
             {(["upcoming", "past"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`px-5 py-2 text-sm font-bold rounded-lg transition-all ${
+                className={`flex-1 sm:px-6 py-2 text-sm font-bold rounded-lg transition-all ${
                   tab === t ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
@@ -91,9 +101,9 @@ const MyReservations = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           {displayItems.length === 0 ? (
-            <div className="bg-white border-2 border-dashed border-slate-200 rounded-2xl py-20 text-center">
+            <div className="bg-white border-2 border-dashed border-slate-200 rounded-[2rem] py-20 text-center shadow-sm">
               <CalendarX className="w-10 h-10 text-slate-200 mx-auto mb-3" />
               <p className="text-slate-500 font-bold">Nenhuma reserva encontrada</p>
             </div>
@@ -102,70 +112,88 @@ const MyReservations = () => {
               const isGroup = item.type === "group";
               const mainRes = isGroup ? item.space : item.reservation;
               const instruments = isGroup ? item.instruments : [];
+              const groupId = isGroup ? item.groupId : `single-${mainRes.id}-${idx}`;
+              const isOpen = openGroups[groupId] || false;
+
               if (!mainRes || !mainRes.itemName) return null;
 
               return (
-                <div key={isGroup ? `group-${item.groupId}` : `single-${mainRes.id}-${idx}`} 
-                     className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 hover:shadow-md hover:border-primary/20 transition-all group">
+                <div key={groupId} 
+                     className="bg-white border border-slate-200 rounded-[1.5rem] shadow-sm p-5 sm:p-6 hover:shadow-lg hover:border-primary/20 transition-all flex flex-col gap-4 overflow-visible min-h-fit">
                   
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    {/* Info Central */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h2 className="text-lg font-bold text-slate-900 truncate group-hover:text-primary transition-colors">
-                          {mainRes.itemName}
-                        </h2>
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border shrink-0 ${
-                          tab === "upcoming" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200"
-                        }`}>
-                          {tab === "upcoming" ? "Confirmada" : "Concluída"}
-                        </span>
+                  {/* Título e Cancelar */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <h2 className="text-lg sm:text-xl font-bold text-slate-900 truncate">
+                        {mainRes.itemName}
+                      </h2>
+                      
+                      {/* Dados: Data e Hora */}
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-slate-500">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-primary/70" />
+                          <span className="text-xs sm:text-sm font-bold">{formatDate(mainRes.date)}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-primary/70" />
+                          <span className="text-xs sm:text-sm font-bold">{mainRes.slots?.join(" · ")}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {tab === "upcoming" && (
+                      <Button
+                        variant="ghost"
+                        className="text-rose-500 hover:bg-rose-50 hover:text-rose-600 font-bold text-[10px] uppercase tracking-widest h-9 px-3 sm:px-4 rounded-xl border border-rose-100/30 transition-all shrink-0"
+                        onClick={() => isGroup ? cancelGroup(item.groupId) : cancelReservation(mainRes.id)}
+                      >
+                        Cancelar
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Área Colapsável para Instrumentos */}
+                  {isGroup && instruments.length > 0 && (
+                    <Collapsible open={isOpen} onOpenChange={() => toggleGroup(groupId)} className="w-full">
+                      <div className="flex items-center justify-between border-t border-slate-50 pt-3">
+                         <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5">
+                               {isOpen ? <><ChevronUp className="w-3 h-3 mr-1" /> Ocultar itens</> : <><ChevronDown className="w-3 h-3 mr-1" /> + {instruments.length} itens inclusos</>}
+                            </Button>
+                         </CollapsibleTrigger>
+                         {!isOpen && (
+                            <div className="flex -space-x-2 overflow-hidden">
+                               {instruments.slice(0, 3).map((inst, i) => (
+                                  <div key={i} className="inline-block h-6 w-6 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center shadow-sm">
+                                     <Package className="w-3 h-3 text-slate-400" />
+                                  </div>
+                               ))}
+                            </div>
+                         )}
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
-                        <div className="flex items-center gap-1.5 text-slate-500">
-                          <Calendar className="w-3.5 h-3.5 text-primary/60" />
-                          <span className="text-sm font-semibold">{formatDate(mainRes.date)}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-slate-500">
-                          <Clock className="w-3.5 h-3.5 text-primary/60" />
-                          <span className="text-sm font-semibold">{mainRes.slots?.join(" · ")}</span>
-                        </div>
-                        {!isGroup && mainRes.quantity && (
-                          <div className="flex items-center gap-1.5 text-slate-500">
-                            <Package className="w-3.5 h-3.5 text-primary/60" />
-                            <span className="text-sm font-bold text-slate-700">{mainRes.quantity} un.</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Lista Simples de Equipamentos (se houver) */}
-                      {isGroup && instruments.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-50">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1">Incluso:</span>
+                      <CollapsibleContent className="space-y-3 pt-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Equipamentos da reserva:</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {instruments.map(inst => (
-                            <div key={inst.id} className="flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">
-                              <span className="text-[11px] font-bold text-slate-600">{inst.itemName}</span>
-                              <span className="text-[10px] font-black text-primary/80">{inst.quantity}</span>
+                            <div key={inst.id} className="flex items-center justify-between bg-slate-50 px-3 py-2 rounded-xl border border-slate-200/60">
+                              <span className="text-xs font-bold text-slate-700">{inst.itemName}</span>
+                              <span className="text-[10px] font-black text-primary bg-white px-2 py-0.5 rounded-md border border-slate-200">{inst.quantity} un.</span>
                             </div>
                           ))}
                         </div>
-                      )}
-                    </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
 
-                    {/* Botão de Ação */}
-                    {tab === "upcoming" && (
-                      <div className="shrink-0">
-                        <Button
-                          variant="ghost"
-                          className="w-full md:w-auto text-rose-500 hover:bg-rose-50 hover:text-rose-600 font-bold text-[11px] uppercase tracking-widest h-9 px-5 rounded-xl border border-transparent hover:border-rose-100 transition-all"
-                          onClick={() => isGroup ? cancelGroup(item.groupId) : cancelReservation(mainRes.id)}
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                  {/* Quantidade única (instrumentos avulsos) */}
+                  {!isGroup && mainRes.quantity && (
+                    <div className="flex items-center gap-2 pt-3 border-t border-slate-50">
+                        <Package className="w-3.5 h-3.5 text-primary/60" />
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Quantidade:</span>
+                        <span className="text-sm font-black text-slate-900">{mainRes.quantity} un.</span>
+                    </div>
+                  )}
                 </div>
               );
             })
