@@ -26,25 +26,27 @@ function formatDateDisplay(dateStr: string) {
 }
 
 function isoToday() {
-  return new Date().toISOString().split("T")[0];
+  return format(new Date(), "yyyy-MM-dd");
 }
 
 function addDays(iso: string, n: number) {
-  const d = new Date(iso + "T12:00:00");
-  d.setDate(d.getDate() + n);
-  return d.toISOString().split("T")[0];
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  date.setDate(date.getDate() + n);
+  return format(date, "yyyy-MM-dd");
 }
 
 function weekRange(iso: string) {
-  const d = new Date(iso + "T12:00:00");
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const mon = new Date(d.setDate(diff));
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(y, m - 1, diff);
   const sun = new Date(mon);
   sun.setDate(mon.getDate() + 6);
   return {
-    start: mon.toISOString().split("T")[0],
-    end: sun.toISOString().split("T")[0],
+    start: format(mon, "yyyy-MM-dd"),
+    end: format(sun, "yyyy-MM-dd"),
   };
 }
 
@@ -217,12 +219,16 @@ const AdminDashboard = () => {
                     <CaretRight weight="bold" className="w-4 h-4" />
                   </button>
                 </div>
-                {selectedDate !== sessionToday && (
-                  <button
-                    onClick={() => setSelectedDate(sessionToday)}
-                    className="text-xs text-primary hover:underline font-medium"
-                  >
+                {selectedDate === today ? (
+                  <span className="text-[10px] font-bold text-primary uppercase bg-primary/10 px-2 py-1 rounded-md border border-primary/20">
                     Hoje
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setSelectedDate(today)}
+                    className="text-xs text-primary hover:underline font-bold"
+                  >
+                    Ir para hoje
                   </button>
                 )}
                 <Button

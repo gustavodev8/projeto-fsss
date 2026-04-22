@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
@@ -6,7 +6,7 @@ import AdminLayout from "@/components/AdminLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useReservations } from "@/contexts/ReservationContext";
 import { listProfessors } from "@/services/users";
-import { fetchAllItems } from "@/services/items";
+import { fetchAllItems, fetchHorarios } from "@/services/items";
 import { DoorOpen, Package, CalendarDays } from "lucide-react";
 import {
   CalendarBlank,
@@ -31,15 +31,16 @@ function toISO(year: number, month: number, day: number) {
 }
 
 function weekRange(iso: string) {
-  const d = new Date(iso + "T12:00:00");
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const mon = new Date(d.setDate(diff));
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(y, m - 1, diff);
   const sun = new Date(mon);
   sun.setDate(mon.getDate() + 6);
   return {
-    start: mon.toISOString().split("T")[0],
-    end: sun.toISOString().split("T")[0],
+    start: mon.toLocaleDateString("en-CA"),
+    end: sun.toLocaleDateString("en-CA"),
   };
 }
 
@@ -69,7 +70,7 @@ const ProfessorHub = () => {
   const { user } = useAuth();
   const { reservations } = useReservations();
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA");
 
   // Calendar state
   const nowDate = new Date();
@@ -101,7 +102,23 @@ const ProfessorHub = () => {
     else setCalMonth((m) => m + 1);
   };
 
-  const selectedDayRes = resByDate[selectedDay] ?? [];
+  const { data: allSlots = [] } = useQuery({
+    queryKey: ["horarios"],
+    queryFn: fetchHorarios,
+  });
+
+  const selectedDayRes = useMemo(() => {
+    const list = resByDate[selectedDay] ?? [];
+    if (allSlots.length === 0) return list;
+    
+    // Sort by the 'ordem' (using index in allSlots) of the first slot
+    return [...list].sort((a, b) => {
+      const idxA = allSlots.findIndex(s => s.label === a.slots[0]);
+      const idxB = allSlots.findIndex(s => s.label === b.slots[0]);
+      return idxA - idxB;
+    });
+  }, [resByDate, selectedDay, allSlots]);
+
   const selectedDayFmt = selectedDay.split("-").reverse().join("/");
 
   const greeting = () => {
@@ -330,6 +347,11 @@ const ProfessorHub = () => {
                                   {" "}+{r.slots.length - 1} horário{r.slots.length > 2 ? "s" : ""}
                                 </span>
                               )}
+                              {r.category === "instrumentos" && r.quantity && (
+                                <span className="font-bold text-primary/70 ml-1.5">
+                                  · {r.quantity} un.
+                                </span>
+                              )}
                             </p>
                           </div>
                           {isOwn && (
@@ -377,7 +399,7 @@ const AdminHub = () => {
     queryFn: fetchAllItems,
   });
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA");
   const { start: weekStart, end: weekEnd } = weekRange(today);
   const weekRes = reservations.filter((r) => r.date >= weekStart && r.date <= weekEnd);
   const todayRes = reservations.filter((r) => r.date === today);

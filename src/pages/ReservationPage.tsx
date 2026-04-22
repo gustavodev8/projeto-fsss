@@ -585,27 +585,39 @@ const ReservationPage = () => {
       </main>
 
       {/* Sticky confirm bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-6 py-3 z-10">
-        <div className="max-w-[1100px] mx-auto space-y-2">
-          {submitError && (
-            <div className="flex items-start gap-2 text-xs text-destructive bg-destructive/8 border border-destructive/20 rounded-lg px-3 py-2">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              <span>{submitError}</span>
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-border px-6 py-4 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <div className="max-w-[1100px] mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-col items-center sm:items-start">
+              {submitError ? (
+                <div className="flex items-center gap-2 text-destructive font-bold text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  {submitError}
+                </div>
+              ) : !date ? (
+                <p className="text-sm font-medium text-muted-foreground">Selecione uma data para continuar</p>
+              ) : selectedSlots.length === 0 ? (
+                <p className="text-sm font-medium text-muted-foreground">Selecione pelo menos um horário</p>
+              ) : (
+                <div className="flex flex-col items-center sm:items-start">
+                  <p className="text-sm font-bold text-foreground">
+                    {format(date, "dd 'de' MMMM", { locale: ptBR })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedSlots.length} {selectedSlots.length === 1 ? "horário selecionado" : "horários selecionados"}
+                  </p>
+                </div>
+              )}
             </div>
-          )}
-          {canConfirm && !submitError && (
-            <p className="text-xs text-muted-foreground text-center">
-              {format(date!, "dd/MM/yyyy")} · {selectedSlots.length} horário
-              {selectedSlots.length > 1 ? "s" : ""}
-              {isInstrumento && ` · ${quantity} unidade${quantity > 1 ? "s" : ""}`}
-              {!isInstrumento &&
-                selectedInstruments.length > 0 &&
-                ` · ${selectedInstruments.length} equipamento${selectedInstruments.length > 1 ? "s" : ""}`}
-            </p>
-          )}
-          <Button onClick={handleConfirm} disabled={!canConfirm} className="w-full" size="lg">
-            {submitting ? "Salvando..." : "Confirmar Reserva"}
-          </Button>
+
+            <Button 
+              onClick={handleConfirm} 
+              disabled={!canConfirm} 
+              className="w-full sm:w-64 h-12 text-base font-bold shadow-lg shadow-primary/20"
+            >
+              {submitting ? "Processando..." : "Confirmar Reserva"}
+            </Button>
+          </div>
         </div>
       </div>
 
