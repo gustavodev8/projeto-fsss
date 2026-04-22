@@ -61,6 +61,8 @@ const AdminLayout = ({ children, activeSection, onSectionChange }: AdminLayoutPr
       onSectionChange("dashboard");
     } else if (path === "/gerenciar" && onSectionChange) {
       onSectionChange("gerenciar");
+    } else if (path === "/gerenciar") {
+      navigate("/admin", { state: { adminSection: "gerenciar" } });
     } else {
       navigate(path);
     }
