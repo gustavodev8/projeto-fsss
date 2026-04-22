@@ -42,7 +42,7 @@ const ReservationPage = () => {
     enabled: !!id,
   });
 
-  const { data: allSlots = [] } = useQuery({
+  const { data: allSlots = [], isLoading: isLoadingSlots, isError: isSlotsError } = useQuery({
     queryKey: ["horarios"],
     queryFn: fetchHorarios,
   });
@@ -255,7 +255,7 @@ const ReservationPage = () => {
     );
   }
 
-  const canConfirm = !!date && selectedSlots.length > 0 && !submitting;
+  const canConfirm = !!date && selectedSlots.length > 0 && !submitting && !isLoadingSlots;
 
   const groupByBreaks = (slots: TimeSlot[]): TimeSlot[][] => {
     const groups: TimeSlot[][] = [[]];
@@ -404,7 +404,22 @@ const ReservationPage = () => {
         </div>
 
         {/* ── FULL WIDTH: time slots ── */}
-        {date && allSlots.length > 0 && (
+        {date && isLoadingSlots && (
+          <div className="bg-card border border-border rounded-xl p-8 mt-6 shadow-sm flex items-center justify-center gap-3 text-muted-foreground">
+            <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            <span className="text-sm font-medium">Carregando horários...</span>
+          </div>
+        )}
+        {date && !isLoadingSlots && (isSlotsError || allSlots.length === 0) && (
+          <div className="bg-card border border-destructive/30 rounded-xl p-8 mt-6 shadow-sm flex items-center gap-3 text-destructive">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span className="text-sm font-medium">Não foi possível carregar os horários. Tente recarregar a página.</span>
+          </div>
+        )}
+        {date && !isLoadingSlots && allSlots.length > 0 && (
           <div className="bg-card border border-border rounded-xl p-8 mt-6 shadow-sm">
             <div className="max-w-4xl">
               <div className="mb-8">
@@ -605,6 +620,10 @@ const ReservationPage = () => {
                 </div>
               ) : !date ? (
                 <p className="text-sm font-medium text-muted-foreground">Selecione uma data para continuar</p>
+              ) : isLoadingSlots ? (
+                <p className="text-sm font-medium text-muted-foreground">Carregando horários...</p>
+              ) : (isSlotsError || allSlots.length === 0) ? (
+                <p className="text-sm font-medium text-destructive">Erro ao carregar horários. Recarregue a página.</p>
               ) : selectedSlots.length === 0 ? (
                 <p className="text-sm font-medium text-muted-foreground">Selecione pelo menos um horário</p>
               ) : (
