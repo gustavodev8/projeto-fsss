@@ -118,16 +118,7 @@ const Listing = () => {
                       (e.target as HTMLImageElement).style.display = "none";
                     }}
                   />
-                  <div className="absolute top-3 right-3">
-                    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${
-                      item.available
-                        ? "bg-primary/90 text-white"
-                        : "bg-red-500/90 text-white"
-                    }`}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-white/80" />
-                      {item.available ? "Disponível" : "Indisponível"}
-                    </span>
-                  </div>
+
                 </div>
 
                 {/* Info */}
