@@ -33,18 +33,13 @@ const MyReservations = () => {
         result.push({ type: "single", reservation: r });
         return;
       }
-      
-      if (!groupMap.has(r.groupId)) {
-        groupMap.set(r.groupId, { instruments: [] });
-      }
-      
+      if (!groupMap.has(r.groupId)) groupMap.set(r.groupId, { instruments: [] });
       const g = groupMap.get(r.groupId)!;
       if (r.category === "espacos") g.space = r;
       else g.instruments.push(r);
       
       if (!seenGroups.has(r.groupId)) {
         seenGroups.add(r.groupId);
-        // Marcamos para processar depois de popular o groupMap
         result.push({ type: "group", groupId: r.groupId, space: {} as Reservation, instruments: [] });
       }
     });
@@ -70,23 +65,23 @@ const MyReservations = () => {
     <div className="min-h-screen bg-slate-50">
       <Header />
 
-      <main className="max-w-3xl mx-auto px-6 py-12">
+      <main className="max-w-3xl mx-auto px-6 py-10">
         <button
           onClick={() => navigate("/")}
-          className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary mb-6 transition-all group"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-primary mb-6 transition-all group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Voltar para o início
+          Voltar
         </button>
 
-        <div className="flex items-center justify-between mb-10">
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Minhas Reservas</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Minhas Reservas</h1>
           <div className="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
             {(["upcoming", "past"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`px-6 py-2 text-sm font-bold rounded-lg transition-all ${
+                className={`px-5 py-2 text-sm font-bold rounded-lg transition-all ${
                   tab === t ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
@@ -96,10 +91,10 @@ const MyReservations = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="flex flex-col gap-3">
           {displayItems.length === 0 ? (
-            <div className="bg-white border-2 border-dashed border-slate-200 rounded-3xl py-24 text-center">
-              <CalendarX className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+            <div className="bg-white border-2 border-dashed border-slate-200 rounded-2xl py-20 text-center">
+              <CalendarX className="w-10 h-10 text-slate-200 mx-auto mb-3" />
               <p className="text-slate-500 font-bold">Nenhuma reserva encontrada</p>
             </div>
           ) : (
@@ -111,80 +106,64 @@ const MyReservations = () => {
 
               return (
                 <div key={isGroup ? `group-${item.groupId}` : `single-${mainRes.id}-${idx}`} 
-                     className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden hover:border-primary/20 transition-all group">
+                     className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 hover:shadow-md hover:border-primary/20 transition-all group">
                   
-                  {/* Header do Card */}
-                  <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
-                    <h2 className="text-lg font-extrabold text-slate-900">{mainRes.itemName}</h2>
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                      tab === "upcoming" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200"
-                    }`}>
-                      {tab === "upcoming" ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                      {tab === "upcoming" ? "Confirmada" : "Concluída"}
-                    </span>
-                  </div>
-
-                  {/* Grid de Informações */}
-                  <div className="p-0">
-                    <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
-                      
-                      {/* Bloco 1: Data */}
-                      <div className="p-5 flex items-center gap-4 group/item hover:bg-slate-50/50 transition-colors">
-                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
-                          <Calendar className="w-5 h-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400 leading-none mb-1">Data</p>
-                          <p className="text-base font-bold text-slate-800">{formatDate(mainRes.date)}</p>
-                        </div>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    {/* Info Central */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h2 className="text-lg font-bold text-slate-900 truncate group-hover:text-primary transition-colors">
+                          {mainRes.itemName}
+                        </h2>
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border shrink-0 ${
+                          tab === "upcoming" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200"
+                        }`}>
+                          {tab === "upcoming" ? "Confirmada" : "Concluída"}
+                        </span>
                       </div>
 
-                      {/* Bloco 2: Horários */}
-                      <div className="p-5 flex items-center gap-4 group/item hover:bg-slate-50/50 transition-colors">
-                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
-                          <Clock className="w-5 h-5 text-primary" />
+                      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5">
+                        <div className="flex items-center gap-1.5 text-slate-500">
+                          <Calendar className="w-3.5 h-3.5 text-primary/60" />
+                          <span className="text-sm font-semibold">{formatDate(mainRes.date)}</span>
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400 leading-none mb-1">Horários</p>
-                          <p className="text-base font-bold text-slate-800 truncate">{mainRes.slots?.join(" · ") || "—"}</p>
+                        <div className="flex items-center gap-1.5 text-slate-500">
+                          <Clock className="w-3.5 h-3.5 text-primary/60" />
+                          <span className="text-sm font-semibold">{mainRes.slots?.join(" · ")}</span>
                         </div>
+                        {!isGroup && mainRes.quantity && (
+                          <div className="flex items-center gap-1.5 text-slate-500">
+                            <Package className="w-3.5 h-3.5 text-primary/60" />
+                            <span className="text-sm font-bold text-slate-700">{mainRes.quantity} un.</span>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Bloco 3: Quantidade ou Categoria */}
-                      <div className="p-5 flex items-center gap-4 group/item hover:bg-slate-50/50 transition-colors">
-                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
-                          <Package className="w-5 h-5 text-primary" />
+                      {/* Lista Simples de Equipamentos (se houver) */}
+                      {isGroup && instruments.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-50">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1">Incluso:</span>
+                          {instruments.map(inst => (
+                            <div key={inst.id} className="flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">
+                              <span className="text-[11px] font-bold text-slate-600">{inst.itemName}</span>
+                              <span className="text-[10px] font-black text-primary/80">{inst.quantity}</span>
+                            </div>
+                          ))}
                         </div>
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400 leading-none mb-1">
-                            {mainRes.category === "espacos" ? "Tipo" : "Quantidade"}
-                          </p>
-                          <p className="text-base font-bold text-slate-800">
-                            {mainRes.category === "espacos" ? "Espaço Físico" : `${mainRes.quantity || 1} unidades`}
-                          </p>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
 
-                  {/* Rodapé */}
-                  <div className="px-6 py-4 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    {isGroup && instruments.length > 0 ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+ {instruments.length} Equipamento{instruments.length > 1 ? "s" : ""}</span>
-                      </div>
-                    ) : (
-                      <div />
-                    )}
-
+                    {/* Botão de Ação */}
                     {tab === "upcoming" && (
-                      <Button
-                        variant="ghost"
-                        className="text-rose-500 hover:bg-rose-50 hover:text-rose-600 font-bold text-xs uppercase tracking-widest h-9 px-6 rounded-xl transition-all"
-                        onClick={() => isGroup ? cancelGroup(item.groupId) : cancelReservation(mainRes.id)}
-                      >
-                        Cancelar Reserva
-                      </Button>
+                      <div className="shrink-0">
+                        <Button
+                          variant="ghost"
+                          className="w-full md:w-auto text-rose-500 hover:bg-rose-50 hover:text-rose-600 font-bold text-[11px] uppercase tracking-widest h-9 px-5 rounded-xl border border-transparent hover:border-rose-100 transition-all"
+                          onClick={() => isGroup ? cancelGroup(item.groupId) : cancelReservation(mainRes.id)}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
