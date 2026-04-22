@@ -5,7 +5,7 @@ import { useReservations } from "@/contexts/ReservationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Reservation } from "@/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CalendarX, Package, Clock, Calendar, CheckCircle2, ChevronRight } from "lucide-react";
+import { ArrowLeft, CalendarX, Package, Clock, Calendar, CheckCircle2 } from "lucide-react";
 
 type DisplayItem =
   | { type: "single"; reservation: Reservation }
@@ -44,7 +44,6 @@ const MyReservations = () => {
       }
     });
 
-    // Preenche os dados dos grupos corretamente
     return result.map(item => {
       if (item.type === "group") {
         const g = groupMap.get(item.groupId)!;
@@ -64,30 +63,24 @@ const MyReservations = () => {
     <div className="min-h-screen bg-slate-50">
       <Header />
 
-      <main className="max-w-4xl mx-auto px-6 py-10">
+      <main className="max-w-3xl mx-auto px-6 py-12">
         <button
           onClick={() => navigate("/")}
-          className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary mb-6 transition-all group"
+          className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary mb-8 transition-all group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Voltar
+          Voltar para o início
         </button>
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Minhas Reservas</h1>
-            <p className="text-slate-500 text-base mt-1 font-medium">Gerencie seus agendamentos institucionais.</p>
-          </div>
-          
-          <div className="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200 shadow-sm">
+        <div className="flex items-center justify-between mb-10">
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Minhas Reservas</h1>
+          <div className="flex bg-slate-200/50 p-1 rounded-xl border border-slate-200">
             {(["upcoming", "past"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`px-5 py-2 text-sm font-bold rounded-lg transition-all ${
-                  tab === t
-                    ? "bg-primary text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                className={`px-6 py-2 text-sm font-bold rounded-lg transition-all ${
+                  tab === t ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
                 {t === "upcoming" ? "Próximas" : "Histórico"}
@@ -96,123 +89,97 @@ const MyReservations = () => {
           </div>
         </div>
 
-        {displayItems.length === 0 ? (
-          <div className="bg-white border-2 border-dashed border-slate-200 rounded-3xl py-24 text-center">
-            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
-              <CalendarX className="w-8 h-8 text-slate-300" />
+        <div className="grid grid-cols-1 gap-6">
+          {displayItems.length === 0 ? (
+            <div className="bg-white border-2 border-dashed border-slate-200 rounded-3xl py-24 text-center">
+              <CalendarX className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+              <p className="text-slate-500 font-bold">Nenhuma reserva encontrada</p>
             </div>
-            <h3 className="text-xl font-bold text-slate-900">Sem reservas</h3>
-            <p className="text-slate-500 text-sm mt-1">Suas novas reservas aparecerão aqui.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-5">
-            {displayItems.map((item, idx) => {
+          ) : (
+            displayItems.map((item, idx) => {
               const isGroup = item.type === "group";
               const mainRes = isGroup ? item.space : item.reservation;
               const instruments = isGroup ? item.instruments : [];
-
               if (!mainRes || !mainRes.itemName) return null;
 
               return (
-                <div 
-                  key={isGroup ? `group-${item.groupId}` : `single-${mainRes.id}-${idx}`} 
-                  className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-200 overflow-hidden group"
-                >
-                  <div className="p-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                      {/* Lado Esquerdo */}
-                      <div className="flex-1 space-y-3">
-                        <div className="flex items-center gap-2">
-                          <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                            tab === "upcoming" 
-                              ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
-                              : "bg-slate-100 text-slate-500 border-slate-200"
-                          }`}>
-                            {tab === "upcoming" ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
-                            {tab === "upcoming" ? "Confirmada" : "Concluída"}
-                          </span>
+                <div key={isGroup ? `group-${item.groupId}` : `single-${mainRes.id}-${idx}`} 
+                     className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden hover:border-primary/30 transition-all">
+                  
+                  {/* Header do Card */}
+                  <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
+                    <h2 className="text-lg font-extrabold text-slate-900">{mainRes.itemName}</h2>
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                      tab === "upcoming" ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-slate-100 text-slate-500 border-slate-200"
+                    }`}>
+                      {tab === "upcoming" ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                      {tab === "upcoming" ? "Confirmada" : "Concluída"}
+                    </span>
+                  </div>
+
+                  {/* Grid de Informações - Preenchimento do Espaço */}
+                  <div className="p-0">
+                    <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+                      
+                      {/* Bloco 1: Data */}
+                      <div className="p-5 flex items-center gap-4 group/item hover:bg-slate-50/50 transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
+                          <Calendar className="w-5 h-5 text-primary" />
                         </div>
-
-                        <h2 className="text-xl md:text-2xl font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors">
-                          {mainRes.itemName}
-                        </h2>
-
-                        <div className="flex flex-wrap items-center gap-y-3 gap-x-5">
-                          <div className="flex items-center gap-2">
-                            <div className="w-9 h-9 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 shadow-sm">
-                              <Calendar className="w-4 h-4 text-primary" />
-                            </div>
-                            <div>
-                              <p className="text-[9px] font-black uppercase tracking-tighter text-slate-400">Data</p>
-                              <p className="text-base font-bold text-slate-800">{formatDate(mainRes.date)}</p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <div className="w-9 h-9 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 shadow-sm">
-                              <Clock className="w-4 h-4 text-primary" />
-                            </div>
-                            <div>
-                              <p className="text-[9px] font-black uppercase tracking-tighter text-slate-400">Horários</p>
-                              <p className="text-base font-bold text-slate-800">{mainRes.slots?.join(" · ") || "—"}</p>
-                            </div>
-                          </div>
-
-                          {!isGroup && mainRes.quantity && (
-                            <div className="flex items-center gap-2">
-                              <div className="w-9 h-9 rounded-lg bg-primary/5 flex items-center justify-center border border-primary/10 shadow-sm">
-                                <Package className="w-4 h-4 text-primary" />
-                              </div>
-                              <div>
-                                <p className="text-[9px] font-black uppercase tracking-tighter text-primary/60">Qtd</p>
-                                <p className="text-base font-bold text-slate-800">{mainRes.quantity} un.</p>
-                              </div>
-                            </div>
-                          )}
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400 leading-none mb-1">Data</p>
+                          <p className="text-base font-bold text-slate-800">{formatDate(mainRes.date)}</p>
                         </div>
                       </div>
 
-                      {/* Lado Direito */}
-                      <div className="flex flex-row lg:flex-col items-center justify-end gap-2 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100">
-                        {tab === "upcoming" && (
-                          <Button
-                            variant="outline"
-                            className="w-full lg:w-36 h-11 border-2 border-rose-100 text-rose-600 hover:bg-rose-50 hover:border-rose-200 font-bold text-xs uppercase tracking-widest transition-all rounded-xl shadow-sm"
-                            onClick={() => isGroup ? cancelGroup(item.groupId) : cancelReservation(mainRes.id)}
-                          >
-                            Cancelar
-                          </Button>
-                        )}
+                      {/* Bloco 2: Horários */}
+                      <div className="p-5 flex items-center gap-4 group/item hover:bg-slate-50/50 transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
+                          <Clock className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400 leading-none mb-1">Horários</p>
+                          <p className="text-base font-bold text-slate-800 truncate">{mainRes.slots?.join(" · ")}</p>
+                        </div>
+                      </div>
+
+                      {/* Bloco 3: Quantidade ou Categoria */}
+                      <div className="p-5 flex items-center gap-4 group/item hover:bg-slate-50/50 transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
+                          <Package className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400 leading-none mb-1">
+                            {mainRes.category === "espacos" ? "Tipo" : "Quantidade"}
+                          </p>
+                          <p className="text-base font-bold text-slate-800">
+                            {mainRes.category === "espacos" ? "Espaço Físico" : `${mainRes.quantity} unidades`}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Itens Adicionais */}
-                  {isGroup && instruments.length > 0 && (
-                    <div className="bg-slate-50/50 border-t border-slate-100 p-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Package className="w-4 h-4 text-slate-400" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Itens Incluídos</span>
-                        <div className="h-px flex-1 bg-slate-200/60" />
+                  {/* Rodapé: Itens Extras (se houver) e Cancelar */}
+                  <div className="px-6 py-4 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    {isGroup && instruments.length > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+ {instruments.length} Equipamento{instruments.length > 1 ? "s" : ""}</span>
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {instruments.map((inst) => (
-                          <div key={inst.id} className="flex items-center justify-between bg-white border border-slate-200 p-4 rounded-xl shadow-sm group/inst hover:border-primary/20 transition-colors">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100 group-hover/inst:bg-primary/5 transition-colors">
-                                <Package className="w-5 h-5 text-slate-400 group-hover/inst:text-primary" />
-                              </div>
-                              <span className="text-base font-bold text-slate-700">{inst.itemName}</span>
-                            </div>
-                            <span className="text-xs font-black bg-slate-100 text-slate-500 px-3 py-1 rounded-lg group-hover/inst:bg-primary/10 group-hover/inst:text-primary transition-colors">
-                              {inst.quantity} un.
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div /> // Espaçador
+                    )}
+
+                    {tab === "upcoming" && (
+                      <Button
+                        variant="ghost"
+                        className="text-rose-500 hover:bg-rose-50 hover:text-rose-600 font-bold text-xs uppercase tracking-widest h-9 px-6 rounded-xl transition-all"
+                        onClick={() => isGroup ? cancelGroup(item.groupId) : cancelReservation(mainRes.id)}
+                      >
+                        Cancelar Reserva
+                      </Button>
+                    )}
+                  </div>
                 </div>
               );
             })}
