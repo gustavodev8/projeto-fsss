@@ -55,7 +55,7 @@ export async function createReservationRpc(params: {
     if (msg.includes("ITEM_NOT_FOUND")) {
       return { id: null, error: "Este item não está mais disponível para reserva." };
     }
-    return { id: null, error: "Não foi possível criar a reserva. Tente novamente." };
+    return { id: null, error: msg || "Não foi possível criar a reserva. Tente novamente." };
   }
   return { id: data as string };
 }

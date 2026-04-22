@@ -182,49 +182,58 @@ const ReservationPage = () => {
   };
 
   const handleConfirm = async () => {
-    if (!item || !date || selectedSlots.length === 0 || !user?.id) return;
+    if (!item || !date || selectedSlots.length === 0) return;
+    if (!user?.id) {
+      setSubmitError("Sessão expirada. Faça login novamente.");
+      return;
+    }
     setSubmitting(true);
     setSubmitError("");
 
-    const dateStr = format(date, "yyyy-MM-dd");
-    const groupId =
-      !isInstrumento && selectedInstruments.length > 0 ? crypto.randomUUID() : undefined;
+    try {
+      const dateStr = format(date, "yyyy-MM-dd");
+      const groupId =
+        !isInstrumento && selectedInstruments.length > 0 ? crypto.randomUUID() : undefined;
 
-    const mainResult = await createReservationRpc({
-      usuarioId: user.id,
-      itemId: item.id,
-      data: dateStr,
-      horarioLabels: selectedSlots,
-      quantidade: isInstrumento ? quantity : 1,
-      grupoId: groupId ?? null,
-    });
-
-    if (mainResult.error) {
-      setSubmitError(mainResult.error);
-      setSubmitting(false);
-      return;
-    }
-
-    for (const si of selectedInstruments) {
-      const instResult = await createReservationRpc({
+      const mainResult = await createReservationRpc({
         usuarioId: user.id,
-        itemId: si.id,
+        itemId: item.id,
         data: dateStr,
         horarioLabels: selectedSlots,
-        quantidade: si.quantity,
+        quantidade: isInstrumento ? quantity : 1,
         grupoId: groupId ?? null,
       });
-      if (instResult.error) {
-        setSubmitError(`Espaço reservado, mas houve um erro com um equipamento: ${instResult.error}`);
-        await reload();
+
+      if (mainResult.error) {
+        setSubmitError(mainResult.error);
         setSubmitting(false);
         return;
       }
-    }
 
-    await reload();
-    setSubmitting(false);
-    setShowSuccess(true);
+      for (const si of selectedInstruments) {
+        const instResult = await createReservationRpc({
+          usuarioId: user.id,
+          itemId: si.id,
+          data: dateStr,
+          horarioLabels: selectedSlots,
+          quantidade: si.quantity,
+          grupoId: groupId ?? null,
+        });
+        if (instResult.error) {
+          setSubmitError(`Espaço reservado, mas houve um erro com um equipamento: ${instResult.error}`);
+          await reload();
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      await reload();
+      setSubmitting(false);
+      setShowSuccess(true);
+    } catch (err) {
+      setSubmitError("Ocorreu um erro inesperado. Tente novamente.");
+      setSubmitting(false);
+    }
   };
 
   if (!item) {
