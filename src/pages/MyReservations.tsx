@@ -73,7 +73,7 @@ const MyReservations = () => {
       <main className="max-w-3xl mx-auto px-6 py-12">
         <button
           onClick={() => navigate("/")}
-          className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary mb-8 transition-all group"
+          className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary mb-6 transition-all group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Voltar para o início
@@ -189,9 +189,9 @@ const MyReservations = () => {
                   </div>
                 </div>
               );
-            })}
-          </div>
-        )}
+            })
+          )}
+        </div>
       </main>
     </div>
   );
