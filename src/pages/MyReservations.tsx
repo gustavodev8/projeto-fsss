@@ -33,28 +33,35 @@ const MyReservations = () => {
         result.push({ type: "single", reservation: r });
         return;
       }
-      if (!groupMap.has(r.groupId)) groupMap.set(r.groupId, { instruments: [] });
+      
+      if (!groupMap.has(r.groupId)) {
+        groupMap.set(r.groupId, { instruments: [] });
+      }
+      
       const g = groupMap.get(r.groupId)!;
       if (r.category === "espacos") g.space = r;
       else g.instruments.push(r);
       
       if (!seenGroups.has(r.groupId)) {
         seenGroups.add(r.groupId);
+        // Marcamos para processar depois de popular o groupMap
         result.push({ type: "group", groupId: r.groupId, space: {} as Reservation, instruments: [] });
       }
     });
 
     return result.map(item => {
       if (item.type === "group") {
-        const g = groupMap.get(item.groupId)!;
-        return { ...item, space: g.space || g.instruments[0], instruments: g.instruments };
+        const g = groupMap.get(item.groupId);
+        const mainSpace = g?.space || (g?.instruments && g.instruments[0]);
+        if (!mainSpace) return null;
+        return { ...item, space: mainSpace, instruments: g?.instruments || [] };
       }
       return item;
-    });
+    }).filter(Boolean) as DisplayItem[];
   }, [displayed]);
 
   const formatDate = (d: string) => {
-    if (!d || !d.includes("-")) return d;
+    if (!d || !d.includes("-")) return d || "—";
     const [y, m, dNum] = d.split("-");
     return `${dNum}/${m}/${y}`;
   };
@@ -104,7 +111,7 @@ const MyReservations = () => {
 
               return (
                 <div key={isGroup ? `group-${item.groupId}` : `single-${mainRes.id}-${idx}`} 
-                     className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden hover:border-primary/30 transition-all">
+                     className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden hover:border-primary/20 transition-all group">
                   
                   {/* Header do Card */}
                   <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
@@ -117,7 +124,7 @@ const MyReservations = () => {
                     </span>
                   </div>
 
-                  {/* Grid de Informações - Preenchimento do Espaço */}
+                  {/* Grid de Informações */}
                   <div className="p-0">
                     <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
                       
@@ -139,7 +146,7 @@ const MyReservations = () => {
                         </div>
                         <div className="min-w-0">
                           <p className="text-[10px] font-black uppercase tracking-tighter text-slate-400 leading-none mb-1">Horários</p>
-                          <p className="text-base font-bold text-slate-800 truncate">{mainRes.slots?.join(" · ")}</p>
+                          <p className="text-base font-bold text-slate-800 truncate">{mainRes.slots?.join(" · ") || "—"}</p>
                         </div>
                       </div>
 
@@ -153,21 +160,21 @@ const MyReservations = () => {
                             {mainRes.category === "espacos" ? "Tipo" : "Quantidade"}
                           </p>
                           <p className="text-base font-bold text-slate-800">
-                            {mainRes.category === "espacos" ? "Espaço Físico" : `${mainRes.quantity} unidades`}
+                            {mainRes.category === "espacos" ? "Espaço Físico" : `${mainRes.quantity || 1} unidades`}
                           </p>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Rodapé: Itens Extras (se houver) e Cancelar */}
+                  {/* Rodapé */}
                   <div className="px-6 py-4 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     {isGroup && instruments.length > 0 ? (
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">+ {instruments.length} Equipamento{instruments.length > 1 ? "s" : ""}</span>
                       </div>
                     ) : (
-                      <div /> // Espaçador
+                      <div />
                     )}
 
                     {tab === "upcoming" && (
