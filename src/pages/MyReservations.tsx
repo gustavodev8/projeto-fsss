@@ -183,12 +183,6 @@ const MyReservations = () => {
                             Cancelar
                           </Button>
                         )}
-                        <Button
-                          variant="ghost"
-                          className="w-full lg:w-36 h-11 text-slate-400 hover:text-primary font-bold text-xs flex items-center justify-center gap-2 transition-all"
-                        >
-                          Ver Detalhes <ChevronRight className="w-4 h-4" />
-                        </Button>
                       </div>
                     </div>
                   </div>
