@@ -121,12 +121,12 @@ const MyReservations = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg ${
+                      <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
                         tab === "upcoming"
-                          ? "bg-primary/10 text-primary border border-primary/20"
+                          ? "bg-green-100 text-green-700"
                           : "bg-muted text-muted-foreground"
                       }`}>
-                        {tab === "upcoming" ? "Confirmada" : "Concluída"}
+                        {tab === "upcoming" ? "✓ Confirmada" : "Concluída"}
                       </span>
                       {tab === "upcoming" && (
                         <Button
@@ -164,12 +164,12 @@ const MyReservations = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg ${
+                      <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
                         tab === "upcoming"
-                          ? "bg-primary/10 text-primary border border-primary/20"
+                          ? "bg-green-100 text-green-700"
                           : "bg-muted text-muted-foreground"
                       }`}>
-                        {tab === "upcoming" ? "Confirmada" : "Concluída"}
+                        {tab === "upcoming" ? "✓ Confirmada" : "Concluída"}
                       </span>
                       {tab === "upcoming" && (
                         <Button
