@@ -20,6 +20,8 @@ import {
   MagnifyingGlass,
   FileCsv,
   X,
+  Trash,
+  Warning,
 } from "@phosphor-icons/react";
 
 const HIST_PAGE_SIZE = 25;
@@ -113,7 +115,7 @@ const StatCard = ({
 );
 
 const AdminDashboard = () => {
-  const { reservations } = useReservations();
+  const { reservations, cancelReservation, cancelGroup, reload } = useReservations();
   const sessionToday = useRef(isoToday()).current;
 
   const [selectedDate, setSelectedDate] = useState(sessionToday);
@@ -123,6 +125,7 @@ const AdminDashboard = () => {
   const [histCategory, setHistCategory] = useState<"all" | "espacos" | "instrumentos">("all");
   const [histStatus, setHistStatus] = useState<"confirmada" | "cancelada" | "todas">("confirmada");
   const [histPage, setHistPage] = useState(1);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   const { data: professors = [] } = useQuery({
     queryKey: ["professors"],
@@ -197,6 +200,22 @@ const AdminDashboard = () => {
   const handleExportCSV = () => {
     const dateStr = format(new Date(), "yyyy-MM-dd");
     downloadCSV(histFiltered, `reservas-fsss-${dateStr}.csv`);
+  };
+
+  const handleCancel = async (r: Reservation) => {
+    const nome = r.userName ?? r.userEmail ?? "professor";
+    const msg = r.groupId
+      ? `Cancelar todas as reservas do grupo de ${nome} em ${formatDateDisplay(r.date)}?`
+      : `Cancelar a reserva de "${r.itemName}" de ${nome} em ${formatDateDisplay(r.date)}?`;
+    if (!confirm(msg)) return;
+    setCancellingId(r.id);
+    if (r.groupId) {
+      await cancelGroup(r.groupId);
+    } else {
+      await cancelReservation(r.id);
+    }
+    setCancellingId(null);
+    await reload();
   };
 
   return (
@@ -306,19 +325,29 @@ const AdminDashboard = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border bg-gray-50/50">
-                    {["Professor / Responsável", "Item reservado", "Tipo", "Horário", "Qtd."].map((h) => (
+                    {["Professor / Responsável", "Item reservado", "Tipo", "Horário", "Qtd.", ""].map((h) => (
                       <th key={h} className="py-3 px-4 text-left text-sm font-bold text-muted-foreground uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {dayReservations.map((r) => (
-                    <tr key={r.id} className="border-b border-border hover:bg-gray-50/80 transition-colors">
+                    <tr key={r.id} className="border-b border-border hover:bg-gray-50/80 transition-colors group">
                       <td className="py-4 px-4 text-[15px] font-semibold text-foreground">{r.userName ?? r.userEmail ?? "—"}</td>
                       <td className="py-4 px-4 text-[15px] text-foreground">{r.itemName}</td>
                       <td className="py-4 px-4"><TypeBadge category={r.category} /></td>
                       <td className="py-4 px-4 text-[15px] font-medium text-foreground">{r.slots.join(" · ")}</td>
                       <td className="py-4 px-4 text-[15px] text-muted-foreground font-mono">{r.quantity ?? "—"}</td>
+                      <td className="py-4 px-4">
+                        <button
+                          onClick={() => handleCancel(r)}
+                          disabled={cancellingId === r.id}
+                          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground/50 hover:text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-40"
+                          title="Cancelar reserva"
+                        >
+                          <Trash weight="bold" className="w-4 h-4" />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -425,14 +454,14 @@ const AdminDashboard = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-border bg-gray-50/50">
-                      {["Data", "Professor", "Item reservado", "Tipo", "Horário", "Qtd.", "Status"].map((h) => (
+                      {["Data", "Professor", "Item reservado", "Tipo", "Horário", "Qtd.", "Status", ""].map((h) => (
                         <th key={h} className="py-3 px-4 text-left text-sm font-bold text-muted-foreground uppercase tracking-wider">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {histPaged.map((r) => (
-                      <tr key={r.id} className={`border-b border-border transition-colors ${r.cancelledAt ? "hover:bg-rose-50/30 bg-rose-50/10" : "hover:bg-gray-50/80"}`}>
+                      <tr key={r.id} className={`border-b border-border transition-colors group ${r.cancelledAt ? "hover:bg-rose-50/30 bg-rose-50/10" : "hover:bg-gray-50/80"}`}>
                         <td className="py-4 px-4 text-xs font-bold text-muted-foreground whitespace-nowrap uppercase tracking-tighter">{formatDateDisplay(r.date)}</td>
                         <td className="py-4 px-4 text-[15px] font-semibold text-foreground">{r.userName ?? r.userEmail ?? "—"}</td>
                         <td className="py-4 px-4 text-[15px] text-foreground">{r.itemName}</td>
@@ -442,6 +471,18 @@ const AdminDashboard = () => {
                         </td>
                         <td className="py-4 px-4 text-[15px] text-muted-foreground font-mono">{r.quantity ?? "—"}</td>
                         <td className="py-4 px-4"><StatusBadge cancelled={!!r.cancelledAt} /></td>
+                        <td className="py-4 px-4">
+                          {!r.cancelledAt && (
+                            <button
+                              onClick={() => handleCancel(r)}
+                              disabled={cancellingId === r.id}
+                              className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground/50 hover:text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-40"
+                              title="Cancelar reserva"
+                            >
+                              <Trash weight="bold" className="w-4 h-4" />
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
