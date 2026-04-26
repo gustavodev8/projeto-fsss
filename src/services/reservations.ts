@@ -60,6 +60,35 @@ export async function createReservationRpc(params: {
   return { id: data as string };
 }
 
+export async function fetchCancelledReservations(userEmail?: string): Promise<Reservation[]> {
+  let query = supabase
+    .from("vw_reservas_detalhadas")
+    .select("*")
+    .eq("status", "cancelada")
+    .order("cancelado_em", { ascending: false });
+
+  if (userEmail) {
+    query = query.eq("usuario_email", userEmail);
+  }
+
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return data.map((r) => ({
+    id: r.reserva_id as string,
+    groupId: (r.grupo_id as string) ?? undefined,
+    itemId: r.item_id as string,
+    itemName: r.item_nome as string,
+    date: r.data_reserva as string,
+    slots: (r.horarios_labels as string[]) ?? [],
+    quantity: (r.quantidade as number) ?? 1,
+    category: r.item_categoria as "espacos" | "instrumentos",
+    userName: r.usuario_nome as string,
+    userEmail: r.usuario_email as string,
+    cancelledAt: r.cancelado_em as string,
+  }));
+}
+
 export async function cancelReservationById(reservaId: string): Promise<void> {
   await supabase
     .from("reservas")

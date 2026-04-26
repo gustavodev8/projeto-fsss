@@ -43,4 +43,5 @@ export interface Reservation {
   category: ItemCategory;
   userName?: string;
   userEmail?: string;
+  cancelledAt?: string;
 }

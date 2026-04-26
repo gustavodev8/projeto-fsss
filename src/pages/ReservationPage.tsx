@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import { fetchItemById, fetchHorarios, fetchItems } from "@/services/items";
 import { createReservationRpc } from "@/services/reservations";
+import { fetchBlockedDates } from "@/services/blockedDates";
 import { useReservations } from "@/contexts/ReservationContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Calendar } from "@/components/ui/calendar";
@@ -52,6 +53,20 @@ const ReservationPage = () => {
     queryFn: () => fetchItems("instrumentos"),
     enabled: !isInstrumento,
   });
+
+  const { data: blockedDatesRaw = [] } = useQuery({
+    queryKey: ["blockedDates"],
+    queryFn: fetchBlockedDates,
+  });
+
+  const blockedDatesSet = useMemo(
+    () => new Set(blockedDatesRaw.map((b) => b.data)),
+    [blockedDatesRaw]
+  );
+
+  const isDateBlocked = (d: Date) => blockedDatesSet.has(format(d, "yyyy-MM-dd"));
+
+  const selectedDateBlocked = date ? isDateBlocked(date) : false;
 
   const morningSlots = allSlots.slice(0, 7);
   const afternoonSlots = allSlots.slice(7);
@@ -255,7 +270,7 @@ const ReservationPage = () => {
     );
   }
 
-  const canConfirm = !!date && selectedSlots.length > 0 && !submitting && !isLoadingSlots;
+  const canConfirm = !!date && selectedSlots.length > 0 && !submitting && !isLoadingSlots && !selectedDateBlocked;
 
   const groupByBreaks = (slots: TimeSlot[]): TimeSlot[][] => {
     const groups: TimeSlot[][] = [[]];
@@ -375,7 +390,9 @@ const ReservationPage = () => {
                     setSelectedInstruments([]);
                     setSubmitError("");
                   }}
-                  disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                  disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0)) || isDateBlocked(d)}
+                  modifiers={{ blocked: isDateBlocked }}
+                  modifiersClassNames={{ blocked: "line-through text-rose-300 hover:!bg-rose-50 hover:!text-rose-400" }}
                   locale={ptBR}
                   className="w-full"
                   classNames={{
@@ -399,6 +416,15 @@ const ReservationPage = () => {
                   }}
                 />
               </div>
+              {selectedDateBlocked && (
+                <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {(() => {
+                    const blocked = blockedDatesRaw.find((b) => b.data === format(date!, "yyyy-MM-dd"));
+                    return blocked?.motivo ? `Bloqueado: ${blocked.motivo}` : "Esta data está bloqueada para reservas.";
+                  })()}
+                </div>
+              )}
             </div>
           </div>
         </div>
