@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import { useReservations } from "@/contexts/ReservationContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { fetchHorarios } from "@/services/items";
 import type { Reservation } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CalendarX, Package, Clock, Calendar } from "lucide-react";
@@ -17,7 +19,12 @@ const MyReservations = () => {
   const { user } = useAuth();
   const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
 
-  const today = new Date().toLocaleDateString("en-CA");
+  const { data: allSlots = [] } = useQuery({
+    queryKey: ["horarios"],
+    queryFn: fetchHorarios,
+  });
+
+  const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
   const myReservations = reservations.filter((r) => r.userEmail === user?.email);
   const upcoming = myReservations.filter((r) => r.date >= today);
   const past = myReservations.filter((r) => r.date < today);
@@ -25,12 +32,12 @@ const MyReservations = () => {
 
   const displayItems = useMemo<DisplayItem[]>(() => {
     const groupMap = new Map<string, { space?: Reservation; instruments: Reservation[] }>();
-    const result: DisplayItem[] = [];
+    const tempResult: DisplayItem[] = [];
     const seenGroups = new Set<string>();
 
     displayed.forEach((r) => {
       if (!r.groupId) {
-        result.push({ type: "single", reservation: r });
+        tempResult.push({ type: "single", reservation: r });
         return;
       }
       if (!groupMap.has(r.groupId)) groupMap.set(r.groupId, { instruments: [] });
@@ -40,11 +47,11 @@ const MyReservations = () => {
       
       if (!seenGroups.has(r.groupId)) {
         seenGroups.add(r.groupId);
-        result.push({ type: "group", groupId: r.groupId, space: {} as Reservation, instruments: [] });
+        tempResult.push({ type: "group", groupId: r.groupId, space: {} as Reservation, instruments: [] });
       }
     });
 
-    return result.map(item => {
+    const result = tempResult.map(item => {
       if (item.type === "group") {
         const g = groupMap.get(item.groupId);
         const mainSpace = g?.space || (g?.instruments && g.instruments[0]);
@@ -53,7 +60,25 @@ const MyReservations = () => {
       }
       return item;
     }).filter(Boolean) as DisplayItem[];
-  }, [displayed]);
+
+    // Sorting logic
+    return result.sort((a, b) => {
+      const resA = a.type === "group" ? a.space : a.reservation;
+      const resB = b.type === "group" ? b.space : b.reservation;
+
+      // 1. Compare Date
+      if (resA.date !== resB.date) {
+        return tab === "upcoming"
+          ? resA.date.localeCompare(resB.date) // Ascending for future
+          : resB.date.localeCompare(resA.date); // Descending for past
+      }
+
+      // 2. Compare Time (if dates are equal)
+      const idxA = allSlots.findIndex(s => s.label === resA.slots[0]);
+      const idxB = allSlots.findIndex(s => s.label === resB.slots[0]);
+      return idxA - idxB;
+    });
+  }, [displayed, allSlots, tab]);
 
   const formatDate = (d: string) => {
     if (!d || !d.includes("-")) return d || "—";
