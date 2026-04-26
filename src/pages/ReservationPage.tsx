@@ -59,15 +59,6 @@ const ReservationPage = () => {
     queryFn: fetchBlockedDates,
   });
 
-  const blockedDatesSet = useMemo(
-    () => new Set(blockedDatesRaw.map((b) => b.data)),
-    [blockedDatesRaw]
-  );
-
-  const isDateBlocked = (d: Date) => blockedDatesSet.has(format(d, "yyyy-MM-dd"));
-
-  const selectedDateBlocked = date ? isDateBlocked(date) : false;
-
   const morningSlots = allSlots.slice(0, 7);
   const afternoonSlots = allSlots.slice(7);
 
@@ -79,6 +70,15 @@ const ReservationPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [imgError, setImgError] = useState(false);
+
+  const blockedDatesSet = useMemo(
+    () => new Set(blockedDatesRaw.map((b) => b.data)),
+    [blockedDatesRaw]
+  );
+
+  const isDateBlocked = (d: Date) => blockedDatesSet.has(format(d, "yyyy-MM-dd"));
+
+  const selectedDateBlocked = date ? isDateBlocked(date) : false;
 
   const reservedQtyForSlot = useMemo(() => {
     if (!date || !item) return {} as Record<string, number>;
