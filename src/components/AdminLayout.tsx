@@ -36,10 +36,12 @@ const navSections = [
   },
 ] as const;
 
+type AdminSection = "dashboard" | "gerenciar" | "espacos" | "instrumentos";
+
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeSection?: "dashboard" | "gerenciar";
-  onSectionChange?: (section: "dashboard" | "gerenciar") => void;
+  activeSection?: AdminSection;
+  onSectionChange?: (section: AdminSection) => void;
 }
 
 const AdminLayout = ({ children, activeSection, onSectionChange }: AdminLayoutProps) => {
@@ -56,14 +58,20 @@ const AdminLayout = ({ children, activeSection, onSectionChange }: AdminLayoutPr
       .map((w) => w[0].toUpperCase())
       .join("") ?? "AD";
 
+  const pathToSection: Record<string, AdminSection> = {
+    "/admin": "dashboard",
+    "/gerenciar": "gerenciar",
+    "/espacos": "espacos",
+    "/instrumentos": "instrumentos",
+  };
+
   const handleNavigate = (path: string) => {
-    if (path === "/admin" && onSectionChange) {
-      onSectionChange("dashboard");
-    } else if (path === "/gerenciar" && onSectionChange) {
-      onSectionChange("gerenciar");
+    const section = pathToSection[path];
+    if (section && onSectionChange) {
+      onSectionChange(section);
     } else if (path === "/gerenciar") {
       navigate("/admin", { state: { adminSection: "gerenciar" } });
-    } else {
+    } else if (!section) {
       navigate(path);
     }
     setSidebarOpen(false);
@@ -123,12 +131,10 @@ const AdminLayout = ({ children, activeSection, onSectionChange }: AdminLayoutPr
               </p>
               <div className="space-y-1">
                 {section.items.map((item) => {
-                  const active =
-                    item.path === "/admin"
-                      ? activeSection === "dashboard" || (!activeSection && location.pathname === "/admin")
-                      : item.path === "/gerenciar"
-                      ? activeSection === "gerenciar"
-                      : location.pathname === item.path;
+                  const mappedSection = pathToSection[item.path];
+                  const active = mappedSection
+                    ? activeSection === mappedSection || (!activeSection && location.pathname === item.path)
+                    : location.pathname === item.path;
                   return (
                     <button
                       key={item.label}
