@@ -67,11 +67,16 @@ const AdminLayout = ({ children, activeSection, onSectionChange }: AdminLayoutPr
 
   const handleNavigate = (path: string) => {
     const section = pathToSection[path];
-    if (section && onSectionChange) {
-      onSectionChange(section);
-    } else if (path === "/gerenciar") {
-      navigate("/admin", { state: { adminSection: "gerenciar" } });
-    } else if (!section) {
+    
+    if (section) {
+      // Se já estivermos no /admin, usamos replace: true para não sujar o histórico
+      const isAlreadyOnAdmin = location.pathname === "/admin";
+      navigate("/admin", { 
+        state: { adminSection: section }, 
+        replace: isAlreadyOnAdmin 
+      });
+      if (onSectionChange) onSectionChange(section);
+    } else {
       navigate(path);
     }
     setSidebarOpen(false);

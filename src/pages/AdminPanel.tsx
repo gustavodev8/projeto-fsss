@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "@/components/AdminLayout";
@@ -151,11 +151,17 @@ const AdminPanel = () => {
   const location = useLocation();
 
   const initial: AdminSection =
-    (location.state as { adminSection?: string } | null)?.adminSection === "gerenciar"
-      ? "gerenciar"
-      : "dashboard";
+    (location.state as { adminSection?: string } | null)?.adminSection as AdminSection || "dashboard";
 
   const [activeSection, setActiveSection] = useState<AdminSection>(initial);
+
+  // Sincroniza a seção ativa com o estado da navegação (sidebar)
+  useEffect(() => {
+    const state = location.state as { adminSection?: AdminSection } | null;
+    if (state?.adminSection && state.adminSection !== activeSection) {
+      setActiveSection(state.adminSection);
+    }
+  }, [location.state, activeSection]);
 
   const handleGoToReservation = (cat: string, id: string) => {
     navigate(`/${cat}/${id}`);

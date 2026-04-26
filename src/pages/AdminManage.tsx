@@ -261,28 +261,28 @@ const AdminManage = () => {
   const getInitial = (name: string) => name.trim()[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8 bg-slate-50/50 min-h-screen">
         {/* Título */}
-        <div>
+        <div className="relative">
           <p className="text-xs font-bold uppercase tracking-[0.15em] text-primary/70 mb-1.5">
             Configurações
           </p>
-          <h1 className="text-2xl font-extrabold text-foreground tracking-tight">Gerenciar recursos</h1>
-          <p className="text-base font-medium text-muted-foreground mt-1">
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Gerenciar recursos</h1>
+          <p className="text-base font-medium text-slate-600 mt-1 max-w-2xl">
             Cadastre, edite e mantenha atualizada a base de espaços, equipamentos e usuários do
             sistema.
           </p>
         </div>
 
         {/* ── Espaços e equipamentos ─────────────────────────────────────────── */}
-        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
-          <div className="border-b border-border px-8 py-5 flex items-center gap-4 bg-gray-50/30">
-            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm shadow-slate-200/50">
+          <div className="border-b border-slate-100 px-8 py-5 flex items-center gap-4 bg-slate-50/80">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/5">
               <Buildings weight="bold" className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground leading-tight">Espaços e equipamentos</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <h2 className="text-lg font-bold text-slate-900 leading-tight">Espaços e equipamentos</h2>
+              <p className="text-sm text-slate-500 font-medium mt-0.5">
                 Adicione ou remova itens disponíveis para reserva.
               </p>
             </div>
@@ -290,149 +290,151 @@ const AdminManage = () => {
 
           <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* Formulário */}
-            <form onSubmit={handleCreateItem} className="space-y-5">
-              <p className="text-[15px] font-bold text-foreground">Novo item</p>
+            <div className="bg-slate-50/80 rounded-2xl p-6 border border-slate-100/50">
+              <form onSubmit={handleCreateItem} className="space-y-5">
+                <p className="text-[15px] font-bold text-slate-800">Novo item</p>
 
-              <div className="grid grid-cols-2 gap-3">
-                {(["espacos", "instrumentos"] as const).map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setItemCategoria(cat)}
-                    className={`flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl border transition-all duration-150 ${
-                      itemCategoria === cat
-                        ? "bg-primary text-white border-primary shadow-sm"
-                        : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
-                    }`}
-                  >
-                    {cat === "espacos" ? (
-                      <>
-                        <Buildings weight="bold" className="w-4 h-4" /> Espaço
-                      </>
-                    ) : (
-                      <>
-                        <Cube weight="bold" className="w-4 h-4" /> Equipamento
-                      </>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-bold text-foreground/80">Nome</Label>
-                <Input
-                  value={itemNome}
-                  onChange={(e) => setItemNome(e.target.value)}
-                  placeholder={
-                    itemCategoria === "espacos" ? "Ex: Espaço Irmã Rosa" : "Ex: Caixa de Som"
-                  }
-                  required
-                  className="h-10 text-[15px] rounded-xl"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-bold text-foreground/80">Descrição</Label>
-                <Input
-                  value={itemDescricao}
-                  onChange={(e) => setItemDescricao(e.target.value)}
-                  placeholder="Breve descrição do item"
-                  required
-                  className="h-10 text-[15px] rounded-xl"
-                />
-              </div>
-              {/* Imagem — upload ou URL */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-bold text-foreground/80">
-                    Imagem <span className="font-normal text-muted-foreground/60">(opcional)</span>
-                  </Label>
-                  <div className="flex gap-1 border border-border rounded-lg overflow-hidden p-0.5 text-[11px]">
+                <div className="grid grid-cols-2 gap-3">
+                  {(["espacos", "instrumentos"] as const).map((cat) => (
                     <button
+                      key={cat}
                       type="button"
-                      onClick={() => { setItemImageMode("upload"); setItemImagemUrl(""); }}
-                      className={`flex items-center gap-1 px-3 py-1 font-bold transition-colors rounded ${itemImageMode === "upload" ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                      onClick={() => setItemCategoria(cat)}
+                      className={`flex items-center justify-center gap-2 py-2.5 text-sm font-bold rounded-xl border transition-all duration-150 ${
+                        itemCategoria === cat
+                          ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
+                          : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                      }`}
                     >
-                      <Image weight="bold" className="w-3.5 h-3.5" /> Upload
+                      {cat === "espacos" ? (
+                        <>
+                          <Buildings weight="bold" className="w-4 h-4" /> Espaço
+                        </>
+                      ) : (
+                        <>
+                          <Cube weight="bold" className="w-4 h-4" /> Equipamento
+                        </>
+                      )}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => { setItemImageMode("url"); setItemImageFile(null); setItemImagePreview(""); }}
-                      className={`flex items-center gap-1 px-3 py-1 font-bold transition-colors rounded ${itemImageMode === "url" ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-                    >
-                      <Link weight="bold" className="w-3.5 h-3.5" /> URL
-                    </button>
-                  </div>
+                  ))}
                 </div>
 
-                {itemImageMode === "upload" ? (
-                  <div>
-                    <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-2xl cursor-pointer transition-colors ${itemImagePreview ? "border-primary/40 bg-primary/4" : "border-border hover:border-primary/30 hover:bg-muted/30"}`}>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          setItemImageFile(file);
-                          setItemImagePreview(URL.createObjectURL(file));
-                        }}
-                      />
-                      {itemImagePreview ? (
-                        <img src={itemImagePreview} alt="preview" className="h-full w-full object-cover rounded-2xl" />
-                      ) : (
-                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                          <Image weight="bold" className="w-7 h-7" />
-                          <span className="text-sm font-medium">Clique para selecionar</span>
-                          <span className="text-[11px]">PNG, JPG, WEBP</span>
-                        </div>
-                      )}
-                    </label>
-                    {itemImageFile && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-slate-700">Nome</Label>
+                  <Input
+                    value={itemNome}
+                    onChange={(e) => setItemNome(e.target.value)}
+                    placeholder={
+                      itemCategoria === "espacos" ? "Ex: Espaço Irmã Rosa" : "Ex: Caixa de Som"
+                    }
+                    required
+                    className="h-10 text-[15px] rounded-xl bg-white border-slate-200"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-slate-700">Descrição</Label>
+                  <Input
+                    value={itemDescricao}
+                    onChange={(e) => setItemDescricao(e.target.value)}
+                    placeholder="Breve descrição do item"
+                    required
+                    className="h-10 text-[15px] rounded-xl bg-white border-slate-200"
+                  />
+                </div>
+                {/* Imagem — upload ou URL */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-bold text-slate-700">
+                      Imagem <span className="font-normal text-slate-400">(opcional)</span>
+                    </Label>
+                    <div className="flex gap-1 border border-slate-200 bg-white rounded-lg overflow-hidden p-0.5 text-[11px]">
                       <button
                         type="button"
-                        onClick={() => { setItemImageFile(null); setItemImagePreview(""); }}
-                        className="mt-2 text-xs font-bold text-muted-foreground hover:text-destructive flex items-center gap-1.5 transition-colors"
+                        onClick={() => { setItemImageMode("upload"); setItemImagemUrl(""); }}
+                        className={`flex items-center gap-1 px-3 py-1 font-bold transition-colors rounded ${itemImageMode === "upload" ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
                       >
-                        <X weight="bold" className="w-3.5 h-3.5" /> Remover imagem
+                        <Image weight="bold" className="w-3.5 h-3.5" /> Upload
                       </button>
-                    )}
+                      <button
+                        type="button"
+                        onClick={() => { setItemImageMode("url"); setItemImageFile(null); setItemImagePreview(""); }}
+                        className={`flex items-center gap-1 px-3 py-1 font-bold transition-colors rounded ${itemImageMode === "url" ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+                      >
+                        <Link weight="bold" className="w-3.5 h-3.5" /> URL
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <Input
-                    value={itemImagemUrl}
-                    onChange={(e) => setItemImagemUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="h-10 text-[15px] rounded-xl"
-                  />
+
+                  {itemImageMode === "upload" ? (
+                    <div>
+                      <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-2xl cursor-pointer transition-colors ${itemImagePreview ? "border-primary/40 bg-white" : "bg-white border-slate-200 hover:border-primary/30 hover:bg-slate-50/50"}`}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setItemImageFile(file);
+                            setItemImagePreview(URL.createObjectURL(file));
+                          }}
+                        />
+                        {itemImagePreview ? (
+                          <img src={itemImagePreview} alt="preview" className="h-full w-full object-cover rounded-2xl" />
+                        ) : (
+                          <div className="flex flex-col items-center gap-2 text-slate-400">
+                            <Image weight="bold" className="w-7 h-7" />
+                            <span className="text-sm font-medium">Clique para selecionar</span>
+                            <span className="text-[11px]">PNG, JPG, WEBP</span>
+                          </div>
+                        )}
+                      </label>
+                      {itemImageFile && (
+                        <button
+                          type="button"
+                          onClick={() => { setItemImageFile(null); setItemImagePreview(""); }}
+                          className="mt-2 text-xs font-bold text-slate-400 hover:text-rose-500 flex items-center gap-1.5 transition-colors"
+                        >
+                          <X weight="bold" className="w-3.5 h-3.5" /> Remover imagem
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <Input
+                      value={itemImagemUrl}
+                      onChange={(e) => setItemImagemUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="h-10 text-[15px] rounded-xl bg-white border-slate-200"
+                    />
+                  )}
+                </div>
+                {itemCategoria === "instrumentos" && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold text-slate-700">Quantidade total</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={itemQtd}
+                      onChange={(e) => setItemQtd(Math.max(1, Number(e.target.value)))}
+                      required
+                      className="h-10 text-[15px] w-32 font-mono rounded-xl bg-white border-slate-200"
+                    />
+                  </div>
                 )}
-              </div>
-              {itemCategoria === "instrumentos" && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-bold text-foreground/80">Quantidade total</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={itemQtd}
-                    onChange={(e) => setItemQtd(Math.max(1, Number(e.target.value)))}
-                    required
-                    className="h-10 text-[15px] w-32 font-mono rounded-xl"
-                  />
-                </div>
-              )}
 
-              {itemError && <p className="text-sm font-bold text-destructive">{itemError}</p>}
-              {itemSuccess && (
-                <div className="flex items-center gap-2.5 text-sm font-bold text-available">
-                  <CheckCircle weight="bold" className="w-4 h-4" /> Item adicionado com sucesso!
-                </div>
-              )}
+                {itemError && <p className="text-sm font-bold text-rose-500">{itemError}</p>}
+                {itemSuccess && (
+                  <div className="flex items-center gap-2.5 text-sm font-bold text-emerald-600">
+                    <CheckCircle weight="bold" className="w-4 h-4" /> Item adicionado com sucesso!
+                  </div>
+                )}
 
-              <Button type="submit" disabled={itemLoading} className="w-full h-11 text-[15px] font-bold gap-2 rounded-xl">
-                <Plus weight="bold" className="w-4 h-4" />
-                {itemLoading ? "Adicionando..." : "Adicionar item"}
-              </Button>
-            </form>
+                <Button type="submit" disabled={itemLoading} className="w-full h-11 text-[15px] font-bold gap-2 rounded-xl shadow-lg shadow-primary/10">
+                  <Plus weight="bold" className="w-4 h-4" />
+                  {itemLoading ? "Adicionando..." : "Adicionar item"}
+                </Button>
+              </form>
+            </div>
 
             {/* Lista */}
             <div>
@@ -443,8 +445,8 @@ const AdminManage = () => {
                     onClick={() => setItemListTab(cat)}
                     className={`text-sm font-bold px-4 py-2 rounded-xl border transition-all duration-150 ${
                       itemListTab === cat
-                        ? "bg-primary text-white border-primary shadow-md shadow-primary/10"
-                        : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground bg-white"
+                        ? "bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/10"
+                        : "border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700 bg-white"
                     }`}
                   >
                     {cat === "espacos"
@@ -456,7 +458,8 @@ const AdminManage = () => {
 
               <div className="space-y-2 max-h-[440px] overflow-y-auto pr-2 custom-scrollbar">
                 {(itemListTab === "espacos" ? espacosList : instrumentosList).map((item) => (
-                  <div key={item.id} className="rounded-xl border border-border bg-white hover:border-primary/20 hover:shadow-sm transition-all group">
+                  <div key={item.id} className="rounded-xl border border-slate-200 bg-white hover:border-primary/20 hover:shadow-sm transition-all group">
+
                     {editingItemId === item.id ? (
                       <div className="p-4 space-y-3">
                         <Input
