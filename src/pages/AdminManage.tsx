@@ -12,6 +12,7 @@ import {
 } from "@/services/users";
 import type { Professor } from "@/services/users";
 import { fetchAllItems, createItem, deleteItem, updateItem, uploadItemImage } from "@/services/items";
+import { fetchBlockedDates, addBlockedDate, removeBlockedDate } from "@/services/blockedDates";
 import type { ReservableItem } from "@/types";
 import {
   Buildings,
@@ -25,6 +26,8 @@ import {
   UserPlus,
   Image,
   Link,
+  CalendarX,
+  Warning,
 } from "@phosphor-icons/react";
 
 const AdminManage = () => {
@@ -164,6 +167,42 @@ const AdminManage = () => {
     queryKey: ["professors"],
     queryFn: listProfessors,
   });
+
+  // ── Estado: dias bloqueados ────────────────────────────────────────────────
+  const [blockData, setBlockData] = useState("");
+  const [blockMotivo, setBlockMotivo] = useState("");
+  const [blockLoading, setBlockLoading] = useState(false);
+  const [blockError, setBlockError] = useState("");
+  const [blockSuccess, setBlockSuccess] = useState(false);
+
+  const { data: blockedDates = [], refetch: refetchBlocked } = useQuery({
+    queryKey: ["blockedDates"],
+    queryFn: fetchBlockedDates,
+  });
+
+  const handleAddBlockedDate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!blockData) return;
+    setBlockError("");
+    setBlockSuccess(false);
+    setBlockLoading(true);
+    const result = await addBlockedDate({ data: blockData, motivo: blockMotivo.trim() || "Bloqueado" });
+    setBlockLoading(false);
+    if (!result.ok) {
+      setBlockError(result.error ?? "Erro ao bloquear data.");
+      return;
+    }
+    setBlockData("");
+    setBlockMotivo("");
+    setBlockSuccess(true);
+    refetchBlocked();
+    setTimeout(() => setBlockSuccess(false), 3000);
+  };
+
+  const handleRemoveBlockedDate = async (id: string) => {
+    await removeBlockedDate(id);
+    refetchBlocked();
+  };
 
   const handleCreateProfessor = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -669,6 +708,108 @@ const AdminManage = () => {
                   <p className="text-base font-medium text-muted-foreground/60 py-10 text-center bg-gray-50/50 rounded-xl border border-dashed border-border">
                     Nenhum professor cadastrado.
                   </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Dias bloqueados ─────────────────────────────────────────────────── */}
+        <div className="bg-white border border-border rounded-xl overflow-hidden">
+          <div className="border-b border-border px-6 py-5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center shrink-0">
+              <CalendarX weight="bold" className="w-5 h-5 text-rose-600" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-foreground">Dias Bloqueados</h2>
+              <p className="text-xs font-medium text-muted-foreground/80 mt-0.5">
+                Feriados e recessos — professores não poderão fazer reservas nestas datas.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Formulário */}
+            <form onSubmit={handleAddBlockedDate} className="space-y-4">
+              <p className="text-sm font-bold text-foreground">Bloquear nova data</p>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Data</Label>
+                <Input
+                  type="date"
+                  value={blockData}
+                  onChange={(e) => setBlockData(e.target.value)}
+                  required
+                  className="h-10 text-sm"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Motivo <span className="font-normal text-muted-foreground">(opcional)</span></Label>
+                <Input
+                  value={blockMotivo}
+                  onChange={(e) => setBlockMotivo(e.target.value)}
+                  placeholder="Ex: Feriado Nacional, Recesso de julho..."
+                  className="h-10 text-sm"
+                />
+              </div>
+
+              {blockError && (
+                <div className="flex items-center gap-2 text-xs text-rose-600 bg-rose-50 border border-rose-100 px-3 py-2 rounded-lg">
+                  <Warning weight="bold" className="w-3.5 h-3.5 shrink-0" />
+                  {blockError}
+                </div>
+              )}
+              {blockSuccess && (
+                <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg">
+                  <CheckCircle weight="bold" className="w-3.5 h-3.5 shrink-0" />
+                  Data bloqueada com sucesso!
+                </div>
+              )}
+
+              <Button type="submit" disabled={blockLoading || !blockData} className="w-full h-10 text-sm gap-1.5">
+                <Plus weight="bold" className="w-3.5 h-3.5" />
+                {blockLoading ? "Bloqueando..." : "Bloquear data"}
+              </Button>
+            </form>
+
+            {/* Lista */}
+            <div>
+              <p className="text-sm font-bold text-foreground mb-3">
+                Datas bloqueadas
+                {blockedDates.length > 0 && (
+                  <span className="ml-2 text-xs font-semibold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                    {blockedDates.length}
+                  </span>
+                )}
+              </p>
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                {blockedDates.length === 0 ? (
+                  <p className="text-sm text-muted-foreground/60 py-6 text-center bg-gray-50/50 rounded-xl border border-dashed border-border">
+                    Nenhuma data bloqueada.
+                  </p>
+                ) : (
+                  blockedDates.map((b) => {
+                    const [y, m, d] = b.data.split("-");
+                    return (
+                      <div key={b.id} className="flex items-center justify-between px-4 py-3 rounded-xl border border-border hover:border-rose-200 hover:bg-rose-50/30 transition-colors group">
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-foreground">
+                            {d}/{m}/{y}
+                          </p>
+                          {b.motivo && (
+                            <p className="text-xs text-muted-foreground truncate mt-0.5">{b.motivo}</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => handleRemoveBlockedDate(b.id)}
+                          className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                          title="Remover bloqueio"
+                        >
+                          <Trash weight="bold" className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </div>
