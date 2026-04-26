@@ -35,6 +35,8 @@ export async function addBlockedDate(params: {
     .insert({ data: params.data, motivo: params.motivo || "Bloqueado" });
   if (error) {
     if (error.code === "23505") return { ok: false, error: "Esta data já está bloqueada." };
+    if (error.message?.includes("schema cache") || error.message?.includes("not found"))
+      return { ok: false, error: "Tabela não encontrada no Supabase. Vá em Settings → API → Reload schema cache e tente novamente." };
     return { ok: false, error: error.message };
   }
   return { ok: true };
