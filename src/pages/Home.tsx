@@ -390,6 +390,10 @@ const AdminHub = () => {
   const navigate = useNavigate();
   const { reservations } = useReservations();
 
+  const handleSectionChange = (section: "dashboard" | "gerenciar" | "espacos" | "instrumentos") => {
+    navigate("/admin", { state: { adminSection: section } });
+  };
+
   const { data: professors = [] } = useQuery({
     queryKey: ["professors"],
     queryFn: listProfessors,
@@ -412,7 +416,7 @@ const AdminHub = () => {
       : 0;
 
   return (
-    <AdminLayout>
+    <AdminLayout onSectionChange={handleSectionChange}>
       <div className="p-8 space-y-8 bg-primary/[0.01] min-h-full">
         {/* Título */}
         <div className="relative">
