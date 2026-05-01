@@ -146,19 +146,19 @@ const ProfessorHub = () => {
         </div>
 
         {/* Action cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
           {professorCategories.map((cat) => (
             <button
               key={cat.key}
               onClick={() => navigate(cat.path)}
-              className="bg-white border border-border rounded-xl p-6 min-h-[140px] text-left transition-all duration-[180ms] hover:-translate-y-1 shadow-[0_2px_12px_rgba(0,0,0,0.07)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.10)] group cursor-pointer"
+              className="bg-white border border-border rounded-xl p-8 min-h-[160px] text-left transition-all duration-[180ms] hover:-translate-y-1 shadow-[0_2px_12px_rgba(0,0,0,0.07)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.10)] group cursor-pointer"
               style={{ borderLeftColor: "#1A56DB", borderLeftWidth: "4px" }}
             >
-              <div className="w-10 h-10 rounded-full bg-[#E8F0FE] flex items-center justify-center mb-4">
-                <cat.icon className="w-5 h-5 text-[#1A56DB]" strokeWidth={2.5} />
+              <div className="w-12 h-12 rounded-full bg-[#E8F0FE] flex items-center justify-center mb-5">
+                <cat.icon className="w-6 h-6 text-[#1A56DB]" strokeWidth={2.5} />
               </div>
-              <h2 className="text-base font-semibold text-foreground mb-1">{cat.label}</h2>
-              <p className="text-sm text-muted-foreground">{cat.subtitle}</p>
+              <h2 className="text-lg font-semibold text-foreground mb-1">{cat.label}</h2>
+              <p className="text-base text-muted-foreground">{cat.subtitle}</p>
             </button>
           ))}
         </div>
