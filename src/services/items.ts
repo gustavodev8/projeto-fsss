@@ -103,20 +103,42 @@ export async function updateItem(params: {
   return { ok: true };
 }
 
+// Converte um arquivo para uma string base64
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      // Formato: "data:image/jpeg;base64,LzlqLzRBQ... -> remove o prefixo
+      const result = (reader.result as string).split(",")[1];
+      resolve(result);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+}
+
 export async function uploadItemImage(
-  file: File
+  file: File,
+  adminId: string
 ): Promise<{ url: string | null; error?: string }> {
   const ext = file.name.split(".").pop() ?? "jpg";
   const path = `itens/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-  const { error } = await supabase.storage
-    .from("item-images")
-    .upload(path, file, { upsert: false, contentType: file.type });
+  try {
+    const fileBody = await fileToBase64(file);
+    const { data, error } = await supabase.rpc("fn_admin_upload_item_image", {
+      p_admin_id: adminId,
+      p_file_body: fileBody,
+      p_file_path: path,
+      p_content_type: file.type,
+    });
 
-  if (error) return { url: null, error: error.message };
+    if (error) throw error;
 
-  const { data } = supabase.storage.from("item-images").getPublicUrl(path);
-  return { url: data.publicUrl };
+    return { url: data, error: undefined };
+  } catch (e: any) {
+    return { url: null, error: e.message ?? "Falha ao chamar RPC de upload." };
+  }
 }
 
 export async function fetchHorarios(): Promise<TimeSlot[]> {

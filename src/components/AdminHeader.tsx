@@ -57,7 +57,16 @@ const AdminHeader = () => {
 
         <div className="flex items-center gap-3 shrink-0">
           <div className="text-right hidden sm:block">
-            <p className="text-xs font-semibold text-foreground leading-tight">{user?.name}</p>
+            <p className="text-xs font-semibold text-foreground leading-tight flex items-center gap-2">
+              {user?.name}
+              {user && (
+                <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                  user.role === 'admin' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'
+                }`}>
+                  {user.role}
+                </span>
+              )}
+            </p>
             <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">{user?.email}</p>
           </div>
           <div className="w-8 h-8 rounded bg-foreground text-background flex items-center justify-center text-[11px] font-bold shrink-0">
