@@ -131,7 +131,7 @@ const ProfessorHub = () => {
   return (
     <div className="min-h-screen bg-[#F3F4F6]">
       <Header />
-      <main className="max-w-[1200px] mx-auto px-6 py-10">
+      <main className="max-w-[1400px] mx-auto px-6 py-10">
 
         {/* Greeting */}
         <div className="mb-6">

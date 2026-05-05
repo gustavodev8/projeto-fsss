@@ -35,7 +35,7 @@ const AdminManage = () => {
   const { user } = useAuth();
   const adminId = user!.id;
 
-  // ── Estado: itens ──────────────────────────────────────────────────────────
+  // ── Estado: itens (Criação) ───────────────────────────────────────────────
   const [itemCategoria, setItemCategoria] = useState<"espacos" | "instrumentos">("espacos");
   const [itemNome, setItemNome] = useState("");
   const [itemDescricao, setItemDescricao] = useState("");
@@ -47,12 +47,17 @@ const AdminManage = () => {
   const [itemLoading, setItemLoading] = useState(false);
   const [itemError, setItemError] = useState("");
   const [itemSuccess, setItemSuccess] = useState(false);
+
+  // ── Estado: itens (Listagem e Edição) ─────────────────────────────────────
   const [itemListTab, setItemListTab] = useState<"espacos" | "instrumentos">("espacos");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editItemNome, setEditItemNome] = useState("");
   const [editItemDescricao, setEditItemDescricao] = useState("");
   const [editItemImagemUrl, setEditItemImagemUrl] = useState("");
+  const [editItemImageFile, setEditItemImageFile] = useState<File | null>(null);
+  const [editItemImagePreview, setEditItemImagePreview] = useState("");
+  const [editItemImageMode, setEditItemImageMode] = useState<"upload" | "url">("upload");
   const [editItemQtd, setEditItemQtd] = useState(1);
   const [editItemCategoria, setEditItemCategoria] = useState<"espacos" | "instrumentos">("espacos");
   const [editItemLoading, setEditItemLoading] = useState(false);
@@ -126,18 +131,37 @@ const AdminManage = () => {
     setEditItemNome(item.name);
     setEditItemDescricao(item.description);
     setEditItemImagemUrl(item.image);
+    setEditItemImagePreview(item.image); // Pré-visualizar imagem existente
+    setEditItemImageMode(item.image ? "url" : "upload"); // Se tem URL, começa no modo URL
+    setEditItemImageFile(null);
     setEditItemQtd(item.totalUnits ?? 1);
     setEditItemCategoria(item.category);
   };
 
   const handleSaveItem = async (id: string) => {
     setEditItemLoading(true);
+
+    let finalImageUrl: string | undefined = editItemImagemUrl.trim() || undefined;
+
+    if (editItemImageMode === "upload" && editItemImageFile) {
+      const { url, error: uploadErr } = await uploadItemImage(editItemImageFile);
+      if (uploadErr || !url) {
+        alert("Erro ao enviar nova imagem: " + (uploadErr ?? "tente novamente."));
+        setEditItemLoading(false);
+        return;
+      }
+      finalImageUrl = url;
+    } else if (editItemImageMode === "upload" && !editItemImageFile) {
+      // Se o modo é upload mas não tem arquivo, talvez a intenção era remover a imagem
+      finalImageUrl = undefined;
+    }
+
     const result = await updateItem({
       adminId,
       id,
       nome: editItemNome.trim(),
       descricao: editItemDescricao.trim(),
-      imagemUrl: editItemImagemUrl.trim() || undefined,
+      imagemUrl: finalImageUrl,
       totalUnidades: editItemCategoria === "instrumentos" ? editItemQtd : undefined,
     });
     setEditItemLoading(false);
@@ -148,6 +172,12 @@ const AdminManage = () => {
     setEditingItemId(null);
     refetchItems();
     queryClient.invalidateQueries({ queryKey: ["items", editItemCategoria] });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingItemId(null);
+    setEditItemImageFile(null);
+    setEditItemImagePreview("");
   };
 
   // ── Estado: professores ───────────────────────────────────────────────────
@@ -461,24 +491,19 @@ const AdminManage = () => {
                   <div key={item.id} className="rounded-xl border border-slate-200 bg-white hover:border-primary/20 hover:shadow-sm transition-all group">
 
                     {editingItemId === item.id ? (
-                      <div className="p-4 space-y-3">
+                      <div className="p-4 space-y-4">
+                        {/* Nome, Descrição, Qtd */}
                         <Input
                           value={editItemNome}
                           onChange={(e) => setEditItemNome(e.target.value)}
                           className="h-10 text-[15px] rounded-xl"
-                          placeholder="Nome"
+                          placeholder="Nome do item"
                         />
                         <Input
                           value={editItemDescricao}
                           onChange={(e) => setEditItemDescricao(e.target.value)}
                           className="h-10 text-[15px] rounded-xl"
-                          placeholder="Descrição"
-                        />
-                        <Input
-                          value={editItemImagemUrl}
-                          onChange={(e) => setEditItemImagemUrl(e.target.value)}
-                          className="h-10 text-[15px] rounded-xl"
-                          placeholder="URL imagem"
+                          placeholder="Descrição do item"
                         />
                         {item.category === "instrumentos" && (
                           <Input
@@ -489,9 +514,67 @@ const AdminManage = () => {
                               setEditItemQtd(Math.max(1, Number(e.target.value)))
                             }
                             className="h-10 text-[15px] w-28 font-mono rounded-xl"
+                            placeholder="Quantidade"
                           />
                         )}
-                        <div className="flex gap-2 pt-1">
+
+                        {/* Upload/URL de Imagem */}
+                        <div className="space-y-2 !mt-5">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs font-bold text-slate-700">Imagem</Label>
+                            <div className="flex gap-1 border border-slate-200 bg-white rounded-lg overflow-hidden p-0.5 text-[11px]">
+                              <button
+                                type="button"
+                                onClick={() => setEditItemImageMode("upload")}
+                                className={`flex items-center gap-1 px-3 py-1 font-bold transition-colors rounded ${editItemImageMode === "upload" ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+                              >
+                                <Image weight="bold" className="w-3.5 h-3.5" /> Upload
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditItemImageMode("url")}
+                                className={`flex items-center gap-1 px-3 py-1 font-bold transition-colors rounded ${editItemImageMode === "url" ? "bg-slate-900 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+                              >
+                                <Link weight="bold" className="w-3.5 h-3.5" /> URL
+                              </button>
+                            </div>
+                          </div>
+                          {editItemImageMode === "upload" ? (
+                            <div>
+                              <label className={`flex flex-col items-center justify-center w-full h-28 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${editItemImagePreview ? "border-primary/40 bg-white" : "bg-white border-slate-200 hover:border-primary/30 hover:bg-slate-50/50"}`}>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    setEditItemImageFile(file);
+                                    setEditItemImagePreview(URL.createObjectURL(file));
+                                  }}
+                                />
+                                {editItemImagePreview ? (
+                                  <img src={editItemImagePreview} alt="preview" className="h-full w-full object-cover rounded-xl" />
+                                ) : (
+                                  <div className="flex flex-col items-center gap-2 text-slate-400">
+                                    <Image weight="bold" className="w-6 h-6" />
+                                    <span className="text-xs font-medium">Selecionar imagem</span>
+                                  </div>
+                                )}
+                              </label>
+                            </div>
+                          ) : (
+                            <Input
+                              value={editItemImagemUrl}
+                              onChange={(e) => setEditItemImagemUrl(e.target.value)}
+                              placeholder="https://..."
+                              className="h-10 text-[15px] rounded-xl bg-white border-slate-200"
+                            />
+                          )}
+                        </div>
+                        
+                        {/* Botões de Ação */}
+                        <div className="flex gap-2 pt-2">
                           <Button
                             size="sm"
                             className="h-9 text-xs font-bold gap-1.5 rounded-lg px-4"
@@ -499,13 +582,13 @@ const AdminManage = () => {
                             disabled={editItemLoading}
                           >
                             <FloppyDisk weight="bold" className="w-4 h-4" />
-                            {editItemLoading ? "Salvando..." : "Salvar"}
+                            {editItemLoading ? "Salvando..." : "Salvar Alterações"}
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             className="h-9 text-xs font-bold gap-1.5 rounded-lg px-4"
-                            onClick={() => setEditingItemId(null)}
+                            onClick={handleCancelEdit}
                           >
                             <X weight="bold" className="w-4 h-4" />
                             Cancelar

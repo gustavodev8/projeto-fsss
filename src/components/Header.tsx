@@ -17,7 +17,7 @@ const Header = () => {
 
   return (
     <header className="bg-white border-b border-border sticky top-0 z-10">
-      <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center justify-between gap-4">
+      <div className="max-w-[1400px] mx-auto px-6 h-14 flex items-center justify-between gap-4">
         {/* Logo */}
         <button
           onClick={() => navigate("/")}

@@ -106,17 +106,31 @@ export async function updateItem(params: {
 export async function uploadItemImage(
   file: File
 ): Promise<{ url: string | null; error?: string }> {
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const path = `itens/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
 
-  const { error } = await supabase.storage
-    .from("item-images")
-    .upload(path, file, { upsert: false, contentType: file.type });
+    // Invoca a Edge Function 'upload-item-image'
+    const { data, error } = await supabase.functions.invoke("upload-item-image", {
+      body: formData,
+    });
 
-  if (error) return { url: null, error: error.message };
+    if (error) {
+      console.error("Erro ao invocar a função de upload:", error);
+      throw error;
+    }
 
-  const { data } = supabase.storage.from("item-images").getPublicUrl(path);
-  return { url: data.publicUrl };
+    if (data.error) {
+      console.error("Erro retornado pela função de upload:", data.error);
+      throw new Error(data.error);
+    }
+    
+    console.log("Função invocada com sucesso, URL recebida:", data.url);
+    return { url: data.url };
+  } catch (e: any) {
+    console.error("Erro catastrófico em uploadItemImage:", e);
+    return { url: null, error: e.message ?? "Erro desconhecido no upload." };
+  }
 }
 
 export async function fetchHorarios(): Promise<TimeSlot[]> {
