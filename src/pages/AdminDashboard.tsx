@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
+import { WeeklyDetailModal } from "@/components/WeeklyDetailModal";
 import { useQuery } from "@tanstack/react-query";
 import { useReservations } from "@/contexts/ReservationContext";
 import { generateDailyReportPDF } from "@/lib/pdfUtils";
@@ -98,11 +99,17 @@ const StatusBadge = ({ cancelled }: { cancelled: boolean }) => (
 );
 
 const StatCard = ({
-  icon, label, value, sub, iconBg = "bg-gray-100",
+  icon, label, value, sub, iconBg = "bg-gray-100", onClick,
 }: {
-  icon: React.ReactNode; label: string; value: string | number; sub?: string; iconBg?: string;
+  icon: React.ReactNode; label: string; value: string | number; sub?: string; iconBg?: string; onClick?: () => void;
 }) => (
-  <div className="bg-white border border-border rounded-xl p-6 hover:shadow-md transition-all duration-200 flex flex-col items-start">
+  <div
+    className={`bg-white border border-border rounded-xl p-6 hover:shadow-md transition-all duration-200 flex flex-col items-start${onClick ? " cursor-pointer select-none" : ""}`}
+    onClick={onClick}
+    role={onClick ? "button" : undefined}
+    tabIndex={onClick ? 0 : undefined}
+    onKeyDown={onClick ? (e) => e.key === "Enter" && onClick() : undefined}
+  >
     <div className={`w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center mb-4 shadow-sm border border-primary/5`}>
       {React.cloneElement(icon as React.ReactElement, { className: "w-6 h-6" })}
     </div>
@@ -126,6 +133,7 @@ const AdminDashboard = () => {
   const [histStatus, setHistStatus] = useState<"confirmada" | "cancelada" | "todas">("confirmada");
   const [histPage, setHistPage] = useState(1);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [weekModalOpen, setWeekModalOpen] = useState(false);
 
   const { data: professors = [] } = useQuery({
     queryKey: ["professors"],
@@ -234,7 +242,7 @@ const AdminDashboard = () => {
       {/* Estatísticas */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={<CalendarBlank weight="bold" className="w-4 h-4 text-primary" />} iconBg="bg-primary/8" label="Reservas hoje" value={stats.today} sub={formatDateDisplay(today)} />
-        <StatCard icon={<BookOpen weight="bold" className="w-4 h-4 text-primary" />} iconBg="bg-primary/8" label="Esta semana" value={stats.week} sub={`${formatDateDisplay(weekStart)} – ${formatDateDisplay(weekEnd)}`} />
+        <StatCard icon={<BookOpen weight="bold" className="w-4 h-4 text-primary" />} iconBg="bg-primary/8" label="Esta semana" value={stats.week} sub={`${formatDateDisplay(weekStart)} – ${formatDateDisplay(weekEnd)}`} onClick={() => setWeekModalOpen(true)} />
         <StatCard icon={<FileText weight="bold" className="w-4 h-4 text-primary" />} iconBg="bg-primary/8" label="Total geral" value={stats.total} sub="todas as reservas" />
         <StatCard icon={<Users weight="bold" className="w-4 h-4 text-primary" />} iconBg="bg-primary/8" label="Professores" value={stats.professors} sub="cadastrados" />
       </div>
@@ -517,6 +525,7 @@ const AdminDashboard = () => {
           )}
         </div>
       )}
+      <WeeklyDetailModal open={weekModalOpen} onOpenChange={setWeekModalOpen} />
     </div>
   );
 };
