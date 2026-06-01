@@ -10,6 +10,13 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
   CalendarBlank,
   DownloadSimple,
   Users,
@@ -23,9 +30,12 @@ import {
   X,
   Trash,
   Warning,
+  Info,
+  IdentificationCard,
+  Hash,
 } from "@phosphor-icons/react";
 
-const HIST_PAGE_SIZE = 25;
+const HIST_PAGE_SIZE = 10;
 
 function formatDateDisplay(dateStr: string) {
   if (!dateStr) return "—";
@@ -134,6 +144,7 @@ const AdminDashboard = () => {
   const [histPage, setHistPage] = useState(1);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [weekModalOpen, setWeekModalOpen] = useState(false);
+  const [selectedResForDetails, setSelectedResForDetails] = useState<Reservation | null>(null);
 
   const { data: professors = [] } = useQuery({
     queryKey: ["professors"],
@@ -340,7 +351,11 @@ const AdminDashboard = () => {
                 </thead>
                 <tbody>
                   {dayReservations.map((r) => (
-                    <tr key={r.id} className="border-b border-border hover:bg-gray-50/80 transition-colors group">
+                    <tr 
+                      key={r.id} 
+                      onClick={() => setSelectedResForDetails(r)}
+                      className="border-b border-border hover:bg-gray-50/80 transition-colors group cursor-pointer"
+                    >
                       <td className="py-4 px-4 text-[15px] font-semibold text-foreground">{r.userName ?? r.userEmail ?? "—"}</td>
                       <td className="py-4 px-4 text-[15px] text-foreground">{r.itemName}</td>
                       <td className="py-4 px-4"><TypeBadge category={r.category} /></td>
@@ -348,7 +363,10 @@ const AdminDashboard = () => {
                       <td className="py-4 px-4 text-[15px] text-muted-foreground font-mono">{r.quantity ?? "—"}</td>
                       <td className="py-4 px-4">
                         <button
-                          onClick={() => handleCancel(r)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCancel(r);
+                          }}
                           disabled={cancellingId === r.id}
                           className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground/50 hover:text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-40"
                           title="Cancelar reserva"
@@ -469,7 +487,11 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody>
                     {histPaged.map((r) => (
-                      <tr key={r.id} className={`border-b border-border transition-colors group ${r.cancelledAt ? "hover:bg-rose-50/30 bg-rose-50/10" : "hover:bg-gray-50/80"}`}>
+                      <tr 
+                        key={r.id} 
+                        onClick={() => setSelectedResForDetails(r)}
+                        className={`border-b border-border transition-colors group cursor-pointer ${r.cancelledAt ? "hover:bg-rose-50/30 bg-rose-50/10" : "hover:bg-gray-50/80"}`}
+                      >
                         <td className="py-4 px-4 text-xs font-bold text-muted-foreground whitespace-nowrap uppercase tracking-tighter">{formatDateDisplay(r.date)}</td>
                         <td className="py-4 px-4 text-[15px] font-semibold text-foreground">{r.userName ?? r.userEmail ?? "—"}</td>
                         <td className="py-4 px-4 text-[15px] text-foreground">{r.itemName}</td>
@@ -482,7 +504,10 @@ const AdminDashboard = () => {
                         <td className="py-4 px-4">
                           {!r.cancelledAt && (
                             <button
-                              onClick={() => handleCancel(r)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCancel(r);
+                              }}
                               disabled={cancellingId === r.id}
                               className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground/50 hover:text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-40"
                               title="Cancelar reserva"
@@ -526,6 +551,123 @@ const AdminDashboard = () => {
         </div>
       )}
       <WeeklyDetailModal open={weekModalOpen} onOpenChange={setWeekModalOpen} />
+
+      {/* Modal de Detalhes da Reserva */}
+      <Dialog open={!!selectedResForDetails} onOpenChange={(open) => !open && setSelectedResForDetails(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
+              <Info weight="bold" className="w-6 h-6 text-primary" />
+              Detalhes da Reserva
+            </DialogTitle>
+            <DialogDescription>
+              Informações completas sobre o agendamento realizado.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedResForDetails && (
+            <div className="space-y-6 pt-4">
+              {/* Seção Professor */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary/70">
+                  <Users weight="bold" className="w-4 h-4" />
+                  Solicitante
+                </div>
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+                  <p className="text-base font-bold text-slate-900">{selectedResForDetails.userName ?? "Professor não identificado"}</p>
+                  <p className="text-sm text-slate-500 font-medium mt-0.5">{selectedResForDetails.userEmail}</p>
+                </div>
+              </div>
+
+              {/* Seção Item e Horário */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary/70">
+                    <Info weight="bold" className="w-4 h-4" />
+                    Item
+                  </div>
+                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-3">
+                    <p className="text-sm font-bold text-slate-900">{selectedResForDetails.itemName}</p>
+                    <div className="mt-2">
+                      <TypeBadge category={selectedResForDetails.category} />
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary/70">
+                    <CalendarBlank weight="bold" className="w-4 h-4" />
+                    Data
+                  </div>
+                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-3">
+                    <p className="text-sm font-bold text-slate-900">{formatDateDisplay(selectedResForDetails.date)}</p>
+                    <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">
+                      {selectedResForDetails.slots.length} horário(s)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Horários e Status */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary/70">
+                  <ClockCounterClockwise weight="bold" className="w-4 h-4" />
+                  Grade de Horários
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedResForDetails.slots.map((slot) => (
+                    <span key={slot} className="bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
+                      {slot}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Identificadores Técnicos */}
+              <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                    <Hash weight="bold" className="w-3 h-3" />
+                    ID da Reserva
+                  </div>
+                  <code className="text-[10px] text-slate-500 font-mono bg-slate-50 px-1.5 py-0.5 rounded">
+                    {selectedResForDetails.id.split("-")[0]}...
+                  </code>
+                </div>
+                {selectedResForDetails.groupId && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                      <IdentificationCard weight="bold" className="w-3 h-3" />
+                      ID do Grupo
+                    </div>
+                    <code className="text-[10px] text-slate-500 font-mono bg-slate-50 px-1.5 py-0.5 rounded">
+                      {selectedResForDetails.groupId.split("-")[0]}...
+                    </code>
+                  </div>
+                )}
+              </div>
+
+              {/* Status Final */}
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-2">
+                   <StatusBadge cancelled={!!selectedResForDetails.cancelledAt} />
+                </div>
+                {selectedResForDetails.quantity && (
+                  <span className="text-sm font-bold text-primary">
+                    {selectedResForDetails.quantity} unidades
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+          
+          <Button 
+            className="w-full mt-4" 
+            onClick={() => setSelectedResForDetails(null)}
+          >
+            Fechar
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

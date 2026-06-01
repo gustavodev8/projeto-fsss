@@ -538,6 +538,78 @@ const AdminHub = () => {
             ))}
           </div>
         </div>
+
+        {/* Atividade Recente */}
+        <div className="pt-2 animate-fade-in">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-bold text-slate-900">Atividade Recente</h2>
+            <button 
+              onClick={() => handleSectionChange("dashboard")}
+              className="text-[11px] font-bold text-primary hover:text-primary/80 uppercase tracking-widest transition-colors"
+            >
+              Ver Histórico Completo
+            </button>
+          </div>
+          
+          <div className="bg-white border border-primary/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+            {reservations.length === 0 ? (
+              <div className="p-12 text-center">
+                <CalendarBlank weight="thin" className="w-10 h-10 mx-auto mb-3 text-slate-300" />
+                <p className="text-sm text-slate-500 font-medium">Nenhuma reserva encontrada no sistema.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-primary/5">
+                {reservations.slice(0, 5).map((res) => {
+                  const initials = res.userName
+                    ?.split(" ")
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((w) => w[0].toUpperCase())
+                    .join("") ?? "?";
+
+                  return (
+                    <div key={res.id} className="p-4 sm:p-5 flex items-center justify-between hover:bg-primary/[0.01] transition-colors group">
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0 group-hover:scale-105 transition-transform">
+                          {initials}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[15px] font-bold text-slate-900 leading-tight truncate">
+                            {res.itemName}
+                          </p>
+                          <p className="text-sm text-slate-500 font-medium mt-0.5 truncate">
+                            {res.userName} · {res.date.split("-").reverse().join("/")}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1.5 shrink-0 ml-4">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tabular-nums tracking-wider">
+                            {res.slots[0]}
+                          </span>
+                        </div>
+                        <span className={`text-[9px] font-extrabold uppercase px-2.5 py-1 rounded-full border ${
+                          res.category === "espacos" 
+                            ? "bg-primary/5 text-primary border-primary/10" 
+                            : "bg-emerald-50 text-emerald-600 border-emerald-100"
+                        }`}>
+                          {res.category === "espacos" ? "Espaço" : "Equipamento"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {reservations.length > 5 && (
+              <div className="bg-slate-50/50 p-3.5 text-center border-t border-primary/5">
+                <p className="text-[11px] text-slate-400 font-bold italic uppercase tracking-wider">
+                  Exibindo as 5 reservas mais recentes de um total de {reservations.length}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );
