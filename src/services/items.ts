@@ -83,6 +83,18 @@ export async function deleteItem(
   return { ok: true };
 }
 
+export async function forceDeleteItem(
+  adminId: string,
+  id: string
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.rpc("fn_forcar_deletar_item", {
+    p_admin_id: adminId,
+    p_item_id: id,
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 export async function updateItem(params: {
   adminId: string;
   id: string;

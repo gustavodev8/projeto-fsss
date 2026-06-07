@@ -11,9 +11,19 @@ import {
   deleteProfessor,
 } from "@/services/users";
 import type { Professor } from "@/services/users";
-import { fetchAllItems, createItem, deleteItem, updateItem, uploadItemImage } from "@/services/items";
+import { fetchAllItems, createItem, deleteItem, updateItem, uploadItemImage, forceDeleteItem } from "@/services/items";
 import { fetchBlockedDates, addBlockedDate, removeBlockedDate } from "@/services/blockedDates";
 import type { ReservableItem } from "@/types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Buildings,
   Cube,
@@ -28,12 +38,23 @@ import {
   Link,
   CalendarX,
   Warning,
+  Info,
 } from "@phosphor-icons/react";
 
 const AdminManage = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const adminId = user!.id;
+
+  // ── Estado: Confirmação de Exclusão ──────────────────────────────────────
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string;
+    description: string;
+    onConfirm: () => void;
+    isLoading?: boolean;
+    variant?: "destructive" | "primary";
+  } | null>(null);
 
   // ── Estado: itens (Criação) ───────────────────────────────────────────────
   const [itemCategoria, setItemCategoria] = useState<"espacos" | "instrumentos">("espacos");
@@ -112,18 +133,48 @@ const AdminManage = () => {
     setTimeout(() => setItemSuccess(false), 3000);
   };
 
-  const handleDeleteItem = async (id: string) => {
-    if (!confirm("Tem certeza que deseja remover este item?")) return;
-    setDeletingId(id);
-    const result = await deleteItem(adminId, id);
-    setDeletingId(null);
-    if (!result.ok) {
-      alert("Não foi possível remover. Verifique se não há reservas ativas para este item.");
-      return;
+  const [itemToForceDelete, setItemToForceDelete] = useState<string | null>(null);
+
+  const handleDeleteItem = (id: string) => {
+    setConfirmConfig({
+      title: "Remover Item",
+      description: "Tem certeza que deseja remover este item? Esta ação só funcionará se não houver reservas no histórico.",
+      onConfirm: async () => {
+        setDeletingId(id);
+        const result = await deleteItem(adminId, id);
+        
+        if (!result.ok) {
+          // Falhou? Provavelmente conflito. Preparamos o segundo modal.
+          console.log("Deleção normal falhou, oferecendo force delete:", result.error);
+          setItemToForceDelete(id);
+        } else {
+          refetchItems();
+          queryClient.invalidateQueries({ queryKey: ["items", "espacos"] });
+          queryClient.invalidateQueries({ queryKey: ["items", "instrumentos"] });
+        }
+        setDeletingId(null);
+        setConfirmDialogOpen(false);
+      },
+      variant: "destructive"
+    });
+    setConfirmDialogOpen(true);
+  };
+
+  const handleForceDelete = async () => {
+    if (!itemToForceDelete) return;
+    setDeletingId(itemToForceDelete);
+    
+    const result = await forceDeleteItem(adminId, itemToForceDelete);
+    
+    if (result.ok) {
+      refetchItems();
+      queryClient.invalidateQueries({ queryKey: ["items", "espacos"] });
+      queryClient.invalidateQueries({ queryKey: ["items", "instrumentos"] });
+      setItemToForceDelete(null);
+    } else {
+      alert("Erro ao forçar exclusão: " + result.error);
     }
-    refetchItems();
-    queryClient.invalidateQueries({ queryKey: ["items", "espacos"] });
-    queryClient.invalidateQueries({ queryKey: ["items", "instrumentos"] });
+    setDeletingId(null);
   };
 
   const handleEditItem = (item: ReservableItem) => {
@@ -271,21 +322,40 @@ const AdminManage = () => {
     );
     setEditProfLoading(false);
     if (!result.ok) {
-      alert(result.error ?? "Erro ao atualizar professor.");
+      setConfirmConfig({
+        title: "Erro ao Atualizar",
+        description: result.error ?? "Ocorreu um erro inesperado ao atualizar o professor.",
+        onConfirm: () => setConfirmDialogOpen(false),
+        variant: "primary"
+      });
+      setConfirmDialogOpen(true);
       return;
     }
     setEditingProfId(null);
     queryClient.invalidateQueries({ queryKey: ["professors"] });
   };
 
-  const handleDeleteProfessor = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir este professor?")) return;
-    const result = await deleteProfessor(adminId, id);
-    if (!result.ok) {
-      alert(result.error ?? "Erro ao excluir professor.");
-      return;
-    }
-    queryClient.invalidateQueries({ queryKey: ["professors"] });
+  const handleDeleteProfessor = (id: string) => {
+    setConfirmConfig({
+      title: "Excluir Professor",
+      description: "Tem certeza que deseja excluir este professor? Todas as suas reservas vinculadas podem ser afetadas.",
+      onConfirm: async () => {
+        const result = await deleteProfessor(adminId, id);
+        if (!result.ok) {
+          setConfirmConfig({
+            title: "Erro ao Excluir",
+            description: result.error ?? "Não foi possível excluir o professor.",
+            onConfirm: () => setConfirmDialogOpen(false),
+            variant: "primary"
+          });
+          setConfirmDialogOpen(true);
+          return;
+        }
+        queryClient.invalidateQueries({ queryKey: ["professors"] });
+      },
+      variant: "destructive"
+    });
+    setConfirmDialogOpen(true);
   };
 
   const getInitial = (name: string) => name.trim()[0]?.toUpperCase() ?? "?";
@@ -901,6 +971,75 @@ const AdminManage = () => {
             </div>
           </div>
         </div>
+
+        {/* Modal de Confirmação Reutilizável */}
+        <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+          <AlertDialogContent className="max-w-[400px] rounded-2xl">
+            <AlertDialogHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${confirmConfig?.variant === "destructive" ? "bg-rose-100 text-rose-600" : "bg-primary/10 text-primary"}`}>
+                  {confirmConfig?.variant === "destructive" ? <Warning weight="bold" className="w-5 h-5" /> : <Info weight="bold" className="w-5 h-5" />}
+                </div>
+                <AlertDialogTitle className="text-xl font-extrabold tracking-tight text-slate-900">
+                  {confirmConfig?.title}
+                </AlertDialogTitle>
+              </div>
+              <AlertDialogDescription className="text-sm font-medium text-slate-500 leading-relaxed">
+                {confirmConfig?.description}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-6 gap-3">
+              <AlertDialogCancel className="flex-1 h-11 rounded-xl font-bold text-slate-500 border-slate-200 hover:bg-slate-50">
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmConfig?.onConfirm}
+                className={`flex-1 h-11 rounded-xl font-bold shadow-lg transition-all ${
+                  confirmConfig?.variant === "destructive" 
+                    ? "bg-rose-600 hover:bg-rose-700 shadow-rose-200" 
+                    : "bg-primary hover:bg-primary-dark shadow-primary/20"
+                }`}
+              >
+                Confirmar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Modal Secundário: Forçar Exclusão */}
+        <AlertDialog open={!!itemToForceDelete} onOpenChange={(open) => !open && setItemToForceDelete(null)}>
+          <AlertDialogContent className="max-w-[400px] rounded-2xl border-rose-100 shadow-2xl shadow-rose-100">
+            <AlertDialogHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 border border-rose-100 shadow-sm">
+                  <CalendarX weight="bold" className="w-7 h-7" />
+                </div>
+                <AlertDialogTitle className="text-xl font-extrabold tracking-tight text-slate-900">
+                  Reservas Ativas
+                </AlertDialogTitle>
+              </div>
+              <AlertDialogDescription className="text-[15px] font-medium text-slate-500 leading-relaxed">
+                Este item possui agendamentos confirmados. Para removê-lo da listagem, o sistema irá:
+                <ul className="list-disc list-inside mt-3 space-y-1 text-rose-600/80 font-bold text-sm">
+                  <li>Cancelar todas as reservas futuras</li>
+                  <li>Ocultar o item para novos agendamentos</li>
+                </ul>
+                <p className="mt-4">Deseja prosseguir com a exclusão forçada?</p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-8 gap-3">
+              <AlertDialogCancel className="flex-1 h-11 rounded-xl font-bold text-slate-500 border-slate-200 hover:bg-slate-50">
+                Manter item
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleForceDelete}
+                className="flex-1 h-11 rounded-xl font-bold bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-200 transition-all"
+              >
+                Sim, excluir tudo
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 };

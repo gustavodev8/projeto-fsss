@@ -17,6 +17,16 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   CalendarBlank,
   DownloadSimple,
   Users,
@@ -146,6 +156,14 @@ const AdminDashboard = () => {
   const [weekModalOpen, setWeekModalOpen] = useState(false);
   const [selectedResForDetails, setSelectedResForDetails] = useState<Reservation | null>(null);
 
+  // ── Estado: Confirmação de Cancelamento ──────────────────────────────────
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string;
+    description: string;
+    onConfirm: () => void;
+  } | null>(null);
+
   const { data: professors = [] } = useQuery({
     queryKey: ["professors"],
     queryFn: listProfessors,
@@ -221,20 +239,25 @@ const AdminDashboard = () => {
     downloadCSV(histFiltered, `reservas-fsss-${dateStr}.csv`);
   };
 
-  const handleCancel = async (r: Reservation) => {
+  const handleCancel = (r: Reservation) => {
     const nome = r.userName ?? r.userEmail ?? "professor";
-    const msg = r.groupId
-      ? `Cancelar todas as reservas do grupo de ${nome} em ${formatDateDisplay(r.date)}?`
-      : `Cancelar a reserva de "${r.itemName}" de ${nome} em ${formatDateDisplay(r.date)}?`;
-    if (!confirm(msg)) return;
-    setCancellingId(r.id);
-    if (r.groupId) {
-      await cancelGroup(r.groupId);
-    } else {
-      await cancelReservation(r.id);
-    }
-    setCancellingId(null);
-    await reload();
+    setConfirmConfig({
+      title: "Cancelar Reserva",
+      description: r.groupId
+        ? `Tem certeza que deseja cancelar todas as reservas do grupo de ${nome} em ${formatDateDisplay(r.date)}?`
+        : `Tem certeza que deseja cancelar a reserva de "${r.itemName}" de ${nome} em ${formatDateDisplay(r.date)}?`,
+      onConfirm: async () => {
+        setCancellingId(r.id);
+        if (r.groupId) {
+          await cancelGroup(r.groupId);
+        } else {
+          await cancelReservation(r.id);
+        }
+        setCancellingId(null);
+        await reload();
+      },
+    });
+    setConfirmDialogOpen(true);
   };
 
   return (
@@ -668,6 +691,36 @@ const AdminDashboard = () => {
           </Button>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de Confirmação de Cancelamento */}
+      <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <AlertDialogContent className="max-w-[400px] rounded-2xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-rose-100 text-rose-600">
+                <Warning weight="bold" className="w-5 h-5" />
+              </div>
+              <AlertDialogTitle className="text-xl font-extrabold tracking-tight text-slate-900">
+                {confirmConfig?.title}
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-sm font-medium text-slate-500 leading-relaxed">
+              {confirmConfig?.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 gap-3">
+            <AlertDialogCancel className="flex-1 h-11 rounded-xl font-bold text-slate-500 border-slate-200 hover:bg-slate-50">
+              Manter reserva
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmConfig?.onConfirm}
+              className="flex-1 h-11 rounded-xl font-bold bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-200 transition-all"
+            >
+              Confirmar cancelamento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

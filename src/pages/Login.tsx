@@ -121,22 +121,6 @@ const Login = () => {
                 {loading ? "Verificando..." : "Entrar"}
               </Button>
             </form>
-
-            <div className="mt-8 pt-6 border-t border-border">
-              <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-3">
-                Credenciais de demonstração
-              </p>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between items-center bg-white border border-border rounded-lg px-3 py-2.5">
-                  <span className="font-medium text-foreground">Administrador</span>
-                  <span className="font-mono text-muted-foreground">admin@fsss.edu.br / admin@fsss</span>
-                </div>
-                <div className="flex justify-between items-center bg-white border border-border rounded-lg px-3 py-2.5">
-                  <span className="font-medium text-foreground">Professor</span>
-                  <span className="font-mono text-muted-foreground">ana.silva@fsss.edu.br / professor</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
