@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
 
 export interface Professor {
   id: string;
@@ -9,9 +9,18 @@ export interface Professor {
 }
 
 export async function listProfessors(): Promise<Professor[]> {
-  const { data, error } = await supabase.rpc("fn_listar_professores");
-  if (error || !data) return [];
-  return data as Professor[];
+  try {
+    const data = await apiGet<{ professors: Professor[] }>("/admin/professors");
+    return (data.professors ?? []).map((p: any) => ({
+      id: p.id,
+      nome: p.name ?? p.nome ?? "",
+      email: p.email,
+      ativo: Boolean(p.active ?? p.ativo),
+      criado_em: p.created_at ?? p.criado_em ?? "",
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function createProfessor(
@@ -20,14 +29,12 @@ export async function createProfessor(
   email: string,
   senha: string
 ): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await supabase.rpc("fn_criar_usuario", {
-    p_admin_id: adminId,
-    p_nome: nome,
-    p_email: email,
-    p_senha: senha,
-  });
-  if (error) return { ok: false, error: error.message };
-  return { ok: true };
+  try {
+    await apiPost("/admin/professors", { admin_id: adminId, name: nome, email, password: senha });
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, error: e.message ?? "Erro ao criar professor." };
+  }
 }
 
 export async function updateProfessor(
@@ -37,25 +44,27 @@ export async function updateProfessor(
   email: string,
   senha?: string
 ): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await supabase.rpc("fn_atualizar_usuario", {
-    p_admin_id: adminId,
-    p_id: id,
-    p_nome: nome,
-    p_email: email,
-    p_senha: senha || null,
-  });
-  if (error) return { ok: false, error: error.message };
-  return { ok: true };
+  try {
+    await apiPut(`/admin/professors/${id}`, {
+      admin_id: adminId,
+      name: nome,
+      email,
+      password: senha || null,
+    });
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, error: e.message ?? "Erro ao atualizar professor." };
+  }
 }
 
 export async function deleteProfessor(
   adminId: string,
   id: string
 ): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await supabase.rpc("fn_deletar_usuario", {
-    p_admin_id: adminId,
-    p_usuario_id: id,
-  });
-  if (error) return { ok: false, error: error.message };
-  return { ok: true };
+  try {
+    await apiDelete(`/admin/professors/${id}`);
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, error: e.message ?? "Erro ao excluir professor." };
+  }
 }

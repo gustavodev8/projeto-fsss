@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { Reservation } from "@/data/mockData";
+import type { Reservation } from "@/types";
 
 interface ReservationReportOptions {
   date: string;

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import { fetchItemById, fetchHorarios, fetchItems } from "@/services/items";
-import { createReservationRpc } from "@/services/reservations";
+import { createReservationRpc, cancelReservationById } from "@/services/reservations";
 import { fetchBlockedDates } from "@/services/blockedDates";
 import { useReservations } from "@/contexts/ReservationContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -209,6 +209,7 @@ const ReservationPage = () => {
       const dateStr = format(date, "yyyy-MM-dd");
       const groupId =
         !isInstrumento && selectedInstruments.length > 0 ? crypto.randomUUID() : undefined;
+      const createdReservationIds: string[] = [];
 
       const mainResult = await createReservationRpc({
         usuarioId: user.id,
@@ -225,6 +226,10 @@ const ReservationPage = () => {
         return;
       }
 
+      if (mainResult.id) {
+        createdReservationIds.push(mainResult.id);
+      }
+
       for (const si of selectedInstruments) {
         const instResult = await createReservationRpc({
           usuarioId: user.id,
@@ -235,10 +240,16 @@ const ReservationPage = () => {
           grupoId: groupId ?? null,
         });
         if (instResult.error) {
+          for (const reservationId of createdReservationIds.reverse()) {
+            await cancelReservationById(reservationId);
+          }
           setSubmitError(`Espaço reservado, mas houve um erro com um equipamento: ${instResult.error}`);
           await reload();
           setSubmitting(false);
           return;
+        }
+        if (instResult.id) {
+          createdReservationIds.push(instResult.id);
         }
       }
 

@@ -1,27 +1,13 @@
-import { supabase } from "@/lib/supabase";
+import { apiGet, apiPost } from "@/lib/api";
 import type { Reservation } from "@/types";
 
 export async function fetchAllReservations(): Promise<Reservation[]> {
-  const { data, error } = await supabase
-    .from("vw_reservas_detalhadas")
-    .select("*")
-    .eq("status", "confirmada")
-    .order("criado_em", { ascending: false });
-
-  if (error || !data) return [];
-
-  return data.map((r) => ({
-    id: r.reserva_id as string,
-    groupId: (r.grupo_id as string) ?? undefined,
-    itemId: r.item_id as string,
-    itemName: r.item_nome as string,
-    date: r.data_reserva as string,
-    slots: (r.horarios_labels as string[]) ?? [],
-    quantity: (r.quantidade as number) ?? 1,
-    category: r.item_categoria as "espacos" | "instrumentos",
-    userName: r.usuario_nome as string,
-    userEmail: r.usuario_email as string,
-  }));
+  try {
+    const data = await apiGet<{ reservations: Reservation[] }>("/reservations?scope=all");
+    return data.reservations ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function createReservationRpc(params: {
@@ -32,17 +18,18 @@ export async function createReservationRpc(params: {
   quantidade?: number;
   grupoId?: string | null;
 }): Promise<{ id: string | null; error?: string }> {
-  const { data, error } = await supabase.rpc("fn_criar_reserva", {
-    p_usuario_id: params.usuarioId,
-    p_item_id: params.itemId,
-    p_data: params.data,
-    p_horario_labels: params.horarioLabels,
-    p_quantidade: params.quantidade ?? 1,
-    p_grupo_id: params.grupoId ?? null,
-  });
-
-  if (error) {
-    const msg = error.message ?? "";
+  try {
+    const data = await apiPost<{ reservation: { id: string } }>("/reservations", {
+      user_id: params.usuarioId,
+      item_id: params.itemId,
+      date: params.data,
+      time_slots: params.horarioLabels,
+      quantity: params.quantidade ?? 1,
+      group_id: params.grupoId ?? null,
+    });
+    return { id: data.reservation?.id ?? null };
+  } catch (e: any) {
+    const msg = e?.message ?? "";
     if (msg.includes("SLOT_UNAVAILABLE:")) {
       const slot = msg.split("SLOT_UNAVAILABLE:")[1]?.trim() ?? "";
       return {
@@ -52,53 +39,27 @@ export async function createReservationRpc(params: {
           : "Um dos horários selecionados não está mais disponível.",
       };
     }
-    if (msg.includes("ITEM_NOT_FOUND")) {
+    if (msg.includes("Item not found")) {
       return { id: null, error: "Este item não está mais disponível para reserva." };
     }
     return { id: null, error: msg || "Não foi possível criar a reserva. Tente novamente." };
   }
-  return { id: data as string };
 }
 
 export async function fetchCancelledReservations(userEmail?: string): Promise<Reservation[]> {
-  let query = supabase
-    .from("vw_reservas_detalhadas")
-    .select("*")
-    .eq("status", "cancelada")
-    .order("cancelado_em", { ascending: false });
-
-  if (userEmail) {
-    query = query.eq("usuario_email", userEmail);
+  try {
+    const suffix = userEmail ? `&userEmail=${encodeURIComponent(userEmail)}` : "";
+    const data = await apiGet<{ reservations: Reservation[] }>(`/reservations?scope=cancelled${suffix}`);
+    return data.reservations ?? [];
+  } catch {
+    return [];
   }
-
-  const { data, error } = await query;
-  if (error || !data) return [];
-
-  return data.map((r) => ({
-    id: r.reserva_id as string,
-    groupId: (r.grupo_id as string) ?? undefined,
-    itemId: r.item_id as string,
-    itemName: r.item_nome as string,
-    date: r.data_reserva as string,
-    slots: (r.horarios_labels as string[]) ?? [],
-    quantity: (r.quantidade as number) ?? 1,
-    category: r.item_categoria as "espacos" | "instrumentos",
-    userName: r.usuario_nome as string,
-    userEmail: r.usuario_email as string,
-    cancelledAt: r.cancelado_em as string,
-  }));
 }
 
 export async function cancelReservationById(reservaId: string): Promise<void> {
-  await supabase
-    .from("reservas")
-    .update({ status: "cancelada", cancelado_em: new Date().toISOString() })
-    .eq("id", reservaId);
+  await apiPost(`/reservations/${reservaId}/cancel`);
 }
 
 export async function cancelGroupById(grupoId: string): Promise<void> {
-  await supabase
-    .from("reservas")
-    .update({ status: "cancelada", cancelado_em: new Date().toISOString() })
-    .eq("grupo_id", grupoId);
+  await apiPost(`/reservations/groups/${grupoId}/cancel`);
 }

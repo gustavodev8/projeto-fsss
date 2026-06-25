@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { signIn } from "@/services/auth";
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { restoreCurrentUser, signIn, signOut } from "@/services/auth";
 
 export type UserRole = "admin" | "professor";
 
@@ -12,6 +12,7 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
+  ready: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
@@ -49,6 +50,45 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(loadSession);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const hydrate = async () => {
+      try {
+        const current = await restoreCurrentUser();
+        if (cancelled) return;
+
+        if (current) {
+          const u: User = {
+            id: current.id,
+            name: current.name,
+            email: current.email,
+            role: current.role,
+          };
+          setUser(u);
+          saveSession(u);
+        } else {
+          setUser(null);
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch {
+        if (!cancelled) {
+          const persisted = loadSession();
+          setUser(persisted);
+        }
+      } finally {
+        if (!cancelled) setReady(true);
+      }
+    };
+
+    hydrate();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     const dbUser = await signIn(email, password);
@@ -60,12 +100,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    void signOut();
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, ready, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

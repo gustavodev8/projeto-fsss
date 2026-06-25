@@ -17,14 +17,16 @@ const queryClient = new QueryClient();
 
 /** Redireciona para Login se não autenticado. */
 const AuthGate = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
+  if (!ready) return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando sistema...</div>;
   if (!user) return <Login />;
   return <>{children}</>;
 };
 
 /** Redireciona para / se não for admin. */
 const AdminGate = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+  const { user, ready } = useAuth();
+  if (!ready) return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Carregando sistema...</div>;
   if (!user) return <Login />;
   if (user.role !== "admin") return <Navigate to="/" replace />;
   return <>{children}</>;
