@@ -56,7 +56,7 @@ final class ReservationService
         $itemId = trim((string) ($payload['item_id'] ?? ''));
         $date = trim((string) ($payload['date'] ?? ''));
         $quantity = max(1, (int) ($payload['quantity'] ?? 1));
-        $groupId = $this->nullableString($payload['group_id'] ?? null);
+        $groupId = $this->normalizeGroupId($payload['group_id'] ?? null);
         $slots = array_values(array_filter(array_map('trim', (array) ($payload['time_slots'] ?? []))));
 
         if ($itemId === '' || $date === '' || $slots === []) {
@@ -157,9 +157,18 @@ final class ReservationService
         ];
     }
 
-    private function nullableString(mixed $value): ?string
+    private function normalizeGroupId(mixed $value): ?string
     {
         $value = is_string($value) ? trim($value) : '';
-        return $value === '' ? null : $value;
+        if ($value === '') {
+            return null;
+        }
+
+        $value = strtolower(str_replace('-', '', $value));
+        if (!preg_match('/^[a-f0-9]{32}$/', $value)) {
+            throw new HttpException(422, 'Invalid group_id');
+        }
+
+        return $value;
     }
 }

@@ -24,8 +24,14 @@ final class Request
             $uriPath = substr($uriPath, strlen($scriptDir));
         }
 
+        $basePath = rtrim(Env::get('APP_BASE_PATH', ''), '/');
+        if ($basePath !== '' && $basePath !== '/' && str_starts_with($uriPath, $basePath)) {
+            $uriPath = substr($uriPath, strlen($basePath));
+        }
+
         $path = '/' . ltrim($uriPath, '/');
-        $path = $path === '//' ? '/' : rtrim($path, '/') ?: '/';
+        $trimmedPath = rtrim($path, '/');
+        $path = $path === '//' ? '/' : ($trimmedPath !== '' ? $trimmedPath : '/');
 
         $headers = function_exists('getallheaders') ? array_change_key_case(getallheaders(), CASE_LOWER) : [];
         $body = self::parseBody();

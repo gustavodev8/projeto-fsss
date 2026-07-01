@@ -6,10 +6,11 @@ namespace Fsss\Api\Services;
 use Fsss\Api\Support\Auth;
 use Fsss\Api\Support\Env;
 use Fsss\Api\Support\HttpException;
+use Fsss\Api\Support\Request;
 
 final class UploadService
 {
-    public function storeItemImage(array $file): array
+    public function storeItemImage(array $file, ?Request $request = null): array
     {
         Auth::requireAdmin();
 
@@ -52,25 +53,45 @@ final class UploadService
 
         return [
             'filename' => $filename,
-            'url' => $this->publicPath() . '/' . $filename,
+            'url' => $this->buildPublicUrl($filename, $request),
         ];
     }
 
     private function detectMime(string $path): string
     {
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        if ($finfo === false) {
-            throw new HttpException(500, 'Fileinfo unavailable');
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo !== false) {
+                $mime = finfo_file($finfo, $path);
+                finfo_close($finfo);
+
+                if (is_string($mime) && $mime !== '') {
+                    return $mime;
+                }
+            }
         }
 
-        $mime = finfo_file($finfo, $path);
-        finfo_close($finfo);
-
-        if (!is_string($mime) || $mime === '') {
-            throw new HttpException(415, 'Could not detect file type');
+        $imageInfo = @getimagesize($path);
+        if (is_array($imageInfo) && isset($imageInfo['mime']) && is_string($imageInfo['mime']) && $imageInfo['mime'] !== '') {
+            return $imageInfo['mime'];
         }
 
-        return $mime;
+        if (function_exists('exif_imagetype')) {
+            $imageType = @exif_imagetype($path);
+            $mime = match ($imageType) {
+                IMAGETYPE_JPEG => 'image/jpeg',
+                IMAGETYPE_PNG => 'image/png',
+                IMAGETYPE_WEBP => 'image/webp',
+                IMAGETYPE_GIF => 'image/gif',
+                default => null,
+            };
+
+            if (is_string($mime)) {
+                return $mime;
+            }
+        }
+
+        throw new HttpException(415, 'Could not detect file type');
     }
 
     private function uploadDir(): string
@@ -82,6 +103,28 @@ final class UploadService
     private function publicPath(): string
     {
         return rtrim(Env::get('UPLOAD_PUBLIC_PATH', '/uploads'), '/');
+    }
+
+    private function buildPublicUrl(string $filename, ?Request $request = null): string
+    {
+        $baseUrl = null;
+
+        if ($request !== null) {
+            $origin = $request->header('Origin');
+            if (is_string($origin) && $origin !== '') {
+                $baseUrl = rtrim($origin, '/');
+            }
+        }
+
+        if ($baseUrl === null) {
+            $baseUrl = rtrim(Env::get('APP_URL', ''), '/');
+        }
+
+        if ($baseUrl === '') {
+            return $this->publicPath() . '/' . $filename;
+        }
+
+        return $baseUrl . $this->publicPath() . '/' . $filename;
     }
 
     private function resolvePath(string $path): string

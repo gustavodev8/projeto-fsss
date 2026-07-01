@@ -97,7 +97,7 @@ return static function (Router $router): void {
             throw new Fsss\Api\Support\HttpException(400, 'Missing upload file');
         }
 
-        return $uploadService->storeItemImage($file);
+        return $uploadService->storeItemImage($file, $request);
     });
 
     $router->get('/reservations', static function (Request $request) use ($reservationService): array {
