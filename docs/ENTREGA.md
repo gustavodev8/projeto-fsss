@@ -29,6 +29,7 @@ Este projeto deve ser zipado a partir da pasta raiz atual, sem criar pasta inter
 
 - contém o frontend já compilado
 - é o conteúdo que deve ser publicado no site principal
+- inclui um `.htaccess` para fazer o roteamento da SPA funcionar no Apache
 
 ### `docs/`
 
@@ -117,6 +118,10 @@ O conteúdo de `backend/public/` deve ir para a rota da API, por exemplo:
 
 Se a HostGator permitir apontar a API para uma pasta fora do webroot, melhor ainda.
 
+Importante:
+- mantenha o `.htaccess` dentro de `dist/`
+- ele é o que evita erro ao abrir rotas como `/login`, `/admin` ou `/minhas-reservas` direto no navegador
+
 ### 6. Colocar o backend privado
 
 As pastas abaixo não devem ficar expostas publicamente:
@@ -191,4 +196,3 @@ Verifique:
 ## Observação final
 
 O sistema já foi migrado para funcionar com `PHP + MySQL`, sem dependência de Supabase.
-
